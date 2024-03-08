@@ -104,7 +104,6 @@ class Header extends React.Component {
             <a href="./documents/resume.pdf" target="_blank">
               Résumé {<PDFIcon />}
             </a>
-            {/* <a href="./banners/">HTML5 Banner Portfolio</a> */}
           </div>
         </article>
         <ThreeHeaderBackground />
