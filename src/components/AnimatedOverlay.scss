@@ -1,0 +1,29 @@
+.animated-overlay {
+  display: block;
+  position: fixed;
+  width: 100vw;
+  height: 300vh;
+  z-index: 100;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  mix-blend-mode: hard-light;
+
+  .bubble {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    @media only screen and (max-width: 777px) {
+      width: 100px;
+      height: 100px;
+    }
+    background: linear-gradient(45deg, #CCFF00, #00CCFF);
+    background-size: contain;
+    border-radius: 50%;
+    transform-origin: top left;
+  }
+}

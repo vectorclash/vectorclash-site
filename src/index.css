@@ -1,0 +1,11 @@
+html {
+  background-color: #333333;
+}
+
+body {
+  margin: 0;
+  font-family: 'Ubuntu',sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}

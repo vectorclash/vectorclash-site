@@ -1,0 +1,104 @@
+.header {
+  background-image: linear-gradient(42deg, #ff0457, #12002f);
+  transition: 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  height: 100vh; /* Use vh as a fallback for browsers that do not support Custom Properties */
+  height: calc(var(--vh, 1vh) * 100);
+  min-height: 700px;
+
+  article {
+    color: white;
+    z-index: 1;
+
+    .logo {
+      opacity: 0;
+      width: 100px;
+      height: 100px;
+      margin-right: 30px;
+      margin-left: -10px;
+      margin-top: -20px;
+      margin-bottom: 75px;
+      @media only screen and (max-width: 600px) {
+        margin-bottom: 100px;
+      }
+    }
+
+    h1 {
+      position: relative;
+      font-size: 5rem;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+      z-index: 1;
+      font-family: "Roboto", sans-serif;
+      font-weight: lighter;
+
+      @media only screen and (max-width: 600px) {
+        font-size: 2.8rem;
+        margin: 0 0 15px 0;
+        line-height: 2.8rem;
+      }
+    }
+
+    h2 {
+      position: relative;
+      font-size: 3rem;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      z-index: 1;
+      font-family: "Roboto", sans-serif;
+      font-weight: lighter;
+
+      @media only screen and (max-width: 600px) {
+        font-size: 1.75rem;
+        margin: 0 0 10px 0;
+        line-height: 2rem;
+      }
+    }
+
+    p {
+      font-size: 30px;
+      margin-bottom: 100px;
+      @media only screen and (max-width: 600px) {
+        font-size: 18px;
+        margin-bottom: 65px;
+      }
+    }
+
+    a {
+      background-color: white;
+      padding: 15px 50px;
+      @media only screen and (max-width: 600px) {
+        display: block;
+        padding: 20px;
+      }
+      border: 1px solid white;
+      border-bottom-color: #CCFF00;
+      border-radius: 5px;
+      color: black;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.2s;
+
+      svg {
+        width: 10px;
+        margin-left: 5px;
+        max-width: 10px;
+        transition: 0.2s;
+      }
+    }
+
+    a:hover {
+      background-color: black;
+      color: white;
+      text-decoration: none;
+      border: 1px solid black;
+      padding: 15px 80px;
+      @media only screen and (max-width: 600px) {
+        padding: 20px;
+      }
+
+      svg {
+        fill: white;
+      }
+    }
+  }
+}
