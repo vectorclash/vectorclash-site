@@ -65,7 +65,7 @@ export default class BrightCluster {
       let mesh = new THREE.Mesh(geometry, material);
       shapeContainer.add(mesh);
 
-      let pointLight = new THREE.PointLight(colors[i].toHexString(), 5, 0, 0);
+      let pointLight = new THREE.PointLight(colors[i].toHexString(), 10, 100, 0);
       pointLight.castShadow = true;
       pointLight.shadow.mapSize.width = 512;
       pointLight.shadow.mapSize.height = 512;

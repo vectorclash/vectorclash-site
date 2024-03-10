@@ -10,12 +10,13 @@ class About extends React.Component {
     this.mount = React.createRef();
     this.state = {
       skills: [
-        { title: "HTML/CSS", level: 10 },
-        { title: "JavaScript", level: 9 },
-        { title: "Web Animation/GSAP", level: 10 },
+        { title: "HTML/CSS/JavaScript", level: 9 },
         { title: "After Effects", level: 7 },
         { title: "Blender", level: 7 },
-        { title: "Figma/Photoshop/Illustrator", level: 9 },
+        { title: "Figma", level: 6 },
+        { title: "Adobe Creative Suite", level: 8 },
+        { title: "JavaScript Frameworks/Libraries", level: 8 },
+        { title: "Version Control Systems", level: 9 }
       ],
     };
   }
@@ -233,40 +234,9 @@ class About extends React.Component {
           <article className="about-text">
             <h3>What I do /</h3>
             <div>
-              <p>
-                I truly love animation. From basic JavaScript or CSS based
-                animation of standard HTML elements on a website to more complex
-                implementations using{" "}
-                <a
-                  href="https://threejs.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  three.js
-                </a>{" "}
-                to create a stunning fully 3D WebGL experience. I tend to do a
-                fair share of banner ads and have grown strangely fond of
-                animating them. For banners I usually rely on the{" "}
-                <a
-                  href="https://greensock.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GSAP
-                </a>{" "}
-                library. I have grown to love it and use it anywhere I can. For
-                larger projects I like to focus on vanilla JavaScript but enjoy
-                using React, Angular or Vue as well.
-              </p>
-
-              <p>
-                I've been branching out between design and motion graphics. I have recently been focusing on After Effects and Blender quite a bit and get super excited about the creative potential there. I love design systems and component libraries. I've
-                recently come to fall in love with Figma and enjoy utilizing my skills in that area.
-              </p>
-              <p>
-                I love making things move with code! I hope we can make
-                something amazing together.
-              </p>
+              <p>As a creative coder and motion engineer, I find a profound connection between coding and the artistry of animation. Crafting banner ads as well as delving into motion graphics with After Effects are part of my daily exploration, yet my true passion lies in how code can animate and bring static concepts to dynamic life. There’s an intriguing balance between technical precision and creative expression, particularly when venturing into 3D animation with Blender, where the limitless potential of digital environments captivates my imagination.</p>
+              <p>On the design front, Figma is my tool of choice for its seamless interface and the collaborative freedom it offers. It’s not just about creating visually appealing designs but also about ensuring they resonate on a functional level. Whether it’s through UI/UX design, animation, or coding, the journey from concept to execution is what I find most rewarding. It’s about crafting experiences that are not only innovative but also intuitive.</p>
+              <p>Ultimately, what I enjoy most is the synergy between these diverse skills. It’s a multidisciplinary approach that allows me to not only conceptualize but also bring these ideas to life in a way that is both technically sound and aesthetically compelling. From the intricacies of HTML/CSS/JavaScript to the creative prowess needed for effective design and animation, it’s this fusion of technology and art that defines my work.</p>
               <p>
                 <a href="./banners/" style={{ textDecoration: "underline" }}>
                   HTML5 Banner Portfolio
