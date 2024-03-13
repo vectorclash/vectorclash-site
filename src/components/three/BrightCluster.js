@@ -1,7 +1,10 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import gsap from "gsap";
 import { MotionPathPlugin } from "gsap/all";
 import tinycolor from "tinycolor2";
+
+import merkaba from "../../assets/models/basic-merkaba.glb";
 
 export default class BrightCluster {
   constructor() {
@@ -17,30 +20,41 @@ export default class BrightCluster {
       repeat: -1,
     });
 
-    this.buildShapes(250);
+    this.buildShapes(10);
     this.buildBrightShapes();
 
     return this.container;
   }
 
   buildShapes(amount) {
-    for (let i = 0; i < amount; i++) {
-      let shapeSize = 3 + Math.round(Math.random() * 5);
-      let geometry = new THREE.IcosahedronGeometry(shapeSize);
-      let ranColor = 0xCCCCCC;
-      let material = new THREE.MeshStandardMaterial({
-        color: ranColor,
-        metalness: 1,
-        roughness: 1
-      })
-      let mesh = new THREE.Mesh(geometry, material);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
+    const loader = new GLTFLoader();
 
-      this.moveShape(mesh, 2, 100);
-      this.scaleShape(mesh);
-      this.container.add(mesh);
-    }
+    loader.load(merkaba, (gltf) => {
+      let merkaba = new THREE.Object3D();
+      merkaba.add();
+
+      for (let i = 0; i < amount; i++) {
+        // let shapeSize = 3 + Math.round(Math.random() * 5);
+        let geometry = gltf.scene.children[0].geometry;
+        let ranColor = 0xCCCCCC;
+        let material = new THREE.MeshStandardMaterial({
+          color: ranColor,
+          metalness: 1,
+          roughness: 1
+        })
+        let mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        this.moveShape(mesh, 2, 100);
+        this.scaleShape(mesh);
+        this.container.add(mesh);
+      }
+    }, undefined, (error) => {
+      console.error(error);
+    });
+
+    
   }
 
   buildBrightShapes() {
