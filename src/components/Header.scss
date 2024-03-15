@@ -25,10 +25,10 @@
       position: relative;
       font-size: 5rem;
       letter-spacing: -0.5px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       z-index: 1;
-      font-family: "Roboto", sans-serif;
-      font-weight: lighter;
+      font-family: "Exo", sans-serif;
+      font-weight: 500;
 
       @media only screen and (max-width: 600px) {
         font-size: 2.8rem;
@@ -41,10 +41,10 @@
       position: relative;
       font-size: 3rem;
       letter-spacing: -0.5px;
-      margin-bottom: 10px;
+      margin-bottom: 0px;
       z-index: 1;
-      font-family: "Roboto", sans-serif;
-      font-weight: lighter;
+      font-family: "Exo", sans-serif;
+      font-weight: 300;
 
       @media only screen and (max-width: 600px) {
         font-size: 1.75rem;
@@ -59,6 +59,7 @@
       @media only screen and (max-width: 600px) {
         font-size: 18px;
         margin-bottom: 65px;
+        max-width: 80%;
       }
     }
 

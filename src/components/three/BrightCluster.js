@@ -30,9 +30,6 @@ export default class BrightCluster {
     const loader = new GLTFLoader();
 
     loader.load(merkaba, (gltf) => {
-      let merkaba = new THREE.Object3D();
-      merkaba.add();
-
       for (let i = 0; i < amount; i++) {
         // let shapeSize = 3 + Math.round(Math.random() * 5);
         let geometry = gltf.scene.children[0].geometry;

@@ -209,10 +209,10 @@ export default class ThreeCanvas {
     }
 
     return (
-      top < window.pageYOffset + window.innerHeight &&
-      left < window.pageXOffset + window.innerWidth &&
-      top + height > window.pageYOffset &&
-      left + width > window.pageXOffset
+      top < window.scrollY + window.innerHeight &&
+      left < window.scrollX + window.innerWidth &&
+      top + height > window.scrollY &&
+      left + width > window.scrollX
     );
   }
 
