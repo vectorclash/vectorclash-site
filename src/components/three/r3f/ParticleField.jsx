@@ -1,0 +1,113 @@
+import { useRef, useEffect, useMemo } from 'react';
+import * as THREE from 'three';
+import gsap from 'gsap';
+import CanvasRadialGradient from '../CanvasRadialGradient';
+
+export default function ParticleField({
+  particleNum = 500,
+  image,
+  size = 1,
+  opacity = 0.4,
+  containerSize = { x: 200, y: 250, z: 200 },
+}) {
+  const pointsRef = useRef();
+
+  const texture = useMemo(() => {
+    if (!image) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+
+    context.globalCompositeOperation = 'destination-atop';
+    const gradient = new CanvasRadialGradient(image.width, image.height);
+    context.drawImage(gradient, 0, 0);
+    context.drawImage(image, 0, 0);
+
+    const tex = new THREE.Texture(canvas);
+    tex.needsUpdate = true;
+    return tex;
+  }, [image]);
+
+  const positions = useMemo(() => {
+    const vertices = [];
+    for (let p = 0; p < particleNum; p++) {
+      const pX = -containerSize.x + Math.random() * (containerSize.x * 2);
+      const pY = -containerSize.y + Math.random() * (containerSize.y * 2);
+      const pZ = -containerSize.z + Math.random() * (containerSize.z * 2);
+      vertices.push(pX, pY, pZ);
+    }
+    return new Float32Array(vertices);
+  }, [particleNum, containerSize]);
+
+  useEffect(() => {
+    if (!pointsRef.current) return;
+
+    // Initial fade-in animation
+    gsap.from(pointsRef.current.material, {
+      duration: 2,
+      opacity: 0,
+      size: 0,
+      ease: 'quad.inOut',
+      delay: 0.5,
+    });
+
+    // Scale animations on each axis
+    gsap.to(pointsRef.current.scale, {
+      duration: 30 + Math.random() * 20,
+      x: 1 + Math.random() * 2,
+      yoyo: true,
+      repeat: -1,
+      ease: 'back.inOut',
+    });
+
+    gsap.to(pointsRef.current.scale, {
+      duration: 30 + Math.random() * 20,
+      y: 1 + Math.random() * 2,
+      yoyo: true,
+      repeat: -1,
+      ease: 'back.inOut',
+    });
+
+    gsap.to(pointsRef.current.scale, {
+      duration: 30 + Math.random() * 20,
+      z: 1 + Math.random() * 2,
+      yoyo: true,
+      repeat: -1,
+      ease: 'back.inOut',
+    });
+
+    // Rotation animation
+    gsap.to(pointsRef.current.rotation, {
+      duration: 100,
+      y: -Math.PI * 2,
+      repeat: -1,
+      ease: 'none',
+    });
+  }, []);
+
+  if (!texture) return null;
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={size}
+        map={texture}
+        blending={THREE.AdditiveBlending}
+        transparent
+        opacity={opacity}
+        depthWrite={false}
+        fog={false}
+      />
+    </points>
+  );
+}

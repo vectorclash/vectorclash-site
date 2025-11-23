@@ -3,9 +3,11 @@ import { gsap, ScrollTrigger } from "gsap/all";
 import tinycolor from "tinycolor2";
 import "./ContactFooter.scss";
 
-import igIcon from "../images/ig-icon.svg";
+import bsIcon from "../images/bs-icon.svg";
 import liIcon from "../images/li-icon.svg";
+import ghIcon from "../images/gh-icon.svg";
 import AnimatedParticles from "./AnimatedParticles";
+import HeaderIcon from "./HeaderIcon";
 
 class ContactFooter extends React.Component {
   constructor(props) {
@@ -100,7 +102,7 @@ class ContactFooter extends React.Component {
       <footer className="contact-footer container" ref={this.mount}>
         <article className="column">
           <div className="footer-left">
-            <h3>Contact me /</h3>
+            <h3>Contact me <HeaderIcon /></h3>
             <p>
               <a className="phone-link" href="tel:720-519-8217">
                 +1 720 519 8217
@@ -109,9 +111,9 @@ class ContactFooter extends React.Component {
             <p>
               <a
                 className="email-link"
-                href="mailto:aaron.sterczewski@gmail.com"
+                href="mailto:aaron@vectorclash.com"
               >
-                aaron.sterczewski@gmail.com
+                aaron@vectorclash.com
               </a>
             </p>
             <div className="copyright">
@@ -122,11 +124,20 @@ class ContactFooter extends React.Component {
             <ul className="social-links">
               <li>
                 <a
-                  href="https://www.instagram.com/vectorclash/"
+                  href="https://bsky.app/profile/vectorclash.bsky.social"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img src={igIcon} alt="Instagram" />
+                  <img src={bsIcon} alt="Blue Sky" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/vectorclash/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={ghIcon} alt="GitHub" />
                 </a>
               </li>
               <li>

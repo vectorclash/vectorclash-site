@@ -1,0 +1,35 @@
+.header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  vertical-align: middle;
+  position: relative;
+  top: -0.1em;
+  animation: rotate 20s linear infinite;
+
+  svg {
+    display: block;
+  }
+
+  .icon-circle {
+    fill: none;
+    stroke: #CCFF00;
+    stroke-width: 1.5;
+    opacity: 0.6;
+  }
+
+  .icon-diamond {
+    fill: #CCFF00;
+    opacity: 0.8;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

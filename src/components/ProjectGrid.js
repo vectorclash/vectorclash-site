@@ -1,8 +1,10 @@
 import React from "react";
+import { createRoot } from "react-dom/client";
 import gsap from "gsap/all";
-import ThreeProjectsCanvas from "./three/ThreeProjectsCanvas";
+import ProjectsScene from "./three/r3f/ProjectsScene";
 import GradientGenerator from "./utils/GradientGenerator";
 import "./ProjectGrid.scss";
+import tinycolor from "tinycolor2";
 
 import left from "..//images/angle-left.svg";
 import right from "../images/angle-right.svg";
@@ -14,19 +16,19 @@ class ProjectGrid extends React.Component {
     this.state = {
       isProjectActive: false,
       activeProjectID: null,
+      currentTexture: null,
+      currentVideo: null,
     };
+    this.r3fRoot = null;
   }
 
   componentDidMount() {
-    this.threeCanvas = new ThreeProjectsCanvas(
-      this.props.threeContainer.offsetWidth,
-      this.props.threeContainer.offsetHeight
-    );
-    this.props.threeContainer.appendChild(this.threeCanvas.renderer.domElement);
+    this.r3fRoot = createRoot(this.props.threeContainer);
+    this.renderThreeScene();
   }
 
-  componentDidUpdate() {
-    const { isProjectActive, activeProjectID } = this.state;
+  componentDidUpdate(prevProps, prevState) {
+    const { isProjectActive, activeProjectID, currentTexture, currentVideo } = this.state;
 
     gsap.fromTo(
       this.mount.querySelectorAll("li, .project-text, .project-images-item"),
@@ -44,45 +46,78 @@ class ProjectGrid extends React.Component {
       }
     );
 
-    this.threeCanvas.onResize();
-    if (isProjectActive) {
+    if (isProjectActive && activeProjectID !== prevState.activeProjectID) {
+      let newVideo = null;
       if (
         this.props.projects[activeProjectID].field_videos.length > 0 &&
         window.innerWidth > 600
       ) {
-        let projectVideo =
+        newVideo =
           this.props.projects[activeProjectID].field_videos[
             Math.floor(
               Math.random() *
                 this.props.projects[activeProjectID].field_videos.length
             )
           ].url;
-        this.threeCanvas.changeVideo(projectVideo);
-      } else {
-        this.threeCanvas.changeVideo(null);
       }
-      this.threeCanvas.addProject(
-        this.props.projects[activeProjectID].field_images[0].url
-      );
+
+      const newTexture = this.props.projects[activeProjectID].field_images[0].url;
+      const newColor = tinycolor("#CCFF00").spin(Math.random() * 360);
+
+      this.setState({
+        currentTexture: newTexture,
+        currentVideo: newVideo,
+      });
+
+      document.querySelector(".project-text").style.borderBottomColor = newColor
+        .setAlpha(0.4)
+        .toRgbString();
 
       let imageItems = this.mount.querySelectorAll(".project-images-item");
       for (let i = 0; i < imageItems.length; i++) {
         imageItems[i].classList.remove("active");
       }
 
-      this.threeCanvas.doRender = true;
       gsap.to(this.props.threeContainer, {
         alpha: 1,
         duration: 0.5,
         delay: 0.3,
       });
-    } else {
-      this.threeCanvas.doRender = false;
+    } else if (!isProjectActive && prevState.isProjectActive) {
+      this.setState({
+        currentTexture: null,
+        currentVideo: null,
+      });
+
       gsap.set(this.props.threeContainer, {
         alpha: 0,
         duration: 0.5,
       });
     }
+
+    if (
+      currentTexture !== prevState.currentTexture ||
+      currentVideo !== prevState.currentVideo
+    ) {
+      this.renderThreeScene();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.r3fRoot) {
+      this.r3fRoot.unmount();
+    }
+  }
+
+  renderThreeScene() {
+    if (!this.r3fRoot) return;
+
+    this.r3fRoot.render(
+      <ProjectsScene
+        textureURL={this.state.currentTexture}
+        videoURL={this.state.currentVideo}
+      />
+    );
   }
 
   onProjectOver(index, e) {
@@ -146,9 +181,8 @@ class ProjectGrid extends React.Component {
 
   onImageOver(index, e) {
     const { activeProjectID } = this.state;
-    this.threeCanvas.addProject(
-      this.props.projects[activeProjectID].field_images[index].url
-    );
+    const newTexture = this.props.projects[activeProjectID].field_images[index].url;
+    this.setState({ currentTexture: newTexture });
   }
 
   onImageClick(index, e) {

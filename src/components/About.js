@@ -3,6 +3,7 @@ import { gsap, SplitText, ScrollTrigger } from "gsap/all";
 import tinycolor from "tinycolor2";
 import "./About.scss";
 import me from "../images/me.png";
+import HeaderIcon from "./HeaderIcon";
 
 class About extends React.Component {
   constructor(props) {
@@ -10,13 +11,36 @@ class About extends React.Component {
     this.mount = React.createRef();
     this.state = {
       skills: [
-        { title: "HTML/CSS/JavaScript", level: 9 },
-        { title: "After Effects", level: 7 },
-        { title: "Blender", level: 7 },
-        { title: "Figma", level: 6 },
-        { title: "Adobe Creative Suite", level: 8 },
-        { title: "JavaScript Frameworks/Libraries", level: 8 },
-        { title: "Version Control Systems", level: 9 }
+        {
+          category: "Front-End Development",
+          items: [
+            { title: "HTML/CSS/JavaScript", level: 10 },
+            { title: "React/Vue/Angular", level: 8 },
+            { title: "Three.js/WebGL", level: 8 },
+          ]
+        },
+        {
+          category: "Motion & Animation",
+          items: [
+            { title: "After Effects", level: 7 },
+            { title: "GSAP", level: 9 },
+            { title: "Blender", level: 7 },
+          ]
+        },
+        {
+          category: "Design & Prototyping",
+          items: [
+            { title: "Figma", level: 8 },
+            { title: "UI/UX Design", level: 6 },
+          ]
+        },
+        {
+          category: "Tools & Workflow",
+          items: [
+            { title: "Git/Version Control", level: 9 },
+            { title: "Build Tools (Vite/Webpack)", level: 8 },
+          ]
+        }
       ],
     };
   }
@@ -72,10 +96,25 @@ class About extends React.Component {
   animateSkills() {
     this.animateElement(this.skillContainer);
 
+    // Animate category headers
+    let categories = this.skillContainer.querySelectorAll(".skill-category");
+    gsap.fromTo(
+      categories,
+      { alpha: 0, y: 10 },
+      {
+        duration: 0.5,
+        alpha: 1,
+        y: 0,
+        stagger: 0.2,
+        delay: 0.5,
+      }
+    );
+
+    // Animate individual skills
     let skills = this.skillContainer.querySelectorAll("li");
     for (let i = 0; i < skills.length; i++) {
       const skill = skills[i];
-      this.animateSkillIn(skill, i * 0.25);
+      this.animateSkillIn(skill, 0.5 + i * 0.15);
     }
   }
 
@@ -126,18 +165,21 @@ class About extends React.Component {
   animateAbout() {
     this.animateElement(this.aboutContainer);
 
-    let aboutSplit = new SplitText(this.aboutContainer.querySelectorAll("p"), {
-      type: "lines",
-    });
-    gsap.from(aboutSplit.lines, {
-      duration: 0.5,
-      y: 10,
-      alpha: 0,
-      ease: "back.out",
-      stagger: {
-        amount: 1,
-      },
-      delay: 0.5
+    // Wait for fonts to load before using SplitText
+    document.fonts.ready.then(() => {
+      let aboutSplit = new SplitText(this.aboutContainer.querySelectorAll("p"), {
+        type: "lines",
+      });
+      gsap.from(aboutSplit.lines, {
+        duration: 0.5,
+        y: 10,
+        alpha: 0,
+        ease: "back.out",
+        stagger: {
+          amount: 1,
+        },
+        delay: 0.5
+      });
     });
   }
 
@@ -207,32 +249,37 @@ class About extends React.Component {
       <section className="about container" ref={this.mount}>
         <div className="column">
           <article className="skills">
-            <h3>Skills /</h3>
-            <ul className="skill-list">
-              {this.state.skills.map((skill, i) => (
-                <li
-                  className={"skill-level-" + skill.level}
-                  key={i}
-                  onMouseEnter={this.onSkillOver}
-                >
-                  {skill.title}
-                  <div className="skill-bar-back"></div>
-                  <div
-                    className="skill-bar-front"
-                    style={
-                      skill.level > 9
-                        ? barStyleFull
-                        : skill.level > 5
-                        ? barStylePartial
-                        : barStyleLow
-                    }
-                  ></div>
-                </li>
-              ))}
-            </ul>
+            <h3>Skills <HeaderIcon /></h3>
+            {this.state.skills.map((skillGroup, groupIndex) => (
+              <div key={groupIndex} className="skill-group">
+                <h4 className="skill-category">{skillGroup.category}</h4>
+                <ul className="skill-list">
+                  {skillGroup.items.map((skill, skillIndex) => (
+                    <li
+                      className={"skill-level-" + skill.level}
+                      key={`${groupIndex}-${skillIndex}`}
+                      onMouseEnter={this.onSkillOver}
+                    >
+                      {skill.title}
+                      <div className="skill-bar-back"></div>
+                      <div
+                        className="skill-bar-front"
+                        style={
+                          skill.level >= 9
+                            ? barStyleFull
+                            : skill.level >= 6
+                            ? barStylePartial
+                            : barStyleLow
+                        }
+                      ></div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </article>
           <article className="about-text">
-            <h3>What I do /</h3>
+            <h3>What I do <HeaderIcon /></h3>
             <div>
               <p>As a creative coder and motion engineer, I find a profound connection between coding and the artistry of animation. Crafting banner ads as well as delving into motion graphics with After Effects are part of my daily exploration, yet my true passion lies in how code can animate and bring static concepts to dynamic life. There’s an intriguing balance between technical precision and creative expression, particularly when venturing into 3D animation with Blender, where the limitless potential of digital environments captivates my imagination.</p>
               <p>On the design front, Figma is my tool of choice for its seamless interface and the collaborative freedom it offers. It’s not just about creating visually appealing designs but also about ensuring they resonate on a functional level. Whether it’s through UI/UX design, animation, or coding, the journey from concept to execution is what I find most rewarding. It’s about crafting experiences that are not only innovative but also intuitive.</p>

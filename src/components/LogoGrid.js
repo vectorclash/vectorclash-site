@@ -1,6 +1,7 @@
 import React from "react";
 import { gsap, ScrollTrigger } from "gsap/all";
 import "./LogoGrid.scss";
+import HeaderIcon from "./HeaderIcon";
 
 import jamba from "../images/logos/jamba.svg";
 import walmart from "../images/logos/walmart.svg";
@@ -118,7 +119,7 @@ class LogoGrid extends React.Component {
         }}
       >
         <div className="column">
-          <h3>Brands /</h3>
+          <h3>Brands <HeaderIcon /></h3>
           <div className="logo-grid-container">
             {this.state.logos.map((logo, i) => (
               <div className="logo-grid-item" key={i}>

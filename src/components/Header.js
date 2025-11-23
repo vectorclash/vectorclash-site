@@ -14,7 +14,10 @@ class Header extends React.Component {
 
   componentDidMount() {
     // window.addEventListener('beforeunload', this.resetWindow)
-    this.animateElements();
+    // Wait for fonts to load before animating to prevent SplitText errors
+    document.fonts.ready.then(() => {
+      this.animateElements();
+    });
   }
 
   resetWindow(e) {
