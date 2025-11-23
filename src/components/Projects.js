@@ -2,8 +2,8 @@ import React from "react";
 import { gsap, ScrollTrigger } from "gsap/all";
 import HexagonLoader from "./HexagonLoader";
 import ProjectGrid from "./ProjectGrid";
-import ImageCarousel from "./ImageCarousel";
 import "./Projects.scss";
+import projectsData from "../data/projects.json";
 
 class Projects extends React.Component {
   constructor(props) {
@@ -13,33 +13,16 @@ class Projects extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      projects: [],
-      showCarousel: false,
-      setShowCarousel: false,
-      carouselImages: [],
-      activeCarouselImage: null
+      projects: []
     };
-
-    this.toggleCarousel = this.toggleCarousel.bind(this);
   }
 
   componentDidMount() {
-    fetch("https://www.vectorclash.com/data/projects?_format=json")
-      .then((res) => res.json())
-      .then(
-        (data) => {
-          this.setState({
-            isLoaded: true,
-            projects: gsap.utils.shuffle(data),
-          });
-        },
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error,
-          });
-        }
-      );
+    // Load projects from local JSON data
+    this.setState({
+      isLoaded: true,
+      projects: gsap.utils.shuffle(projectsData),
+    });
 
     ScrollTrigger.create({
       trigger: this.mount.current,
@@ -76,21 +59,8 @@ class Projects extends React.Component {
     );
   }
 
-  toggleCarousel(projectIndex, imageIndex) {
-    if(projectIndex !== null && imageIndex !== null) {
-      this.setState({
-        carouselImages: this.state.projects[projectIndex].field_images,
-        activeCarouselImage: imageIndex
-      });
-    }
-
-    this.setState((prevState) => ({
-      showCarousel: !prevState.showCarousel,
-    }))
-  }
-
   render() {
-    const { error, isLoaded, projects, showCarousel } = this.state;
+    const { error, isLoaded, projects } = this.state;
 
     if (error) {
       return (
@@ -118,16 +88,8 @@ class Projects extends React.Component {
             <ProjectGrid
               projects={projects}
               threeContainer={this.mount.current.children[0]}
-              toggleCarousel={this.toggleCarousel}
             />
           </div>
-          {showCarousel && (
-            <ImageCarousel
-              toggleCarousel={this.toggleCarousel}
-              carouselImages={this.state.carouselImages}
-              activeCarouselImage={this.state.activeCarouselImage}
-            />
-          )}
         </section>
       );
     }

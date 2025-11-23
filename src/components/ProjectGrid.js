@@ -18,6 +18,11 @@ class ProjectGrid extends React.Component {
       activeProjectID: null,
       currentTexture: null,
       currentVideo: null,
+      activeImageIndex: 0,
+      isGalleryOpen: false,
+      previousImageIndex: 0,
+      isTransitioning: false,
+      transitionDirection: 'forward',
     };
     this.r3fRoot = null;
   }
@@ -30,21 +35,34 @@ class ProjectGrid extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     const { isProjectActive, activeProjectID, currentTexture, currentVideo } = this.state;
 
-    gsap.fromTo(
-      this.mount.querySelectorAll("li, .project-text, .project-images-item"),
-      {
-        alpha: 0,
-      },
-      {
-        duration: 0.3,
-        alpha: 1,
-        ease: "quad.inOut",
-        stagger: {
-          amount: 0.5,
-        },
-        delay: 0.2,
-      }
-    );
+    // Only animate when switching projects or toggling project active state
+    if (activeProjectID !== prevState.activeProjectID || isProjectActive !== prevState.isProjectActive) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        if (!this.mount) return;
+
+        const elements = this.mount.querySelectorAll("li, .project-description, .thumbnail, h2, .tools, .gallery-main");
+        if (elements.length > 0) {
+          gsap.fromTo(
+            elements,
+            {
+              opacity: 0,
+              y: 20,
+            },
+            {
+              duration: 0.4,
+              opacity: 1,
+              y: 0,
+              ease: "power2.out",
+              stagger: {
+                amount: 0.3,
+              },
+              delay: 0.1,
+            }
+          );
+        }
+      });
+    }
 
     if (isProjectActive && activeProjectID !== prevState.activeProjectID) {
       let newVideo = null;
@@ -67,15 +85,14 @@ class ProjectGrid extends React.Component {
       this.setState({
         currentTexture: newTexture,
         currentVideo: newVideo,
+        activeImageIndex: 0,
       });
 
-      document.querySelector(".project-text").style.borderBottomColor = newColor
-        .setAlpha(0.4)
-        .toRgbString();
-
-      let imageItems = this.mount.querySelectorAll(".project-images-item");
-      for (let i = 0; i < imageItems.length; i++) {
-        imageItems[i].classList.remove("active");
+      const headerElement = this.mount.querySelector(".project-header");
+      if (headerElement) {
+        headerElement.style.borderBottomColor = newColor
+          .setAlpha(0.4)
+          .toRgbString();
       }
 
       gsap.to(this.props.threeContainer, {
@@ -87,6 +104,8 @@ class ProjectGrid extends React.Component {
       this.setState({
         currentTexture: null,
         currentVideo: null,
+        activeImageIndex: 0,
+        isGalleryOpen: false,
       });
 
       gsap.set(this.props.threeContainer, {
@@ -179,79 +198,239 @@ class ProjectGrid extends React.Component {
     });
   }
 
-  onImageOver(index, e) {
-    const { activeProjectID } = this.state;
-    const newTexture = this.props.projects[activeProjectID].field_images[index].url;
-    this.setState({ currentTexture: newTexture });
-  }
-
   onImageClick(index, e) {
     const { activeProjectID } = this.state;
-    this.props.toggleCarousel(activeProjectID, index);
+    const newTexture = this.props.projects[activeProjectID].field_images[index].url;
+    this.setState({
+      activeImageIndex: index,
+      currentTexture: newTexture
+    });
+  }
+
+  onMainImageClick() {
+    this.setState({ isGalleryOpen: true });
+  }
+
+  onGalleryPrevClick(e) {
+    e.stopPropagation();
+    const { activeProjectID, activeImageIndex, isTransitioning } = this.state;
+    if (isTransitioning) return;
+
+    const images = this.props.projects[activeProjectID].field_images;
+    const prevIndex = (activeImageIndex - 1 + images.length) % images.length;
+
+    this.setState({
+      previousImageIndex: activeImageIndex,
+      isTransitioning: true,
+      transitionDirection: 'backward',
+    });
+
+    setTimeout(() => {
+      this.setState({
+        activeImageIndex: prevIndex,
+        currentTexture: images[prevIndex].url,
+      });
+
+      setTimeout(() => {
+        this.setState({ isTransitioning: false });
+      }, 400);
+    }, 50);
+  }
+
+  onGalleryNextClick(e) {
+    e.stopPropagation();
+    const { activeProjectID, activeImageIndex, isTransitioning } = this.state;
+    if (isTransitioning) return;
+
+    const images = this.props.projects[activeProjectID].field_images;
+    const nextIndex = (activeImageIndex + 1) % images.length;
+
+    this.setState({
+      previousImageIndex: activeImageIndex,
+      isTransitioning: true,
+      transitionDirection: 'forward',
+    });
+
+    setTimeout(() => {
+      this.setState({
+        activeImageIndex: nextIndex,
+        currentTexture: images[nextIndex].url,
+      });
+
+      setTimeout(() => {
+        this.setState({ isTransitioning: false });
+      }, 400);
+    }, 50);
+  }
+
+  onGalleryClose(e) {
+    if (e) e.stopPropagation();
+    this.setState({ isGalleryOpen: false });
   }
 
   render() {
-    const { isProjectActive, activeProjectID } = this.state;
+    const { isProjectActive, activeProjectID, activeImageIndex, isGalleryOpen, previousImageIndex, isTransitioning, transitionDirection } = this.state;
 
     if (isProjectActive) {
+      const project = this.props.projects[activeProjectID];
+      const currentImage = project.field_images[activeImageIndex];
+
       return (
         <div
-          className="project-info"
+          className="project-detail"
           ref={(mount) => {
             this.mount = mount;
           }}
         >
-          <article className="project-text">
-            <h2>{this.props.projects[activeProjectID].title[0].value}</h2>
-            <ul className="tools">
-              {this.props.projects[activeProjectID].field_tools.map(
-                (tool, i) => (
+          <div className="project-header">
+            <div className="project-meta">
+              <h2>{project.title[0].value}</h2>
+              <ul className="tools">
+                {project.field_tools.map((tool, i) => (
                   <li key={i}>{tool.value}</li>
-                )
-              )}
-            </ul>
-            <span
-              dangerouslySetInnerHTML={{
-                __html: this.props.projects[activeProjectID].body[0].value,
-              }}
-            ></span>
-          </article>
-          <div className="project-images">
-            {this.props.projects[activeProjectID].field_images.map(
-              (image, i) => (
-                <div
-                  className="project-images-item"
-                  key={i}
-                  onClick={(e) => this.onImageClick(i, e)}
-                  onMouseEnter={(e) => this.onImageOver(i, e)}
-                >
-                  <img src={image.url} alt="" />
+                ))}
+              </ul>
+            </div>
+            <div className="project-controls">
+              <div
+                className="prev-button"
+                onClick={(e) => this.onProjectPrevClick(e)}
+                title="Previous Project"
+              >
+                <img src={left} alt="Previous Project" />
+              </div>
+              <div
+                className="close-button"
+                onClick={(e) => this.onProjectCloseClick(e)}
+                title="Close"
+              >
+                <img src={close} alt="Close Project" />
+              </div>
+              <div
+                className="next-button"
+                onClick={(e) => this.onProjectNextClick(e)}
+                title="Next Project"
+              >
+                <img src={right} alt="Next Project" />
+              </div>
+            </div>
+          </div>
+
+          <div className="project-content">
+            <div className="project-description">
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: project.body[0].value,
+                }}
+              ></span>
+            </div>
+
+            <div className="project-gallery">
+              <div className="gallery-main">
+                <img src={currentImage.url} alt={project.title[0].value} />
+                <div className="gallery-counter">
+                  {activeImageIndex + 1} / {project.field_images.length}
                 </div>
-              )
-            )}
+                <button
+                  className="gallery-magnify"
+                  onClick={() => this.onMainImageClick()}
+                  aria-label="View Full Size"
+                  title="View Full Size"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="11" y1="8" x2="11" y2="14"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="gallery-thumbnails">
+                {project.field_images.map((image, i) => (
+                  <div
+                    className={`thumbnail ${i === activeImageIndex ? "active" : ""}`}
+                    key={i}
+                    onClick={(e) => this.onImageClick(i, e)}
+                  >
+                    <img src={image.url} alt="" />
+                  </div>
+                ))}
+              </div>
+
+              {project.field_images.length > 1 && (
+                <div className="gallery-nav">
+                  <button
+                    className="gallery-nav-prev"
+                    onClick={(e) => this.onGalleryPrevClick(e)}
+                    aria-label="Previous Image"
+                  >
+                    <img src={left} alt="Previous" />
+                  </button>
+                  <button
+                    className="gallery-nav-next"
+                    onClick={(e) => this.onGalleryNextClick(e)}
+                    aria-label="Next Image"
+                  >
+                    <img src={right} alt="Next" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="project-controls">
+
+          {isGalleryOpen && (
             <div
-              className="prev-button"
-              onClick={(e) => this.onProjectPrevClick(e)}
+              className="gallery-lightbox"
+              onClick={(e) => this.onGalleryClose(e)}
             >
-              <img src={left} alt="Previous Project" />
+              <div className="lightbox-content">
+                {isTransitioning && (
+                  <img
+                    src={project.field_images[previousImageIndex].url}
+                    alt={project.title[0].value}
+                    className={`lightbox-image-previous ${transitionDirection}`}
+                  />
+                )}
+                <img
+                  src={currentImage.url}
+                  alt={project.title[0].value}
+                  className={isTransitioning ? `lightbox-image-current transitioning ${transitionDirection}` : "lightbox-image-current"}
+                />
+                <button
+                  className="lightbox-close"
+                  onClick={(e) => this.onGalleryClose(e)}
+                  aria-label="Close"
+                >
+                  <img src={close} alt="Close" />
+                </button>
+                {project.field_images.length > 1 && (
+                  <>
+                    <button
+                      className="lightbox-prev"
+                      onClick={(e) => this.onGalleryPrevClick(e)}
+                      aria-label="Previous Image"
+                    >
+                      <img src={left} alt="Previous" />
+                    </button>
+                    <button
+                      className="lightbox-next"
+                      onClick={(e) => this.onGalleryNextClick(e)}
+                      aria-label="Next Image"
+                    >
+                      <img src={right} alt="Next" />
+                    </button>
+                  </>
+                )}
+                <div className="lightbox-counter">
+                  {activeImageIndex + 1} / {project.field_images.length}
+                </div>
+              </div>
             </div>
-            <div
-              className="close-button"
-              onClick={(e) => this.onProjectCloseClick(e)}
-            >
-              <img src={close} alt="Close Project" />
-            </div>
-            <div
-              className="next-button"
-              onClick={(e) => this.onProjectNextClick(e)}
-            >
-              <img src={right} alt="Next Project" />
-            </div>
-          </div>
-          <div className="project-extra">
-            {activeProjectID + 1 + " of " + this.props.projects.length}
+          )}
+
+          <div className="project-pagination">
+            Project {activeProjectID + 1} of {this.props.projects.length}
           </div>
         </div>
       );

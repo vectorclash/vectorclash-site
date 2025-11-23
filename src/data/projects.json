@@ -1,0 +1,94 @@
+[
+  {
+    "title": [{ "value": "E-Commerce Platform" }],
+    "body": [
+      {
+        "value": "<p>A modern e-commerce platform built with React and Node.js, featuring real-time inventory management, secure payment processing, and a seamless checkout experience. The platform handles thousands of transactions daily and includes advanced analytics for business intelligence.</p><p>Key features include personalized product recommendations, multi-currency support, and integration with major shipping providers.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "React" },
+      { "value": "Node.js" },
+      { "value": "PostgreSQL" },
+      { "value": "Stripe API" },
+      { "value": "Redux" },
+      { "value": "Express" }
+    ],
+    "field_images": [
+      { "url": "https://picsum.photos/seed/project1-1/800/600" },
+      { "url": "https://picsum.photos/seed/project1-2/800/600" },
+      { "url": "https://picsum.photos/seed/project1-3/800/600" },
+      { "url": "https://picsum.photos/seed/project1-4/800/600" }
+    ],
+    "field_videos": []
+  },
+  {
+    "title": [{ "value": "Social Media Dashboard" }],
+    "body": [
+      {
+        "value": "<p>An intuitive social media management dashboard that aggregates data from multiple platforms. Users can schedule posts, track engagement metrics, and analyze audience demographics across Twitter, Instagram, and Facebook from a single interface.</p><p>Built with performance in mind, the dashboard updates in real-time and handles high-volume data streams efficiently.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "Vue.js" },
+      { "value": "D3.js" },
+      { "value": "Firebase" },
+      { "value": "Chart.js" },
+      { "value": "OAuth 2.0" },
+      { "value": "WebSockets" }
+    ],
+    "field_images": [
+      { "url": "https://picsum.photos/seed/project2-1/800/600" },
+      { "url": "https://picsum.photos/seed/project2-2/800/600" },
+      { "url": "https://picsum.photos/seed/project2-3/800/600" }
+    ],
+    "field_videos": []
+  },
+  {
+    "title": [{ "value": "Mobile Fitness App" }],
+    "body": [
+      {
+        "value": "<p>A cross-platform mobile fitness application that helps users track workouts, monitor progress, and achieve their health goals. The app features personalized workout plans, nutritional tracking, and integration with popular wearable devices.</p><p>Machine learning algorithms provide intelligent recommendations based on user activity patterns and preferences. The app has been downloaded over 100,000 times across iOS and Android platforms.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "React Native" },
+      { "value": "TensorFlow" },
+      { "value": "MongoDB" },
+      { "value": "HealthKit" },
+      { "value": "GraphQL" },
+      { "value": "AWS Lambda" }
+    ],
+    "field_images": [
+      { "url": "https://picsum.photos/seed/project3-1/800/600" },
+      { "url": "https://picsum.photos/seed/project3-2/800/600" },
+      { "url": "https://picsum.photos/seed/project3-3/800/600" },
+      { "url": "https://picsum.photos/seed/project3-4/800/600" },
+      { "url": "https://picsum.photos/seed/project3-5/800/600" }
+    ],
+    "field_videos": []
+  },
+  {
+    "title": [{ "value": "AI Content Generator" }],
+    "body": [
+      {
+        "value": "<p>An advanced AI-powered content generation platform that helps marketers and content creators produce high-quality written content at scale. The system uses natural language processing to understand context and generate relevant, engaging copy for various use cases.</p><p>Features include multi-language support, tone adjustment, SEO optimization suggestions, and plagiarism detection. The platform serves enterprise clients and independent creators alike.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "Python" },
+      { "value": "OpenAI API" },
+      { "value": "FastAPI" },
+      { "value": "React" },
+      { "value": "Docker" },
+      { "value": "Redis" },
+      { "value": "Kubernetes" }
+    ],
+    "field_images": [
+      { "url": "https://picsum.photos/seed/project4-1/800/600" },
+      { "url": "https://picsum.photos/seed/project4-2/800/600" },
+      { "url": "https://picsum.photos/seed/project4-3/800/600" }
+    ],
+    "field_videos": []
+  }
+]
