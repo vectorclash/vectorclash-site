@@ -6,9 +6,21 @@ import gsap from 'gsap';
 export default function WireframeBox({ size = 2000, depth = 12, color = '#ccff00' }) {
   const meshRef = useRef();
   const hueRef = useRef(0);
+  const rotationRef = useRef({
+    x: Math.random() * Math.PI,
+    y: Math.random() * Math.PI,
+    z: Math.random() * Math.PI,
+  });
 
   useEffect(() => {
     if (!meshRef.current) return;
+
+    // Set initial rotation
+    meshRef.current.rotation.set(
+      rotationRef.current.x,
+      rotationRef.current.y,
+      rotationRef.current.z
+    );
 
     // Initial opacity animation
     gsap.from(meshRef.current.material, {
@@ -19,10 +31,9 @@ export default function WireframeBox({ size = 2000, depth = 12, color = '#ccff00
     });
 
     // Rotation animation
-    const initialRotation = meshRef.current.rotation.z;
-    gsap.to(meshRef.current.rotation, {
+    const rotationTween = gsap.to(meshRef.current.rotation, {
       duration: 150,
-      z: -initialRotation + Math.PI * 2,
+      z: rotationRef.current.z + Math.PI * 2,
       repeat: -1,
       ease: 'none',
     });
@@ -42,16 +53,20 @@ export default function WireframeBox({ size = 2000, depth = 12, color = '#ccff00
       });
     };
     changeColor();
+
+    // Cleanup
+    return () => {
+      rotationTween.kill();
+    };
   }, []);
 
-  const randomRotation = [
-    Math.random() * Math.PI,
-    Math.random() * Math.PI,
-    Math.random() * Math.PI,
-  ];
+  useFrame(() => {
+    // Ensure GSAP maintains control by not interfering with rotation
+    // This helps prevent React Three Fiber from overwriting GSAP animations
+  });
 
   return (
-    <mesh ref={meshRef} rotation={randomRotation}>
+    <mesh ref={meshRef}>
       <boxGeometry args={[size, size, size, depth, depth, depth]} />
       <meshBasicMaterial
         color={color}

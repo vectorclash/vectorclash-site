@@ -1,16 +1,27 @@
 import { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { useFrame } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
 
-function Scene({ textureURL, videoURL, fogColor, onTextureLoad }) {
+function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
   const projectGroupRef = useRef();
   const videoGroupRef = useRef();
   const { camera, gl } = useThree();
+
+  // Preload all textures
+  const preloadedTextures = useTexture(allImageURLs, (loadedTextures) => {
+    // Configure all textures
+    const texturesArray = Array.isArray(loadedTextures) ? loadedTextures : [loadedTextures];
+    texturesArray.forEach(texture => {
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.repeat.x = -1;
+    });
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,11 +60,9 @@ function Scene({ textureURL, videoURL, fogColor, onTextureLoad }) {
       <directionalLight intensity={1} color={0x00ccff} />
 
       <group ref={projectGroupRef}>
-        {textureURL && (
-          <Suspense fallback={null}>
-            <ProjectShape size={300} textureURL={textureURL} onLoadComplete={onTextureLoad} />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          {textureURL && <ProjectShape key="project-shape" size={300} textureURL={textureURL} preloadedTextures={preloadedTextures} allImageURLs={allImageURLs} />}
+        </Suspense>
       </group>
 
       <group ref={videoGroupRef}>
@@ -63,7 +72,7 @@ function Scene({ textureURL, videoURL, fogColor, onTextureLoad }) {
   );
 }
 
-export default function ProjectsScene({ textureURL, videoURL, onTextureLoad }) {
+export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [] }) {
   const [fogColor, setFogColor] = useState('#fb0097');
   const [backgroundColor, setBackgroundColor] = useState('#fb0097');
 
@@ -88,7 +97,7 @@ export default function ProjectsScene({ textureURL, videoURL, onTextureLoad }) {
         textureURL={textureURL}
         videoURL={videoURL}
         fogColor={fogColor}
-        onTextureLoad={onTextureLoad}
+        allImageURLs={allImageURLs}
       />
     </Canvas>
   );

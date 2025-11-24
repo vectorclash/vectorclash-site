@@ -49,27 +49,39 @@ function Scene({ colors }) {
   }, []);
 
   useEffect(() => {
+    const scrollTarget = { offsetY: 0 };
+    let cameraTween = null;
+    let rotationTween = null;
+
     const handleScroll = () => {
       const parentElement = gl.domElement.parentNode;
       if (!parentElement) return;
 
-      const offsetY = window.scrollY - parentElement.getBoundingClientRect().y;
+      scrollTarget.offsetY = window.scrollY - parentElement.getBoundingClientRect().y;
 
-      gsap.to(camera.position, {
+      // Kill existing tweens to prevent buildup
+      if (cameraTween) cameraTween.kill();
+      if (rotationTween) rotationTween.kill();
+
+      cameraTween = gsap.to(camera.position, {
         duration: 0.5,
-        y: -offsetY * 0.15,
+        y: -scrollTarget.offsetY * 0.15,
         ease: 'quad.out',
       });
 
-      gsap.to(groupRef.current.rotation, {
+      rotationTween = gsap.to(groupRef.current.rotation, {
         duration: 0.5,
-        y: -offsetY * 0.0007,
+        y: -scrollTarget.offsetY * 0.0007,
         ease: 'quad.out',
       });
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (cameraTween) cameraTween.kill();
+      if (rotationTween) rotationTween.kill();
+    };
   }, [camera, gl]);
 
   return (

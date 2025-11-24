@@ -33,47 +33,63 @@ class Header extends React.Component {
       ease: "quad.out",
     });
 
-    let headlineSplit1 = new SplitText(
-      this.myRef.current.querySelector("article").children[1],
-      { type: "words" }
-    );
+    // Make h2 visible so SplitText words can be seen
+    const h2Element = this.myRef.current.querySelector("article").children[1];
+    gsap.set(h2Element, { autoAlpha: 1 });
 
-    tl.from(headlineSplit1.words, {
-      duration: 0.5,
+    let headlineSplit1 = new SplitText(h2Element, { type: "words" });
+
+    tl.fromTo(headlineSplit1.words, {
       x: 30,
       alpha: 0,
+    }, {
+      duration: 0.5,
+      x: 0,
+      alpha: 1,
       ease: "elastic.out",
       stagger: {
         amount: 0.5,
       },
     });
 
-    let headlineSplit2 = new SplitText(
-      this.myRef.current.querySelector("article").children[2],
-      { type: "words" }
-    );
+    // Make h1 visible so SplitText words can be seen
+    const h1Element = this.myRef.current.querySelector("article").children[2];
+    gsap.set(h1Element, { autoAlpha: 1 });
 
-    tl.from(headlineSplit2.words, {
-      duration: 0.5,
+    let headlineSplit2 = new SplitText(h1Element, { type: "words" });
+
+    tl.fromTo(headlineSplit2.words, {
       y: -30,
       scaleY: 0.5,
       rotation: -20,
       skewY: 20,
       alpha: 0,
+    }, {
+      duration: 0.5,
+      y: 0,
+      scaleY: 1,
+      rotation: 0,
+      skewY: 0,
+      alpha: 1,
       ease: "bounce.out",
       stagger: {
         amount: 0.5,
       },
     });
 
-    let subHeadlineSplit = new SplitText(
-      this.myRef.current.querySelector("p"),
-      { type: "words" }
-    );
-    tl.from(subHeadlineSplit.words, {
-      duration: 0.5,
+    // Make p visible so SplitText words can be seen
+    const pElement = this.myRef.current.querySelector("p");
+    gsap.set(pElement, { autoAlpha: 1 });
+
+    let subHeadlineSplit = new SplitText(pElement, { type: "words" });
+
+    tl.fromTo(subHeadlineSplit.words, {
       x: 30,
       alpha: 0,
+    }, {
+      duration: 0.5,
+      x: 0,
+      alpha: 1,
       ease: "back.out",
       stagger: {
         amount: 0.5,

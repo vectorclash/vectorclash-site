@@ -64,22 +64,28 @@ class ProjectGrid extends React.Component {
       });
     }
 
-    if (isProjectActive && activeProjectID !== prevState.activeProjectID) {
+    // When opening a project or switching between projects
+    if (isProjectActive && (activeProjectID !== prevState.activeProjectID || !prevState.isProjectActive)) {
+      const project = this.props.projects[activeProjectID];
+
+      // Safety check
+      if (!project || !project.field_images || project.field_images.length === 0) {
+        return;
+      }
+
       let newVideo = null;
       if (
-        this.props.projects[activeProjectID].field_videos.length > 0 &&
+        project.field_videos &&
+        project.field_videos.length > 0 &&
         window.innerWidth > 600
       ) {
         newVideo =
-          this.props.projects[activeProjectID].field_videos[
-            Math.floor(
-              Math.random() *
-                this.props.projects[activeProjectID].field_videos.length
-            )
+          project.field_videos[
+            Math.floor(Math.random() * project.field_videos.length)
           ].url;
       }
 
-      const newTexture = this.props.projects[activeProjectID].field_images[0].url;
+      const newTexture = project.field_images[0].url;
       const newColor = tinycolor("#CCFF00").spin(Math.random() * 360);
 
       this.setState({
@@ -88,7 +94,7 @@ class ProjectGrid extends React.Component {
         activeImageIndex: 0,
       });
 
-      const headerElement = this.mount.querySelector(".project-header");
+      const headerElement = this.mount?.querySelector(".project-header");
       if (headerElement) {
         headerElement.style.borderBottomColor = newColor
           .setAlpha(0.4)
@@ -131,10 +137,20 @@ class ProjectGrid extends React.Component {
   renderThreeScene() {
     if (!this.r3fRoot) return;
 
+    // Collect all image URLs from all projects for preloading
+    const allImageURLs = this.props.projects.reduce((urls, project) => {
+      if (project.field_images && project.field_images.length > 0) {
+        return [...urls, ...project.field_images.map(img => img.url)];
+      }
+      return urls;
+    }, []);
+
     this.r3fRoot.render(
       <ProjectsScene
+        key="projects-scene"
         textureURL={this.state.currentTexture}
         videoURL={this.state.currentVideo}
+        allImageURLs={allImageURLs}
       />
     );
   }
@@ -273,7 +289,14 @@ class ProjectGrid extends React.Component {
 
     if (isProjectActive) {
       const project = this.props.projects[activeProjectID];
-      const currentImage = project.field_images[activeImageIndex];
+
+      // Safety check: ensure activeImageIndex is within bounds
+      if (!project || !project.field_images || project.field_images.length === 0) {
+        return null;
+      }
+
+      const safeImageIndex = Math.min(activeImageIndex, project.field_images.length - 1);
+      const currentImage = project.field_images[safeImageIndex];
 
       return (
         <div
@@ -329,7 +352,7 @@ class ProjectGrid extends React.Component {
               <div className="gallery-main">
                 <img src={currentImage.url} alt={project.title[0].value} />
                 <div className="gallery-counter">
-                  {activeImageIndex + 1} / {project.field_images.length}
+                  {safeImageIndex + 1} / {project.field_images.length}
                 </div>
                 <button
                   className="gallery-magnify"
@@ -349,7 +372,7 @@ class ProjectGrid extends React.Component {
               <div className="gallery-thumbnails">
                 {project.field_images.map((image, i) => (
                   <div
-                    className={`thumbnail ${i === activeImageIndex ? "active" : ""}`}
+                    className={`thumbnail ${i === safeImageIndex ? "active" : ""}`}
                     key={i}
                     onClick={(e) => this.onImageClick(i, e)}
                   >
@@ -423,7 +446,7 @@ class ProjectGrid extends React.Component {
                   </>
                 )}
                 <div className="lightbox-counter">
-                  {activeImageIndex + 1} / {project.field_images.length}
+                  {safeImageIndex + 1} / {project.field_images.length}
                 </div>
               </div>
             </div>
