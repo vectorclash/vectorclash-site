@@ -86,9 +86,9 @@ function Scene({ colors }) {
 
   return (
     <>
-      <fog attach="fog" args={[fogColor, 1, 450]} />
-      <ambientLight intensity={1} color={0xfafafa} />
-      <directionalLight intensity={0.5} color={fogColor} />
+      {/* <fog attach="fog" args={[fogColor, 1, 900]} /> */}
+      <ambientLight intensity={0.2} color={0xfafafa} />
+      {/* <directionalLight intensity={0.2} color={fogColor} /> */}
 
       <group ref={groupRef} scale={[0.00002, 0.00002, 0.00002]} visible={false}>
         <WireframeBox size={2000} depth={12} color={fogColor} />

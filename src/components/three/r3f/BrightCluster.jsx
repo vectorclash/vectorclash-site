@@ -76,7 +76,7 @@ function BrightShape({ color, initialPosition }) {
 
     const moveShape = () => {
       const positionRange = 150;
-      const speed = 2;
+      const speed = 5;
       const path = [];
       for (let i = 0; i < 3; i++) {
         path.push({
