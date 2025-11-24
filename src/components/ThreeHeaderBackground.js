@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import GradientBackground from "./GradientBackground";
+// import GradientBackground from "./GradientBackground";
 import HeaderScene from "./three/r3f/HeaderScene";
 import "./ThreeHeaderBackground.scss";
 import GradientGenerator from "./utils/GradientGenerator";
@@ -19,7 +19,7 @@ export default function ThreeHeaderBackground() {
 
   return (
     <div className="three-background">
-      <GradientBackground />
+      {/* <GradientBackground /> */}
       <HeaderScene colors={colors} />
     </div>
   );
