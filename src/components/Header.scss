@@ -1,12 +1,11 @@
 .header {
   background-image: linear-gradient(42deg, #ff0457, #12002f);
-  transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   height: 100vh;
   min-height: 777px;
 
   @media only screen and (max-width: 600px) {
-    height: 777px;
-    min-height: 777px;
+    height: 100dvh;
+    min-height: 100dvh;
   }
 
   article {
