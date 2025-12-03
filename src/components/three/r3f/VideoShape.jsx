@@ -71,7 +71,7 @@ export default function VideoShape({ url, size = 50 }) {
   }, [videoLoaded]);
 
   return (
-    <group ref={groupRef} position={[70, 50, 0]}>
+    <group ref={groupRef}>
       {/* Placeholder mesh */}
       <mesh ref={placeholderRef} scale={[0.9, 0.9, 0.9]}>
         <tetrahedronGeometry args={[size]} />

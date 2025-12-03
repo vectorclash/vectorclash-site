@@ -4,44 +4,14 @@ import tinycolor from "tinycolor2";
 import "./About.scss";
 import me from "../images/me.png";
 import HeaderIcon from "./HeaderIcon";
+import skillsData from "../data/skills.json";
 
 class About extends React.Component {
   constructor(props) {
     super(props);
     this.mount = React.createRef();
     this.state = {
-      skills: [
-        {
-          category: "Front-End Development",
-          items: [
-            { title: "HTML/CSS/JavaScript", level: 10 },
-            { title: "React/Vue/Angular", level: 8 },
-            { title: "Three.js/WebGL", level: 8 },
-          ]
-        },
-        {
-          category: "Motion & Animation",
-          items: [
-            { title: "After Effects", level: 7 },
-            { title: "GSAP", level: 9 },
-            { title: "Blender", level: 7 },
-          ]
-        },
-        {
-          category: "Design & Prototyping",
-          items: [
-            { title: "Figma", level: 8 },
-            { title: "UI/UX Design", level: 6 },
-          ]
-        },
-        {
-          category: "Tools & Workflow",
-          items: [
-            { title: "Git/Version Control", level: 9 },
-            { title: "Build Tools (Vite/Webpack)", level: 8 },
-          ]
-        }
-      ],
+      skills: skillsData,
     };
   }
 

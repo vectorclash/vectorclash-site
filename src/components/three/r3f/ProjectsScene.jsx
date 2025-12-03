@@ -66,7 +66,7 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
         </Suspense>
       </group>
 
-      <group ref={videoGroupRef}>
+      <group ref={videoGroupRef} position={[-10, 0, 0]}>
         {videoURL && <VideoShape url={videoURL} size={50} />}
       </group>
     </>

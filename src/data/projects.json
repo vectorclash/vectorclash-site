@@ -20,7 +20,7 @@
       { "url": "https://picsum.photos/seed/project1-3/800/600" },
       { "url": "https://picsum.photos/seed/project1-4/800/600" }
     ],
-    "field_videos": []
+    "field_videos": [{ "url": "/videos/5994360-hd_1550_1080_30fps.mp4" }]
   },
   {
     "title": [{ "value": "Social Media Dashboard" }],

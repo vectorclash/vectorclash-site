@@ -4,6 +4,7 @@ import "./Header.scss";
 import PDFIcon from "./PDFIcon";
 import ThreeHeaderBackground from "./ThreeHeaderBackground";
 import Logo from "./Logo";
+import profileData from "../data/profile.json";
 
 class Header extends React.Component {
   constructor(props) {
@@ -112,16 +113,14 @@ class Header extends React.Component {
       <header className="header container" ref={this.myRef}>
         <article className="column">
           <Logo />
-          <h2>Hello! My name is</h2>
+          <h2>{profileData.greeting}</h2>
           <h1>
-            <b>Aaron Ezra Sterczewski.</b>
+            <b>{profileData.name.full}.</b>
           </h1>
-          <p>
-            I'm a <b>creative developer / motion engineer</b> and I love color.
-          </p>
+          <p dangerouslySetInnerHTML={{ __html: profileData.intro }} />
           <div className="header-buttons">
-            <a href="./documents/resume.pdf" target="_blank">
-              Résumé {<PDFIcon />}
+            <a href={profileData.resume.url} target="_blank">
+              {profileData.resume.text} {<PDFIcon />}
             </a>
           </div>
         </article>
