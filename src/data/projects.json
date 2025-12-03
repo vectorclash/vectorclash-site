@@ -1,26 +1,25 @@
 [
   {
-    "title": [{ "value": "E-Commerce Platform" }],
+    "title": [{ "value": "Spinor" }],
     "body": [
       {
-        "value": "<p>A modern e-commerce platform built with React and Node.js, featuring real-time inventory management, secure payment processing, and a seamless checkout experience. The platform handles thousands of transactions daily and includes advanced analytics for business intelligence.</p><p>Key features include personalized product recommendations, multi-currency support, and integration with major shipping providers.</p>"
+        "value": "<p>Spinor was quite a unique project. The goal was to create a dynamic and engaging intro and site preloader animation. We wanted to use three.js to create a three dimensional scene with elements that are chosen dynamically at runtime to slightly alter the composition on each view. The module was ultimately incorporated into a wordpress site.</p>"
       }
     ],
     "field_tools": [
-      { "value": "React" },
-      { "value": "Node.js" },
-      { "value": "PostgreSQL" },
-      { "value": "Stripe API" },
-      { "value": "Redux" },
-      { "value": "Express" }
+      { "value": "three.js" },
+      { "value": "gsap" },
+      { "value": "sass" },
+      { "value": "webpack" }
     ],
     "field_images": [
-      { "url": "https://picsum.photos/seed/project1-1/800/600" },
-      { "url": "https://picsum.photos/seed/project1-2/800/600" },
-      { "url": "https://picsum.photos/seed/project1-3/800/600" },
-      { "url": "https://picsum.photos/seed/project1-4/800/600" }
+      { "url": "/projects/spinor/images/img01.jpg" },
+      { "url": "/projects/spinor/images/img02.jpg" },
+      { "url": "/projects/spinor/images/img03.jpg" },
+      { "url": "/projects/spinor/images/img04.jpg" },
+      { "url": "/projects/spinor/images/img05.jpg" }
     ],
-    "field_videos": [{ "url": "/videos/5994360-hd_1550_1080_30fps.mp4" }]
+    "field_videos": [{ "url": "/projects/spinor/videos/spinor.mp4" }]
   },
   {
     "title": [{ "value": "Social Media Dashboard" }],
