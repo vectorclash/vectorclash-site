@@ -30,12 +30,24 @@ export default function ParticleField({
     return tex;
   }, [image]);
 
+  // Cleanup texture on unmount
+  useEffect(() => {
+    return () => {
+      if (texture) {
+        texture.dispose();
+      }
+    };
+  }, [texture]);
+
   const positions = useMemo(() => {
     const vertices = [];
     for (let p = 0; p < particleNum; p++) {
       const pX = -containerSize.x + Math.random() * (containerSize.x * 2);
       const pY = -containerSize.y + Math.random() * (containerSize.y * 2);
-      const pZ = -containerSize.z + Math.random() * (containerSize.z * 2);
+      // Bias Z distribution toward negative values (in front of camera at z=130)
+      // Using power distribution to cluster more particles closer to camera
+      const zRandom = Math.pow(Math.random(), 1.5); // Bias toward 0
+      const pZ = -containerSize.z + zRandom * (containerSize.z * 2);
       vertices.push(pX, pY, pZ);
     }
     return new Float32Array(vertices);
@@ -54,7 +66,7 @@ export default function ParticleField({
     });
 
     // Scale animations on each axis
-    gsap.to(pointsRef.current.scale, {
+    const scaleXTween = gsap.to(pointsRef.current.scale, {
       duration: 30 + Math.random() * 20,
       x: 1 + Math.random() * 2,
       yoyo: true,
@@ -62,7 +74,7 @@ export default function ParticleField({
       ease: 'back.inOut',
     });
 
-    gsap.to(pointsRef.current.scale, {
+    const scaleYTween = gsap.to(pointsRef.current.scale, {
       duration: 30 + Math.random() * 20,
       y: 1 + Math.random() * 2,
       yoyo: true,
@@ -70,7 +82,7 @@ export default function ParticleField({
       ease: 'back.inOut',
     });
 
-    gsap.to(pointsRef.current.scale, {
+    const scaleZTween = gsap.to(pointsRef.current.scale, {
       duration: 30 + Math.random() * 20,
       z: 1 + Math.random() * 2,
       yoyo: true,
@@ -79,12 +91,19 @@ export default function ParticleField({
     });
 
     // Rotation animation
-    gsap.to(pointsRef.current.rotation, {
+    const rotationTween = gsap.to(pointsRef.current.rotation, {
       duration: 100,
       y: -Math.PI * 2,
       repeat: -1,
       ease: 'none',
     });
+
+    return () => {
+      scaleXTween.kill();
+      scaleYTween.kill();
+      scaleZTween.kill();
+      rotationTween.kill();
+    };
   }, []);
 
   if (!texture) return null;

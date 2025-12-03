@@ -38,8 +38,11 @@ export default function WireframeBox({ size = 2000, depth = 12, color = '#ccff00
       ease: 'none',
     });
 
-    // Color change animation
+    // Color change animation with cleanup flag
+    let isActive = true;
     const changeColor = () => {
+      if (!isActive) return;
+
       gsap.to(hueRef, {
         current: Math.random(),
         duration: 5 + Math.random() * 20,
@@ -56,7 +59,9 @@ export default function WireframeBox({ size = 2000, depth = 12, color = '#ccff00
 
     // Cleanup
     return () => {
+      isActive = false;
       rotationTween.kill();
+      gsap.killTweensOf(hueRef);
     };
   }, []);
 

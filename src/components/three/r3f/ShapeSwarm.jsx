@@ -19,6 +19,15 @@ function SingleShape({ geometry, containerSize, positionRange = 250, speed = 10 
     return tex;
   }, []);
 
+  // Cleanup texture on unmount
+  useEffect(() => {
+    return () => {
+      if (texture) {
+        texture.dispose();
+      }
+    };
+  }, [texture]);
+
   const initialPosition = useMemo(() => ({
     x: -containerSize.x + Math.random() * (containerSize.x * 2),
     y: -containerSize.y + Math.random() * (containerSize.y * 2),
@@ -36,7 +45,11 @@ function SingleShape({ geometry, containerSize, positionRange = 250, speed = 10 
   useEffect(() => {
     if (!meshRef.current) return;
 
+    let isActive = true;
+
     const moveShape = () => {
+      if (!isActive || !meshRef.current) return;
+
       const path = [];
       for (let i = 0; i < 3; i++) {
         path.push({
@@ -55,9 +68,16 @@ function SingleShape({ geometry, containerSize, positionRange = 250, speed = 10 
     };
 
     moveShape();
+
+    return () => {
+      isActive = false;
+      if (meshRef.current) {
+        gsap.killTweensOf(meshRef.current.position);
+      }
+    };
   }, [positionRange, speed]);
 
-  useFrame((state) => {
+  useFrame(() => {
     if (meshRef.current && meshRef.current.parent) {
       meshRef.current.lookAt(
         meshRef.current.parent.position.x,
@@ -110,7 +130,7 @@ export default function ShapeSwarm({ amount = 5, containerSize = { x: 120, y: 20
     if (!groupRef.current) return;
 
     // Group rotation animation
-    gsap.to(groupRef.current.rotation, {
+    const rotationTween = gsap.to(groupRef.current.rotation, {
       duration: 50,
       y: Math.PI * 2,
       repeat: -1,
@@ -119,7 +139,7 @@ export default function ShapeSwarm({ amount = 5, containerSize = { x: 120, y: 20
 
     // Group scale animation
     const ranScale = 1 + Math.random() * 2;
-    gsap.to(groupRef.current.scale, {
+    const scaleTween = gsap.to(groupRef.current.scale, {
       duration: 30 + Math.random() * 20,
       x: ranScale,
       y: ranScale,
@@ -128,7 +148,21 @@ export default function ShapeSwarm({ amount = 5, containerSize = { x: 120, y: 20
       repeat: -1,
       ease: 'back.inOut',
     });
+
+    return () => {
+      rotationTween.kill();
+      scaleTween.kill();
+    };
   }, []);
+
+  // Cleanup geometry on unmount
+  useEffect(() => {
+    return () => {
+      if (geometry) {
+        geometry.dispose();
+      }
+    };
+  }, [geometry]);
 
   return (
     <group ref={groupRef}>

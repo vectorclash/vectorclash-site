@@ -10,6 +10,7 @@ import ParticleField from './ParticleField';
 import GradientGenerator from '../../utils/GradientGenerator';
 import StarLarge from '../../../images/star-sprite-large.png';
 import StarSmall from '../../../images/star-sprite-small.png';
+import { getParticleConfig, shouldEnableBloom, shouldEnableAntialias } from '../../utils/PerformanceDetector';
 
 // Animated gradient background component
 function AnimatedGradientBackground() {
@@ -186,6 +187,10 @@ function Scene({ colors }) {
   const middleColor = Math.floor(colors.length / 2);
   const fogColor = colors[middleColor].toHexString();
 
+  // Get performance-based configuration
+  const particleConfig = getParticleConfig();
+  const enableBloom = shouldEnableBloom();
+
   useEffect(() => {
     // Load star images
     const loader = new THREE.ImageLoader();
@@ -266,41 +271,43 @@ function Scene({ colors }) {
           <BrightCluster />
         </Suspense>
 
-        {/* Small particles */}
+        {/* Small particles - optimized for visibility in front of camera */}
         {starSmallImage &&
-          Array.from({ length: 50 }).map((_, i) => (
+          Array.from({ length: particleConfig.smallFields }).map((_, i) => (
             <ParticleField
               key={`small-${i}`}
-              particleNum={500}
+              particleNum={particleConfig.smallParticles}
               image={starSmallImage}
-              size={0.5 + Math.random() * 1}
-              opacity={0.4}
-              containerSize={{ x: 200, y: 250, z: 200 }}
+              size={0.8 + Math.random() * 1.5}
+              opacity={0.6}
+              containerSize={{ x: 150, y: 200, z: 350 }}
             />
           ))}
 
-        {/* Large particles */}
+        {/* Large particles - optimized for visibility */}
         {starLargeImage &&
-          Array.from({ length: 20 }).map((_, i) => (
+          Array.from({ length: particleConfig.largeFields }).map((_, i) => (
             <ParticleField
               key={`large-${i}`}
-              particleNum={5}
+              particleNum={particleConfig.largeParticles}
               image={starLargeImage}
-              size={10 + Math.random() * 30}
-              opacity={0.7}
-              containerSize={{ x: 150, y: 150, z: 150 }}
+              size={15 + Math.random() * 35}
+              opacity={0.8}
+              containerSize={{ x: 120, y: 150, z: 300 }}
             />
           ))}
       </group>
 
-      <EffectComposer>
-        <Bloom
-          intensity={1}
-          luminanceThreshold={0.3}
-          luminanceSmoothing={0.9}
-          mipmapBlur
-        />
-      </EffectComposer>
+      {enableBloom && (
+        <EffectComposer>
+          <Bloom
+            intensity={1}
+            luminanceThreshold={0.3}
+            luminanceSmoothing={0.9}
+            mipmapBlur
+          />
+        </EffectComposer>
+      )}
     </>
   );
 }
@@ -308,12 +315,13 @@ function Scene({ colors }) {
 export default function HeaderScene({ colors }) {
   const middleColor = Math.floor(colors.length / 2);
   const fallbackColor = colors[middleColor].toHexString();
+  const enableAntialias = shouldEnableAntialias();
 
   return (
     <Canvas
-      camera={{ position: [0, 2, 130], fov: 50, near: 0.1, far: 20000 }}
+      camera={{ position: [0, 2, 130], fov: 60, near: 0.1, far: 20000 }}
       gl={{
-        antialias: true,
+        antialias: enableAntialias,
         alpha: false,
         physicallyCorrectLights: false,
         shadowMap: {

@@ -7,6 +7,7 @@ import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
+import { shouldEnableAntialias, getGLPrecision } from '../../utils/PerformanceDetector';
 
 function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
   const projectGroupRef = useRef();
@@ -75,6 +76,8 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
 export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [] }) {
   const [fogColor, setFogColor] = useState('#fb0097');
   const [backgroundColor, setBackgroundColor] = useState('#fb0097');
+  const enableAntialias = shouldEnableAntialias();
+  const glPrecision = getGLPrecision();
 
   useEffect(() => {
     if (textureURL) {
@@ -88,8 +91,8 @@ export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [] 
     <Canvas
       camera={{ position: [0, 2, 160], fov: 50, near: 0.1, far: 20000 }}
       gl={{
-        antialias: true,
-        precision: 'highp',
+        antialias: enableAntialias,
+        precision: glPrecision,
       }}
       style={{ background: backgroundColor }}
     >
