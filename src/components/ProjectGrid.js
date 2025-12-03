@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import gsap from "gsap/all";
 import ProjectsScene from "./three/r3f/ProjectsScene";
 import GradientGenerator from "./utils/GradientGenerator";
+import HexagonLoader from "./HexagonLoader";
 import "./ProjectGrid.scss";
 import tinycolor from "tinycolor2";
 
@@ -23,6 +24,8 @@ class ProjectGrid extends React.Component {
       previousImageIndex: 0,
       isTransitioning: false,
       transitionDirection: 'forward',
+      isProjectTransitioning: false,
+      isLoadingProject: false,
     };
     this.r3fRoot = null;
   }
@@ -32,36 +35,57 @@ class ProjectGrid extends React.Component {
     this.renderThreeScene();
   }
 
+  preloadImages(imageUrls) {
+    return Promise.all(
+      imageUrls.map(url => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(url);
+          img.onerror = () => reject(url);
+          img.src = url;
+        });
+      })
+    );
+  }
+
   componentDidUpdate(prevProps, prevState) {
     const { isProjectActive, activeProjectID, currentTexture, currentVideo } = this.state;
 
     // Only animate when switching projects or toggling project active state
     if (activeProjectID !== prevState.activeProjectID || isProjectActive !== prevState.isProjectActive) {
-      // Use requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
-        if (!this.mount) return;
+      if (!this.mount) return;
 
-        const elements = this.mount.querySelectorAll("li, .project-description, .thumbnail, h2, .tools, .gallery-main");
-        if (elements.length > 0) {
-          gsap.fromTo(
-            elements,
-            {
-              opacity: 0,
-              y: 20,
-            },
-            {
-              duration: 0.4,
-              opacity: 1,
-              y: 0,
-              ease: "power2.out",
-              stagger: {
-                amount: 0.3,
-              },
-              delay: 0.1,
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        const projectContent = this.mount?.querySelector(".project-content");
+        if (projectContent) {
+          // Immediately hide the entire content area
+          gsap.set(projectContent, {
+            opacity: 0,
+          });
+
+          // Preload all images for this project
+          if (isProjectActive && activeProjectID !== null) {
+            const project = this.props.projects[activeProjectID];
+            if (project && project.field_images && project.field_images.length > 0) {
+              const imageUrls = project.field_images.map(img => img.url);
+              this.preloadImages(imageUrls).then(() => {
+                // All images loaded, now show content
+                this.setState({ isLoadingProject: false }, () => {
+                  // Then after React updates, start the fade-in animation
+                  setTimeout(() => {
+                    gsap.to(projectContent, {
+                      duration: 0.5,
+                      opacity: 1,
+                      ease: "power2.out",
+                    });
+                  }, 50);
+                });
+              });
             }
-          );
+          }
         }
-      });
+      }, 0);
     }
 
     // When opening a project or switching between projects
@@ -183,17 +207,34 @@ class ProjectGrid extends React.Component {
     this.setState({
       isProjectActive: true,
       activeProjectID: index,
+      isLoadingProject: true,
     });
   }
 
   onProjectPrevClick(e) {
+    if (this.state.isProjectTransitioning) return;
+
+    this.setState({ isProjectTransitioning: true });
+
+    // Calculate the new project ID
     let prevProject = this.state.activeProjectID - 1;
     if (prevProject < 0) {
       prevProject = this.props.projects.length - 1;
     }
 
-    this.setState({
-      activeProjectID: prevProject,
+    // Fade out current project content
+    const projectContent = this.mount.querySelector(".project-content");
+    gsap.to(projectContent, {
+      duration: 0.3,
+      opacity: 0,
+      ease: "power2.in",
+      onComplete: () => {
+        this.setState({
+          activeProjectID: prevProject,
+          isProjectTransitioning: false,
+          isLoadingProject: true,
+        });
+      }
     });
   }
 
@@ -204,13 +245,29 @@ class ProjectGrid extends React.Component {
   }
 
   onProjectNextClick(e) {
+    if (this.state.isProjectTransitioning) return;
+
+    this.setState({ isProjectTransitioning: true });
+
+    // Calculate the new project ID
     let nextProject = this.state.activeProjectID + 1;
     if (nextProject >= this.props.projects.length) {
       nextProject = 0;
     }
 
-    this.setState({
-      activeProjectID: nextProject,
+    // Fade out current project content
+    const projectContent = this.mount.querySelector(".project-content");
+    gsap.to(projectContent, {
+      duration: 0.3,
+      opacity: 0,
+      ease: "power2.in",
+      onComplete: () => {
+        this.setState({
+          activeProjectID: nextProject,
+          isProjectTransitioning: false,
+          isLoadingProject: true,
+        });
+      }
     });
   }
 
@@ -285,7 +342,7 @@ class ProjectGrid extends React.Component {
   }
 
   render() {
-    const { isProjectActive, activeProjectID, activeImageIndex, isGalleryOpen, previousImageIndex, isTransitioning, transitionDirection } = this.state;
+    const { isProjectActive, activeProjectID, activeImageIndex, isGalleryOpen, previousImageIndex, isTransitioning, transitionDirection, isLoadingProject } = this.state;
 
     if (isProjectActive) {
       const project = this.props.projects[activeProjectID];
@@ -305,6 +362,11 @@ class ProjectGrid extends React.Component {
             this.mount = mount;
           }}
         >
+          {isLoadingProject && (
+            <div className="project-loader">
+              <HexagonLoader />
+            </div>
+          )}
           <div className="project-header">
             <div className="project-meta">
               <h2>{project.title[0].value}</h2>
@@ -339,7 +401,7 @@ class ProjectGrid extends React.Component {
             </div>
           </div>
 
-          <div className="project-content">
+          <div className={`project-content ${isLoadingProject ? 'hidden' : ''}`}>
             <div className="project-description">
               <span
                 dangerouslySetInnerHTML={{
