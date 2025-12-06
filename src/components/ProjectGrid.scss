@@ -24,8 +24,8 @@
     transform-origin: bottom;
 
     h4 {
-      padding-bottom: 50px;
-      border-bottom: 30px solid white;
+      padding-bottom: 10px;
+      border-bottom: 10px solid white;
       opacity: 0;
       z-index: 1;
       transition: 0.2s;
@@ -59,8 +59,6 @@
   li:hover {
     h4 {
       opacity: 1;
-      padding-bottom: 3px;
-      border-bottom: 10px solid white;
     }
 
     .background {
@@ -203,14 +201,54 @@
         }
 
         a {
+          position: relative;
           color: #d4ff00;
           font-weight: bold;
           text-decoration: none;
-          transition: 0.2s;
-          border-bottom: 2px solid transparent;
+          padding: 4px 10px;
+          border-radius: 3px;
+          transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          display: inline-block;
+          background: linear-gradient(to right, rgba(#d4ff00, 0.1), rgba(#d4ff00, 0.15));
+          border-bottom: 2px solid rgba(#d4ff00, 0.3);
+          overflow: hidden;
+
+          &::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(to right, #d4ff00, #ccff00, #d4ff00);
+            transition: width 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 0 8px rgba(#d4ff00, 0.6);
+          }
+
+          &::after {
+            content: '\2192';
+            margin-left: 4px;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          }
 
           &:hover {
-            border-bottom-color: #d4ff00;
+            color: #fff;
+            background: linear-gradient(to right, rgba(#d4ff00, 0.2), rgba(#d4ff00, 0.25));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(#d4ff00, 0.3);
+
+            &::before {
+              width: 100%;
+            }
+
+            &::after {
+              transform: translateX(3px);
+            }
+          }
+
+          &:active {
+            transform: translateY(0);
           }
         }
       }
@@ -656,3 +694,4 @@
     filter: blur(0px);
   }
 }
+

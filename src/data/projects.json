@@ -3,7 +3,7 @@
     "title": [{ "value": "Spinor" }],
     "body": [
       {
-        "value": "<p>Spinor was quite a unique project. The goal was to create a dynamic and engaging intro and site preloader animation. We wanted to use three.js to create a three dimensional scene with elements that are chosen dynamically at runtime to slightly alter the composition on each view. The module was ultimately incorporated into a wordpress site.</p>"
+        "value": "<p>Spinor represents a distinctive approach to web preloading experiences. The project's core objective was to transform the traditionally mundane site loading phase into a captivating three-dimensional introduction that engages visitors from their very first interaction.</p><p>Leveraging three.js, we crafted an immersive 3D scene where visual elements are procedurally selected at runtime, ensuring that each page load presents a subtly unique composition. This dynamic variability keeps the experience fresh for returning visitors while maintaining brand consistency. The animation was carefully optimized to balance visual richness with performance, ultimately being seamlessly integrated as a custom module within a WordPress ecosystem. GSAP provided the timing precision needed to orchestrate the various animation sequences, while Sass and Webpack rounded out the build pipeline for maintainable, production-ready code.</p>"
       }
     ],
     "field_tools": [
@@ -13,80 +13,78 @@
       { "value": "webpack" }
     ],
     "field_images": [
-      { "url": "/projects/spinor/images/img01.jpg" },
-      { "url": "/projects/spinor/images/img02.jpg" },
-      { "url": "/projects/spinor/images/img03.jpg" },
-      { "url": "/projects/spinor/images/img04.jpg" },
-      { "url": "/projects/spinor/images/img05.jpg" }
+      { "url": "/projects/spinor/images/spinor_img01.jpg" },
+      { "url": "/projects/spinor/images/spinor_img02.jpg" },
+      { "url": "/projects/spinor/images/spinor_img03.jpg" },
+      { "url": "/projects/spinor/images/spinor_img04.jpg" },
+      { "url": "/projects/spinor/images/spinor_img05.jpg" }
     ],
     "field_videos": [{ "url": "/projects/spinor/videos/spinor.mp4" }]
   },
   {
-    "title": [{ "value": "Social Media Dashboard" }],
+    "title": [{ "value": "Winc" }],
     "body": [
       {
-        "value": "<p>An intuitive social media management dashboard that aggregates data from multiple platforms. Users can schedule posts, track engagement metrics, and analyze audience demographics across Twitter, Instagram, and Facebook from a single interface.</p><p>Built with performance in mind, the dashboard updates in real-time and handles high-volume data streams efficiently.</p>"
+        "value": "<p>The Winc project marked my deep dive into the world of native web components, presenting both a significant learning opportunity and a substantial technical challenge. The mission was ambitious: architect and develop a complete ecommerce platform from the ground up, built entirely on a component-based paradigm.</p><p>What made this project particularly compelling was the emphasis on creating a rich, animated user experience while maintaining complete modularity. Each component was designed as a self-contained unit with its own encapsulated animations, powered by GSAP for fluid, performant motion design. This architectural approach demanded the creation of an extensive component library—a comprehensive system capable of generating any conceivable content layout or page variation through flexible composition patterns. The result was a truly modular site where components could be mixed, matched, and deployed in countless configurations, all while preserving consistent animation behavior and visual polish throughout the entire shopping experience.</p>"
       }
     ],
     "field_tools": [
-      { "value": "Vue.js" },
-      { "value": "D3.js" },
-      { "value": "Firebase" },
-      { "value": "Chart.js" },
-      { "value": "OAuth 2.0" },
-      { "value": "WebSockets" }
+      { "value": "Web Components" },
+      { "value": "GSAP" }
     ],
     "field_images": [
-      { "url": "https://picsum.photos/seed/project2-1/800/600" },
-      { "url": "https://picsum.photos/seed/project2-2/800/600" },
-      { "url": "https://picsum.photos/seed/project2-3/800/600" }
+      { "url": "/projects/winc/images/winc_img01.jpg" },
+      { "url": "/projects/winc/images/winc_img02.jpg" },
+      { "url": "/projects/winc/images/winc_img03.jpg" },
+      { "url": "/projects/winc/images/winc_img04.jpg" },
+      { "url": "/projects/winc/images/winc_img05.jpg" },
+      { "url": "/projects/winc/images/winc_img06.jpg" },
+      { "url": "/projects/winc/images/winc_img07.jpg" }
     ],
-    "field_videos": []
+    "field_videos": [{ "url": "/projects/winc/videos/winc.mp4" }]
   },
   {
-    "title": [{ "value": "Mobile Fitness App" }],
+    "title": [{ "value": "Honey 10" }],
     "body": [
       {
-        "value": "<p>A cross-platform mobile fitness application that helps users track workouts, monitor progress, and achieve their health goals. The app features personalized workout plans, nutritional tracking, and integration with popular wearable devices.</p><p>Machine learning algorithms provide intelligent recommendations based on user activity patterns and preferences. The app has been downloaded over 100,000 times across iOS and Android platforms.</p>"
+        "value": "<p>Being invited to create a visual experience for Honey Soundsystem's 10th anniversary celebration was both an honor and an exciting creative challenge. The project called for a dancefloor projection that would become an integral part of the live musical experience, responding and evolving alongside the DJ sets throughout the night.</p><p>Using three.js as the rendering foundation, I developed a generative geometric animation system that strikes a balance between visual simplicity and dynamic complexity. The core concept centers on mathematically-driven shape movements—geometric forms whose motions are governed by precise mathematical formulas, making them ideally suited for real-time audio manipulation. As music pulses through the sound system, incoming audio data directly influences the animation parameters, creating a living visual representation of the sonic landscape. This reactive relationship between sound and visuals transformed the static projection surface into a dynamic canvas that breathed in sync with the music, amplifying the immersive atmosphere of the celebration.</p>"
       }
     ],
     "field_tools": [
-      { "value": "React Native" },
-      { "value": "TensorFlow" },
-      { "value": "MongoDB" },
-      { "value": "HealthKit" },
-      { "value": "GraphQL" },
-      { "value": "AWS Lambda" }
+      { "value": "Event Projection" },
+      { "value": "Sound Reactivity" },
+      { "value": "three.js" },
+      { "value": "GSAP" }
     ],
     "field_images": [
-      { "url": "https://picsum.photos/seed/project3-1/800/600" },
-      { "url": "https://picsum.photos/seed/project3-2/800/600" },
-      { "url": "https://picsum.photos/seed/project3-3/800/600" },
-      { "url": "https://picsum.photos/seed/project3-4/800/600" },
-      { "url": "https://picsum.photos/seed/project3-5/800/600" }
+      { "url": "/projects/honey/images/honey_img01.jpg" },
+      { "url": "/projects/honey/images/honey_img02.jpg" },
+      { "url": "/projects/honey/images/honey_img03.jpg" },
+      { "url": "/projects/honey/images/honey_img04.jpg" },
+      { "url": "/projects/honey/images/honey_img05.jpg" }
     ],
-    "field_videos": []
+    "field_videos": [{ "url": "/projects/honey/videos/honey.mp4" }]
   },
   {
-    "title": [{ "value": "AI Content Generator" }],
+    "title": [{ "value": "VectorForge" }],
     "body": [
       {
-        "value": "<p>An advanced AI-powered content generation platform that helps marketers and content creators produce high-quality written content at scale. The system uses natural language processing to understand context and generate relevant, engaging copy for various use cases.</p><p>Features include multi-language support, tone adjustment, SEO optimization suggestions, and plagiarism detection. The platform serves enterprise clients and independent creators alike.</p>"
+        "value": "<p>VectorForge began as a personal passion project—an exploration into the intersection of code, mathematics, and visual art through procedural generation. What started as creative experimentation evolved into a fully-featured React web application that serves as a generative art studio in the browser.</p><p>The application empowers users to create endlessly unique, vibrantly colorful artworks through algorithmic processes. Each piece is procedurally generated, meaning no two creations are ever exactly alike. The interface provides intuitive controls for generating, fine-tuning, saving, and downloading these digital artworks. Color manipulation is handled through tinycolor, while GSAP adds smooth, engaging transitions throughout the user experience. Looking toward the future, I envision expanding VectorForge into a complete print-on-demand service—a platform where users can not only generate their own distinctive artwork but seamlessly transform their digital creations into wearable pieces by having them printed on their garment of choice, bridging the gap between digital art generation and physical fashion.</p><p><a href='https://vectorclash.com/forge/' target='_blank'>View Project</a></p>"
       }
     ],
     "field_tools": [
-      { "value": "Python" },
-      { "value": "OpenAI API" },
-      { "value": "FastAPI" },
       { "value": "React" },
-      { "value": "Docker" },
-      { "value": "Redis" },
-      { "value": "Kubernetes" }
+      { "value": "GSAP" },
+      { "value": "tinycolor" }
     ],
     "field_images": [
-      { "url": "https://picsum.photos/seed/project4-1/800/600" },
-      { "url": "https://picsum.photos/seed/project4-2/800/600" },
-      { "url": "https://picsum.photos/seed/project4-3/800/600" }
+      { "url": "/projects/forge/images/forge_img01.jpg" },
+      { "url": "/projects/forge/images/forge_img02.jpg" },
+      { "url": "/projects/forge/images/forge_img03.jpg" },
+      { "url": "/projects/forge/images/forge_img04.jpg" },
+      { "url": "/projects/forge/images/forge_img05.jpg" },
+      { "url": "/projects/forge/images/forge_img06.jpg" },
+      { "url": "/projects/forge/images/forge_img07.jpg" }
     ],
     "field_videos": []
   }
