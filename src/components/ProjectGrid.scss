@@ -317,6 +317,53 @@
         }
       }
 
+      .gallery-nav {
+        display: none;
+
+        @media only screen and (max-width: 1024px) {
+          display: block;
+        }
+
+        button {
+          position: absolute;
+          top: calc(var(--gallery-image-height, 200px) / 2);
+          transform: translateY(-50%);
+          background: rgba(0, 0, 0, 0.7);
+          border: none;
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border-radius: 50%;
+          backdrop-filter: blur(4px);
+          z-index: 10;
+
+          img {
+            height: 18px;
+            filter: brightness(0) invert(1);
+          }
+
+          &:hover {
+            background: rgba(0, 0, 0, 0.85);
+          }
+
+          &:active {
+            transform: translateY(-50%) scale(0.95);
+          }
+        }
+
+        .gallery-nav-prev {
+          left: 10px;
+        }
+
+        .gallery-nav-next {
+          right: 10px;
+        }
+      }
+
       .gallery-thumbnails {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -364,53 +411,6 @@
               opacity: 1;
             }
           }
-        }
-      }
-
-      .gallery-nav {
-        display: none;
-        position: absolute;
-        top: 40%;
-        left: 0;
-        right: 0;
-        transform: translateY(-50%);
-        justify-content: space-between;
-        pointer-events: none;
-
-        @media only screen and (max-width: 1024px) {
-          display: flex;
-        }
-
-        button {
-          pointer-events: all;
-          background: rgba(0, 0, 0, 0.6);
-          border: none;
-          width: 50px;
-          height: 50px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          border-radius: 50%;
-
-          img {
-            height: 20px;
-            filter: brightness(0) invert(1);
-          }
-
-          &:hover {
-            background: rgba(0, 0, 0, 0.8);
-            transform: scale(1.1);
-          }
-        }
-
-        .gallery-nav-prev {
-          margin-left: 10px;
-        }
-
-        .gallery-nav-next {
-          margin-right: 10px;
         }
       }
     }

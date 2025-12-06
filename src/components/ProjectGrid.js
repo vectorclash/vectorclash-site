@@ -33,6 +33,10 @@ class ProjectGrid extends React.Component {
   componentDidMount() {
     this.r3fRoot = createRoot(this.props.threeContainer);
     this.renderThreeScene();
+
+    // Add resize listener for gallery nav positioning
+    this.handleResize = () => this.updateGalleryNavPosition();
+    window.addEventListener('resize', this.handleResize);
   }
 
   preloadImages(imageUrls) {
@@ -79,6 +83,8 @@ class ProjectGrid extends React.Component {
                       opacity: 1,
                       ease: "power2.out",
                     });
+                    // Update gallery nav position after images are loaded and visible
+                    this.updateGalleryNavPosition();
                   }, 50);
                 });
               });
@@ -156,6 +162,8 @@ class ProjectGrid extends React.Component {
     if (this.r3fRoot) {
       this.r3fRoot.unmount();
     }
+    // Remove resize listener
+    window.removeEventListener('resize', this.handleResize);
   }
 
   renderThreeScene() {
@@ -277,7 +285,22 @@ class ProjectGrid extends React.Component {
     this.setState({
       activeImageIndex: index,
       currentTexture: newTexture
+    }, () => {
+      // Update nav position after image changes
+      setTimeout(() => this.updateGalleryNavPosition(), 100);
     });
+  }
+
+  updateGalleryNavPosition() {
+    if (!this.mount) return;
+    const galleryMain = this.mount.querySelector('.gallery-main img');
+    if (galleryMain) {
+      const height = galleryMain.offsetHeight;
+      const gallery = this.mount.querySelector('.project-gallery');
+      if (gallery) {
+        gallery.style.setProperty('--gallery-image-height', `${height}px`);
+      }
+    }
   }
 
   onMainImageClick() {
