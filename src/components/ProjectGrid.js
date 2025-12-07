@@ -26,6 +26,7 @@ class ProjectGrid extends React.Component {
       transitionDirection: 'forward',
       isProjectTransitioning: false,
       isLoadingProject: false,
+      activeThumbnailID: null, // For mobile two-tap behavior
     };
     this.r3fRoot = null;
   }
@@ -34,9 +35,16 @@ class ProjectGrid extends React.Component {
     this.r3fRoot = createRoot(this.props.threeContainer);
     this.renderThreeScene();
 
-    // Add resize listener for gallery nav positioning
-    this.handleResize = () => this.updateGalleryNavPosition();
-    window.addEventListener('resize', this.handleResize);
+    // Add click listener to deactivate thumbnails when clicking outside
+    this.handleDocumentClick = (e) => {
+      if (this.state.activeThumbnailID !== null && this.mount) {
+        const clickedInsideGrid = this.mount.contains(e.target);
+        if (!clickedInsideGrid) {
+          this.setState({ activeThumbnailID: null });
+        }
+      }
+    };
+    document.addEventListener('click', this.handleDocumentClick);
   }
 
   preloadImages(imageUrls) {
@@ -83,8 +91,6 @@ class ProjectGrid extends React.Component {
                       opacity: 1,
                       ease: "power2.out",
                     });
-                    // Update gallery nav position after images are loaded and visible
-                    this.updateGalleryNavPosition();
                   }, 50);
                 });
               });
@@ -162,8 +168,8 @@ class ProjectGrid extends React.Component {
     if (this.r3fRoot) {
       this.r3fRoot.unmount();
     }
-    // Remove resize listener
-    window.removeEventListener('resize', this.handleResize);
+    // Remove document click listener
+    document.removeEventListener('click', this.handleDocumentClick);
   }
 
   renderThreeScene() {
@@ -212,11 +218,32 @@ class ProjectGrid extends React.Component {
   }
 
   onProjectClick(index, e) {
-    this.setState({
-      isProjectActive: true,
-      activeProjectID: index,
-      isLoadingProject: true,
-    });
+    const { activeThumbnailID } = this.state;
+
+    // On mobile/touch devices, use two-tap behavior
+    if (window.innerWidth <= 1024) {
+      if (activeThumbnailID === index) {
+        // Second tap - open the project
+        this.setState({
+          isProjectActive: true,
+          activeProjectID: index,
+          isLoadingProject: true,
+          activeThumbnailID: null,
+        });
+      } else {
+        // First tap - activate the thumbnail
+        this.setState({
+          activeThumbnailID: index,
+        });
+      }
+    } else {
+      // Desktop - direct click to open
+      this.setState({
+        isProjectActive: true,
+        activeProjectID: index,
+        isLoadingProject: true,
+      });
+    }
   }
 
   onProjectPrevClick(e) {
@@ -285,22 +312,7 @@ class ProjectGrid extends React.Component {
     this.setState({
       activeImageIndex: index,
       currentTexture: newTexture
-    }, () => {
-      // Update nav position after image changes
-      setTimeout(() => this.updateGalleryNavPosition(), 100);
     });
-  }
-
-  updateGalleryNavPosition() {
-    if (!this.mount) return;
-    const galleryMain = this.mount.querySelector('.gallery-main img');
-    if (galleryMain) {
-      const height = galleryMain.offsetHeight;
-      const gallery = this.mount.querySelector('.project-gallery');
-      if (gallery) {
-        gallery.style.setProperty('--gallery-image-height', `${height}px`);
-      }
-    }
   }
 
   onMainImageClick() {
@@ -365,7 +377,7 @@ class ProjectGrid extends React.Component {
   }
 
   render() {
-    const { isProjectActive, activeProjectID, activeImageIndex, isGalleryOpen, previousImageIndex, isTransitioning, transitionDirection, isLoadingProject } = this.state;
+    const { isProjectActive, activeProjectID, activeImageIndex, isGalleryOpen, previousImageIndex, isTransitioning, transitionDirection, isLoadingProject, activeThumbnailID } = this.state;
 
     if (isProjectActive) {
       const project = this.props.projects[activeProjectID];
@@ -551,17 +563,18 @@ class ProjectGrid extends React.Component {
           }}
         >
           {this.props.projects.map((project, i) => (
-            <li key={i} onMouseEnter={(e) => this.onProjectOver(i, e)}>
+            <li
+              key={i}
+              className={activeThumbnailID === i ? 'active' : ''}
+              onMouseEnter={(e) => this.onProjectOver(i, e)}
+              onClick={(e) => this.onProjectClick(i, e)}
+            >
               <h4>{project.title[0].value}</h4>
               <div
                 className="background"
                 style={{
                   backgroundImage: "url(" + project.field_images[0].url + ")",
                 }}
-              ></div>
-              <div
-                className="click-area"
-                onClick={(e) => this.onProjectClick(i, e)}
               ></div>
             </li>
           ))}
