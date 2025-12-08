@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import gsap from "gsap/all";
 import ProjectsScene from "./three/r3f/ProjectsScene";
 import GradientGenerator from "./utils/GradientGenerator";
+import HexagonLoader from "./HexagonLoader";
 import "./ProjectGrid.scss";
 import tinycolor from "tinycolor2";
 
@@ -22,6 +23,7 @@ function ProjectGrid({ projects, threeContainerRef }) {
   const [transitionDirection, setTransitionDirection] = useState('forward');
   const [isProjectTransitioning, setIsProjectTransitioning] = useState(false);
   const [activeThumbnailID, setActiveThumbnailID] = useState(null);
+  const [isProjectLoading, setIsProjectLoading] = useState(false);
 
   const mountRef = useRef(null);
   const r3fRootRef = useRef(null);
@@ -70,6 +72,9 @@ function ProjectGrid({ projects, threeContainerRef }) {
         return;
       }
 
+      // Show loader
+      setIsProjectLoading(true);
+
       // Set up project data
       let newVideo = null;
       if (project.field_videos && project.field_videos.length > 0 && window.innerWidth > 600) {
@@ -89,30 +94,117 @@ function ProjectGrid({ projects, threeContainerRef }) {
         headerElement.style.borderBottomColor = newColor.setAlpha(0.4).toRgbString();
       }
 
-      // Animate project content
-      if (projectContent) {
-        gsap.set(projectContent, { opacity: 0 });
-        setTimeout(() => {
-          gsap.to(projectContent, {
-            duration: 0.5,
-            opacity: 1,
-            ease: "power2.out",
-          });
-        }, 50);
+      // Hide Three.js container initially
+      if (threeContainerRef.current) {
+        gsap.set(threeContainerRef.current, { alpha: 0 });
       }
 
-      if (threeContainerRef.current) {
-        gsap.to(threeContainerRef.current, {
-          alpha: 1,
-          duration: 0.5,
-          delay: 0.3,
-        });
-      }
+      // Sequence: Show loader (500ms) → Hide loader → Animate in content
+      setTimeout(() => {
+        // Hide loader
+        setIsProjectLoading(false);
+
+        // Fade in project content container first
+        if (projectContent) {
+          gsap.to(projectContent, {
+            opacity: 1,
+            duration: 0.1,
+            ease: "power2.out"
+          });
+        }
+
+        // Animate header elements
+        const header = mountRef.current?.querySelector(".project-header");
+        const projectTitle = header?.querySelector("h2");
+        const tools = header?.querySelector(".tools");
+        const controls = header?.querySelector(".project-controls");
+
+        if (projectTitle) {
+          gsap.to(projectTitle, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            ease: "power2.out"
+          });
+        }
+
+        if (tools) {
+          gsap.to(tools, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            delay: 0.05,
+            ease: "power2.out"
+          });
+        }
+
+        if (controls) {
+          gsap.to(controls, {
+            opacity: 0.8,
+            x: 0,
+            duration: 0.5,
+            delay: 0.1,
+            ease: "power2.out"
+          });
+        }
+
+        if (projectContent) {
+          // Animate description
+          const description = projectContent.querySelector(".project-description");
+          if (description) {
+            gsap.set(description, { y: 30, opacity: 0 });
+            gsap.to(description, {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              delay: 0.1,
+              ease: "power2.out"
+            });
+          }
+
+          // Animate gallery main image
+          const galleryMain = projectContent.querySelector(".gallery-main");
+          if (galleryMain) {
+            gsap.set(galleryMain, { y: 30, opacity: 0 });
+            gsap.to(galleryMain, {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              delay: 0.15,
+              ease: "power2.out"
+            });
+          }
+
+          // Animate thumbnails with stagger - slide up from below
+          const thumbnails = projectContent.querySelectorAll(".thumbnail");
+          if (thumbnails.length > 0) {
+            gsap.set(thumbnails, { y: 30, opacity: 0 }); // Start 30px below
+            gsap.to(thumbnails, {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              delay: 0.2,
+              stagger: 0.04,
+              ease: "bounce.out"
+            });
+          }
+        }
+
+        // Fade in Three.js background
+        if (threeContainerRef.current) {
+          gsap.to(threeContainerRef.current, {
+            alpha: 1,
+            duration: 0.6,
+            ease: "power2.out",
+          });
+        }
+      }, 1000);
     } else if (!isProjectActive) {
       setCurrentTexture(null);
       setCurrentVideo(null);
       setActiveImageIndex(0);
       setIsGalleryOpen(false);
+      setIsProjectLoading(false);
 
       if (threeContainerRef.current) {
         gsap.set(threeContainerRef.current, {
@@ -289,6 +381,11 @@ function ProjectGrid({ projects, threeContainerRef }) {
 
     return (
       <div className="project-detail" ref={mountRef}>
+        {isProjectLoading && (
+          <div className="project-loader">
+            <HexagonLoader />
+          </div>
+        )}
         <div className="project-header">
           <div className="project-meta">
             <h2>{project.title[0].value}</h2>

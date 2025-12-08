@@ -9,10 +9,11 @@ import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
 import { shouldEnableAntialias, getGLPrecision } from '../../utils/PerformanceDetector';
 
-function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
+function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete }) {
   const projectGroupRef = useRef();
   const videoGroupRef = useRef();
   const { camera, gl } = useThree();
+  const [loadComplete, setLoadComplete] = useState(false);
 
   // Preload all textures
   const preloadedTextures = useTexture(allImageURLs, (loadedTextures) => {
@@ -22,6 +23,16 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
       texture.wrapS = THREE.RepeatWrapping;
       texture.repeat.x = -1;
     });
+
+    // Mark as loaded after a short delay
+    if (!loadComplete) {
+      setTimeout(() => {
+        setLoadComplete(true);
+        if (onLoadComplete) {
+          onLoadComplete();
+        }
+      }, 100);
+    }
   });
 
   useEffect(() => {
@@ -73,7 +84,7 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs }) {
   );
 }
 
-export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [] }) {
+export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [], onLoadComplete }) {
   const [fogColor, setFogColor] = useState('#fb0097');
   const [backgroundColor, setBackgroundColor] = useState('#fb0097');
   const enableAntialias = shouldEnableAntialias();
@@ -101,6 +112,7 @@ export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [] 
         videoURL={videoURL}
         fogColor={fogColor}
         allImageURLs={allImageURLs}
+        onLoadComplete={onLoadComplete}
       />
     </Canvas>
   );
