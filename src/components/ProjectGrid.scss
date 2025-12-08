@@ -4,14 +4,15 @@
   list-style-type: none;
   flex-wrap: wrap;
   min-width: 100%;
+  gap: 10px;
 
   li {
     position: relative;
     display: inline-flex;
-    width: 25%;
+    width: calc(25% - 7.5px);
     height: 220px;
     @media only screen and (max-width: 777px) {
-      width: 50%;
+      width: calc(50% - 5px);
     }
     @media only screen and (max-width: 600px) {
       height: 150px;

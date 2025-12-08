@@ -1,27 +1,24 @@
-import React from "react";
+import { useRef, useEffect } from "react";
 import { gsap, MotionPathPlugin } from "gsap/all";
 import tinycolor from "tinycolor2";
 import "./AnimatedParticles.scss";
 
-class AnimatedParticles extends React.Component {
-  constructor(props) {
-    super(props);
-    this.mount = React.createRef();
-    this.state = { bubbles: props.particles };
-    gsap.registerPlugin(MotionPathPlugin);
-  }
+function AnimatedParticles({ particles }) {
+  const mountRef = useRef(null);
 
-  componentDidMount() {
-    this.mountTl = gsap.timeline({
+  useEffect(() => {
+    gsap.registerPlugin(MotionPathPlugin);
+
+    const mountTl = gsap.timeline({
       scrollTrigger: {
-        trigger: this.mount.current,
+        trigger: mountRef.current,
         start: "top bottom+=500px",
         end: "bottom bottom+=500px",
         scrub: 2
       },
     });
 
-    this.mountTl.fromTo(this.mount.current, {
+    mountTl.fromTo(mountRef.current, {
       top: 500,
     }, {
       top: 0,
@@ -29,85 +26,70 @@ class AnimatedParticles extends React.Component {
       duration: 10,
     });
 
-    for (let i = 0; i < this.state.bubbles; i++) {
-      let bubble = document.createElement("div");
-      bubble.className = "bubble";
-      this.mount.current.appendChild(bubble);
+    const randomX = () => {
+      return (
+        -500 +
+        Math.random() * mountRef.current.getBoundingClientRect().width +
+        500
+      );
+    };
 
-      let startX = this.randomX();
-      let startY = this.randomY();
+    const randomY = () => {
+      return (
+        -500 +
+        Math.random() * mountRef.current.getBoundingClientRect().height +
+        500
+      );
+    };
+
+    const moveParticle = (particle) => {
+      const ranTime = 5 + Math.random() * 50;
+      const newScale = 0.01 + Math.random() * 0.25;
+
+      const path = [];
+      for (let i = 0; i < 2; i++) {
+        path.push({
+          x: randomX(),
+          y: randomY(),
+        });
+      }
+
+      gsap.to(particle, {
+        duration: ranTime,
+        motionPath: { path },
+        scale: newScale,
+        rotation: Math.random() * 360,
+        ease: "quad.inOut",
+        onComplete: () => moveParticle(particle),
+      });
+    };
+
+    // Create and animate bubbles
+    for (let i = 0; i < particles; i++) {
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      mountRef.current.appendChild(bubble);
+
+      const startX = randomX();
+      const startY = randomY();
 
       gsap.set(bubble, {
         x: startX,
         y: startY,
         scale: 0.01 + Math.random() * 0.25,
-        background:
-          "linear-gradient(" +
-          Math.round(Math.random() * 360) +
-          "deg, " +
-          tinycolor("#CCFF00")
-            .spin(Math.random() * 360)
-            .toHexString() +
-          ", " +
-          tinycolor("#CCFF00")
-            .spin(Math.random() * 360)
-            .toHexString() +
-          ")",
+        background: `linear-gradient(${Math.round(Math.random() * 360)}deg, ${tinycolor("#CCFF00").spin(Math.random() * 360).toHexString()}, ${tinycolor("#CCFF00").spin(Math.random() * 360).toHexString()})`,
       });
 
-      this.moveParticle(bubble);
-    }
-  }
-
-  componentWillUnmount() {
-    gsap.killTweensOf(".bubble");
-  }
-
-  moveParticle(particle) {
-    let ranTime = 5 + Math.random() * 50;
-    let newScale = 0.01 + Math.random() * 0.25;
-
-    let path = [];
-    for (let i = 0; i < 2; i++) {
-      const coords = {
-        x: this.randomX(),
-        y: this.randomY(),
-      };
-      path.push(coords);
+      moveParticle(bubble);
     }
 
-    gsap.to(particle, {
-      duration: ranTime,
-      motionPath: {
-        path: path,
-      },
-      scale: newScale,
-      rotation: Math.random() * 360,
-      ease: "quad.inOut",
-      onComplete: this.moveParticle.bind(this),
-      onCompleteParams: [particle],
-    });
-  }
+    return () => {
+      gsap.killTweensOf(".bubble");
+      mountTl.kill();
+    };
+  }, [particles]);
 
-  randomX() {
-    return (
-      -500 +
-      Math.random() * this.mount.current.getBoundingClientRect().width +
-      500
-    );
-  }
-
-  randomY() {
-    return (
-      -500 +
-      Math.random() * this.mount.current.getBoundingClientRect().height +
-      500
-    );
-  }
-
-  render() {
-    return <div className="animated-particles" ref={this.mount}></div>;
-  }
+  return <div className="animated-particles" ref={mountRef}></div>;
 }
 
 export default AnimatedParticles;

@@ -35,10 +35,12 @@ npm install
 Run the development server:
 
 ```bash
+npm start
+# or
 npm run dev
 ```
 
-The site will be available at `http://localhost:5173`
+The site will be available at `http://localhost:3000`
 
 ### Build
 
@@ -70,13 +72,20 @@ npm test
 vectorclash-site/
 ├── src/
 │   ├── components/     # React components
-│   ├── assets/         # Static assets
+│   ├── data/           # JSON data files (projects, skills, profile)
 │   ├── images/         # Image files
 │   ├── App.js          # Main app component
-│   └── index.js        # Entry point
+│   └── main.jsx        # Entry point
 ├── public/             # Public assets
-└── build/              # Production build output
+└── dist/               # Production build output
 ```
+
+## Data Management
+
+The site uses local JSON files for content management:
+- `src/data/projects.json` - Portfolio projects
+- `src/data/skills.json` - Technical skills and categories
+- `src/data/profile.json` - Personal information and resume link
 
 ## License
 

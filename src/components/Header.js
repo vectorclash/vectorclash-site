@@ -115,7 +115,7 @@ class Header extends React.Component {
           <Logo />
           <h2>{profileData.greeting}</h2>
           <h1>
-            <b>{profileData.name.full}.</b>
+            <b>{profileData.name.full}</b>
           </h1>
           <p dangerouslySetInnerHTML={{ __html: profileData.intro }} />
           <div className="header-buttons">
