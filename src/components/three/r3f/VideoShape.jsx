@@ -74,14 +74,14 @@ export default function VideoShape({ url, size = 50 }) {
     <group ref={groupRef}>
       {/* Placeholder mesh */}
       <mesh ref={placeholderRef} scale={[0.9, 0.9, 0.9]}>
-        <tetrahedronGeometry args={[size]} />
-        <meshStandardMaterial color={placeholderColor} flatShading />
+        <tetrahedronGeometry args={[size, 0]} />
+        <meshBasicMaterial color={placeholderColor} flatShading />
       </mesh>
 
       {/* Video mesh */}
       {videoTexture && (
         <mesh ref={meshRef}>
-          <tetrahedronGeometry args={[size]} />
+          <tetrahedronGeometry args={[size, 0]} />
           <meshBasicMaterial map={videoTexture} color={0xffffff} />
         </mesh>
       )}

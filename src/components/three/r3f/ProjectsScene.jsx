@@ -2,18 +2,24 @@ import { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
+import { EffectComposer, Noise } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
-import { shouldEnableAntialias, getGLPrecision } from '../../utils/PerformanceDetector';
+import { shouldEnableAntialias, getGLPrecision, shouldEnableBloom, detectPerformanceTier } from '../../utils/PerformanceDetector';
 
 function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete }) {
   const projectGroupRef = useRef();
   const videoGroupRef = useRef();
   const { camera, gl } = useThree();
   const [loadComplete, setLoadComplete] = useState(false);
+
+  // Get performance tier for conditional effects
+  const performanceTier = detectPerformanceTier();
+  const enablePostprocessing = performanceTier === 'high' || performanceTier === 'medium';
 
   // Preload all textures
   const preloadedTextures = useTexture(allImageURLs, (loadedTextures) => {
@@ -36,19 +42,36 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete })
   });
 
   useEffect(() => {
+    const scrollTarget = { offsetY: 0 };
+    let cameraTween = null;
+
     const handleScroll = () => {
       const parentElement = gl.domElement.parentNode;
       if (!parentElement) return;
 
-      gsap.to(camera.position, {
+      scrollTarget.offsetY = window.scrollY - parentElement.getBoundingClientRect().y;
+
+      // Kill existing tween to prevent buildup
+      if (cameraTween) cameraTween.kill();
+
+      // Limit the camera movement to prevent going beyond the background cube
+      // Use a very small multiplier so movement is spread across the entire section
+      const maxMovement = 150; // Maximum camera movement in units (downward)
+      const movement = -scrollTarget.offsetY * 0.025; // Much smaller multiplier for slower movement
+      const targetY = Math.max(-maxMovement, Math.min(0, movement)); // Clamp between -maxMovement and 0
+
+      cameraTween = gsap.to(camera.position, {
         duration: 0.5,
-        y: parentElement.getBoundingClientRect().y * 0.13,
+        y: targetY,
         ease: 'quad.out',
       });
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (cameraTween) cameraTween.kill();
+    };
   }, [camera, gl]);
 
   useFrame(() => {
@@ -77,9 +100,19 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete })
         </Suspense>
       </group>
 
-      <group ref={videoGroupRef} position={[-10, 0, 0]}>
+      <group ref={videoGroupRef} position={[-20, -70, -20]}>
         {videoURL && <VideoShape url={videoURL} size={50} />}
       </group>
+
+      {enablePostprocessing && (
+        <EffectComposer>
+          {/* Film Grain/Noise */}
+          <Noise
+            blendFunction={BlendFunction.SCREEN} // Screen blend mode for better visibility
+            opacity={0.05} // Visible grain effect
+          />
+        </EffectComposer>
+      )}
     </>
   );
 }
@@ -106,6 +139,9 @@ export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [],
       gl={{
         antialias: enableAntialias,
         precision: glPrecision,
+        alpha: false, // Disable alpha for better performance
+        physicallyCorrectLights: false, // Disable for better performance
+        powerPreference: 'high-performance', // Request high-performance GPU
       }}
       style={{ background: backgroundColor }}
     >

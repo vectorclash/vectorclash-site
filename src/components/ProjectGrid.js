@@ -84,7 +84,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
       // Set up project data
       let newVideo = null;
-      if (project.field_videos && project.field_videos.length > 0 && window.innerWidth > 600) {
+      if (project.field_videos && project.field_videos.length > 0) {
         newVideo = project.field_videos[Math.floor(Math.random() * project.field_videos.length)].url;
       }
 

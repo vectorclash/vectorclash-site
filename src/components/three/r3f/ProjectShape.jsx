@@ -91,11 +91,10 @@ export default function ProjectShape({ size = 300, textureURL, preloadedTextures
     <group ref={groupRef}>
       {/* Main textured mesh */}
       <mesh ref={meshRef}>
-        <boxGeometry args={[size, size, size, 6, 6, 6]} />
-        <meshStandardMaterial
+        <boxGeometry args={[size, size, size, 4, 4, 4]} />
+        <meshBasicMaterial
           map={texture}
           color={0x777777}
-          roughness={0.5}
           side={THREE.BackSide}
           transparent
           opacity={1}
@@ -104,7 +103,7 @@ export default function ProjectShape({ size = 300, textureURL, preloadedTextures
 
       {/* Wireframe mesh 1 */}
       <mesh scale={[0.9, 0.9, 0.9]}>
-        <boxGeometry args={[size, size, size, 6, 6, 6]} />
+        <boxGeometry args={[size, size, size, 4, 4, 4]} />
         <meshBasicMaterial
           color={wireframeColors.color1}
           wireframe

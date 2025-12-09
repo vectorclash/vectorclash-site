@@ -129,6 +129,7 @@
         font-family: "Roboto", sans-serif;
         font-weight: bolder;
         font-size: 48px;
+        text-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
         @media only screen and (max-width: 777px) {
           font-size: 32px;
         }
@@ -147,6 +148,7 @@
         color: #cccccc;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        text-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 
         li {
           display: inline;
@@ -209,6 +211,7 @@
         font-size: 16px;
         line-height: 1.8;
         margin-bottom: 20px;
+        text-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 
         &:last-child {
           margin-bottom: 0;
