@@ -11,7 +11,7 @@ import left from "..//images/angle-left.svg";
 import right from "../images/angle-right.svg";
 import close from "../images/window-close.svg";
 
-function ProjectGrid({ projects, threeContainerRef }) {
+function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const [isProjectActive, setIsProjectActive] = useState(false);
   const [activeProjectID, setActiveProjectID] = useState(null);
   const [currentTexture, setCurrentTexture] = useState(null);
@@ -58,6 +58,13 @@ function ProjectGrid({ projects, threeContainerRef }) {
   useEffect(() => {
     renderThreeScene();
   }, [currentTexture, currentVideo]);
+
+  // Notify parent component when project active state changes
+  useEffect(() => {
+    if (onProjectActiveChange) {
+      onProjectActiveChange(isProjectActive);
+    }
+  }, [isProjectActive, onProjectActiveChange]);
 
   // Handle project activation and deactivation
   useEffect(() => {

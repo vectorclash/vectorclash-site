@@ -95,6 +95,8 @@ export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [],
       const newColor = tinycolor('#CCFF00').spin(Math.random() * 360);
       setFogColor(newColor.toHexString());
       setBackgroundColor(newColor.toHexString());
+    } else {
+      setBackgroundColor('transparent');
     }
   }, [textureURL]);
 

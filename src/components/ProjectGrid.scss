@@ -101,6 +101,11 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
+
+    @media only screen and (max-width: 1024px) {
+      top: 200px;
+      transform: translateX(-50%);
+    }
   }
 
   .project-header {
