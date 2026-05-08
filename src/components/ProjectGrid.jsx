@@ -11,6 +11,51 @@ import left from "..//images/angle-left.svg";
 import right from "../images/angle-right.svg";
 import close from "../images/window-close.svg";
 
+function GradientFiller() {
+  const layerARef = useRef(null);
+  const layerBRef = useRef(null);
+
+  const generateGradient = () => {
+    const colors = new GradientGenerator(2, true).colors;
+    return `linear-gradient(42deg, ${colors[0].toHexString()}, ${colors[1].toHexString()})`;
+  };
+
+  useEffect(() => {
+    layerARef.current.style.backgroundImage = generateGradient();
+
+    let timeoutId;
+
+    const transition = () => {
+      const next = generateGradient();
+      layerBRef.current.style.backgroundImage = next;
+      gsap.to(layerBRef.current, {
+        opacity: 1,
+        duration: 3.5,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          layerARef.current.style.backgroundImage = next;
+          gsap.set(layerBRef.current, { opacity: 0 });
+          scheduleNext();
+        }
+      });
+    };
+
+    const scheduleNext = () => {
+      timeoutId = setTimeout(transition, 5000 + Math.random() * 10000);
+    };
+
+    scheduleNext();
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  return (
+    <li className="grid-filler" aria-hidden="true">
+      <div ref={layerARef} className="filler-layer" />
+      <div ref={layerBRef} className="filler-layer filler-layer--top" />
+    </li>
+  );
+}
+
 function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const [isProjectActive, setIsProjectActive] = useState(false);
   const [activeProjectID, setActiveProjectID] = useState(null);
@@ -565,6 +610,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           ></div>
         </li>
       ))}
+      <GradientFiller />
     </ul>
   );
 }

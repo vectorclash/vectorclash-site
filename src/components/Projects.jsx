@@ -8,7 +8,7 @@ import projectsData from "../data/projects.json";
 function Projects() {
   const mountRef = useRef(null);
   const threeContainerRef = useRef(null);
-  const projects = useMemo(() => gsap.utils.shuffle(projectsData), []);
+  const projects = useMemo(() => gsap.utils.shuffle(projectsData.filter(p => !p.disabled)), []);
   const [isProjectActive, setIsProjectActive] = useState(false);
 
   useEffect(() => {

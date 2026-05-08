@@ -114,6 +114,24 @@
     "field_videos": []
   },
   {
+    "title": [{ "value": "Nylas" }],
+    "body": [
+      {
+        "value": "<p>The Nylas project presented a sophisticated challenge at the intersection of technical communication and motion design: translating a complex software platform's capabilities into a visual narrative that was both technically accurate and immediately comprehensible to a broad audience. The brief called for an immersive SVG animation module that would live within the Nylas WordPress site, functioning as an interactive explainer that could convey the depth and elegance of the platform's feature set in a way that static copy and diagrams simply could not.</p><p>The animation system was architected as a self-contained module, designed to integrate cleanly into the existing WordPress environment without disrupting the surrounding page infrastructure. GSAP served as the animation engine, providing the sequencing precision and performance characteristics necessary to orchestrate layered SVG elements across multiple synchronized timelines. Each animated passage was carefully choreographed to guide the viewer's attention through the product's core functionality—connections, data flows, and API interactions rendered as fluid, purposeful motion rather than abstract technical diagrams. The result is a presentation layer that elevates product communication, making sophisticated infrastructure concepts legible and compelling to developers and decision-makers alike.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "GSAP" },
+      { "value": "WordPress" }
+    ],
+    "field_images": [
+      { "url": "/projects/nylas/images/nylas_img01.jpg" },
+      { "url": "/projects/nylas/images/nylas_img02.jpg" },
+      { "url": "/projects/nylas/images/nylas_img03.jpg" }
+    ],
+    "field_videos": []
+  },
+  {
     "title": [{ "value": "AT&T" }],
     "body": [
       {
