@@ -72,6 +72,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
   const mountRef = useRef(null);
   const r3fRootRef = useRef(null);
+  const projectLoadTimeoutRef = useRef(null);
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -152,7 +153,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       }
 
       // Sequence: Show loader (500ms) → Hide loader → Animate in content
-      setTimeout(() => {
+      if (projectLoadTimeoutRef.current) {
+        clearTimeout(projectLoadTimeoutRef.current);
+      }
+      projectLoadTimeoutRef.current = setTimeout(() => {
         // Hide loader
         setIsProjectLoading(false);
 
@@ -250,8 +254,14 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             ease: "power2.out",
           });
         }
+        projectLoadTimeoutRef.current = null;
       }, 1000);
     } else if (!isProjectActive) {
+      if (projectLoadTimeoutRef.current) {
+        clearTimeout(projectLoadTimeoutRef.current);
+        projectLoadTimeoutRef.current = null;
+      }
+
       setCurrentTexture(null);
       setCurrentVideo(null);
       setActiveImageIndex(0);
@@ -259,10 +269,8 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       setIsProjectLoading(false);
 
       if (threeContainerRef.current) {
-        gsap.set(threeContainerRef.current, {
-          alpha: 0,
-          duration: 0.5,
-        });
+        gsap.killTweensOf(threeContainerRef.current);
+        gsap.set(threeContainerRef.current, { alpha: 0 });
       }
     }
   }, [isProjectActive, activeProjectID]);
