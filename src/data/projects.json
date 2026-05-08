@@ -8,9 +8,9 @@
     ],
     "field_tools": [
       { "value": "three.js" },
-      { "value": "gsap" },
-      { "value": "sass" },
-      { "value": "webpack" }
+      { "value": "GSAP" },
+      { "value": "SASS" },
+      { "value": "Webpack" }
     ],
     "field_images": [
       { "url": "/projects/spinor/images/spinor_img01.jpg" },

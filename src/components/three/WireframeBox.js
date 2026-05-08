@@ -4,18 +4,16 @@ import gsap from "gsap/all";
 export default class WireframeBox {
   constructor(size, depth, color) {
     this.hue = 0;
-    let geometry = new THREE.BoxGeometry(size, size, size, depth, depth, depth);
+    let geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(size, size, size, depth, depth, depth));
 
-    this.material = new THREE.MeshBasicMaterial({
+    this.material = new THREE.LineBasicMaterial({
       color: color,
-      side: THREE.DoubleSide,
-      wireframe: true,
       transparent: true,
-      opacity: 0.1,
+      opacity: 0.5,
       fog: false,
     });
 
-    let shape = new THREE.Mesh(geometry, this.material);
+    let shape = new THREE.LineSegments(geometry, this.material);
     shape.rotation.x = Math.random() * Math.PI;
     shape.rotation.y = Math.random() * Math.PI;
     shape.rotation.z = Math.random() * Math.PI;

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm outdated *)",
+      "Bash(npm show *)",
+      "Bash(npm install *)",
+      "Bash(npm audit *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"import\\('vite'\\).then\\(v => console.log\\(Object.keys\\(v\\)\\)\\)\")",
+      "Bash(npm test *)"
+    ]
+  }
+}
