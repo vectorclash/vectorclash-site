@@ -74,6 +74,7 @@
     ],
     "field_tools": [
       { "value": "React" },
+      { "value": "Vite" },
       { "value": "GSAP" },
       { "value": "tinycolor" }
     ],
@@ -87,6 +88,55 @@
       { "url": "/projects/forge/images/forge_img07.jpg" },
       { "url": "/projects/forge/images/forge_img08.jpg" }
     ],
+    "field_videos": [{ "url": "/projects/forge/videos/FusedCryosphere-ebeb.mp4"}]
+  },
+  {
+    "title": [{ "value": "Gap Denim" }],
+    "body": [
+      {
+        "value": "<p>Gap has been woven into the fabric of American culture since 1969, and this project was an opportunity to honor that legacy in a way that felt worthy of it. The brief called for an interactive application chronicling the brand's history—a piece of permanent installation work destined for the GAP museum at their San Francisco headquarters, where it would serve as a touchpoint between the company's storied past and the employees and visitors who move through the space every day.</p><p>The application was built to be as much an experience as it is an archive, guiding users through decades of cultural moments, iconic campaigns, and brand milestones through a series of richly animated, touch-driven interactions. GSAP provided the precision and expressiveness needed to bring each chapter of the timeline to life, while Webpack kept the build lean and performant for the demands of a permanent public-facing installation. The result is something that feels less like a corporate history and more like a living, navigable piece of the brand's identity.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "GSAP" },
+      { "value": "Webpack" }
+    ],
+    "field_images": [
+      { "url": "/projects/gap/images/gap_img01.jpg" },
+      { "url": "/projects/gap/images/gap_img02.jpg" },
+      { "url": "/projects/gap/images/gap_img03.jpg" },
+      { "url": "/projects/gap/images/gap_img04.jpg" },
+      { "url": "/projects/gap/images/gap_img05.jpg" },
+      { "url": "/projects/gap/images/gap_img06.jpg" },
+      { "url": "/projects/gap/images/gap_img07.jpg" },
+      { "url": "/projects/gap/images/gap_img08.jpg" }
+    ],
     "field_videos": []
+  },
+  {
+    "title": [{ "value": "AT&T" }],
+    "body": [
+      {
+        "value": "<p>Working with AT&T meant operating at scale—producing a high volume of animated banner ads and social videos for one of the most recognizable brands in the country. The work demanded a disciplined approach to motion design, where every animation had to feel polished and on-brand while adhering to the strict technical specifications of a wide range of ad platforms and social channels. GSAP drove the interactive banner executions, providing the precise timing control needed to choreograph layered text, imagery, and transitions within tight filesize constraints. After Effects handled the social video pipeline, where motion graphics needed to feel cinematic while remaining optimized for mobile-first viewing environments.</p><p>Beyond the creative work, a significant part of the engagement involved identifying and eliminating repetitive production bottlenecks. I designed and implemented automation workflows that streamlined the handoff between design assets and final deliverables, reducing the manual effort required to resize, reformat, and export creative variations across dozens of spec combinations. What had previously been a labor-intensive process of duplicating and adjusting files by hand became a largely automated pipeline, freeing the team to focus on the quality of the work itself rather than the mechanics of producing it.</p>"
+      }
+    ],
+    "field_tools": [
+      { "value": "GSAP" },
+      { "value": "Animate" },
+      { "value": "After Effects" }
+    ],
+    "field_images": [
+      { "url": "/projects/att/images/att_img01.jpg" },
+      { "url": "/projects/att/images/att_img02.jpg" },
+      { "url": "/projects/att/images/att_img03.jpg" },
+      { "url": "/projects/att/images/att_img04.jpg" },
+      { "url": "/projects/att/images/att_img05.jpg" },
+      { "url": "/projects/att/images/att_img06.jpg" },
+      { "url": "/projects/att/images/att_img07.jpg" }
+    ],
+    "field_videos": [
+      { "url": "/projects/att/videos/delivery.mp4" },
+      { "url": "/projects/att/videos/ladybugs.mp4" }
+    ]
   }
 ]

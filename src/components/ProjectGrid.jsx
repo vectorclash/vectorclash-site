@@ -85,7 +85,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       // Set up project data
       let newVideo = null;
       if (project.field_videos && project.field_videos.length > 0) {
-        newVideo = project.field_videos[Math.floor(Math.random() * project.field_videos.length)].url;
+        newVideo = project.field_videos.map(v => v.url);
       }
 
       const newTexture = project.field_images[0].url;
@@ -237,7 +237,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       <ProjectsScene
         key="projects-scene"
         textureURL={currentTexture}
-        videoURL={currentVideo}
+        videoURLs={currentVideo}
         allImageURLs={allImageURLs}
       />
     );

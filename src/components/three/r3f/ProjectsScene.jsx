@@ -11,7 +11,7 @@ import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
 import { shouldEnableAntialias, getGLPrecision, shouldEnableBloom, detectPerformanceTier } from '../../utils/PerformanceDetector';
 
-function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete }) {
+function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }) {
   const projectGroupRef = useRef();
   const videoGroupRef = useRef();
   const { camera, gl } = useThree();
@@ -101,7 +101,7 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete })
       </group>
 
       <group ref={videoGroupRef} position={[-20, -70, -20]}>
-        {videoURL && <VideoShape url={videoURL} size={50} />}
+        {videoURLs && videoURLs.length > 0 && <VideoShape urls={videoURLs} size={50} />}
       </group>
 
       {enablePostprocessing && (
@@ -117,7 +117,7 @@ function Scene({ textureURL, videoURL, fogColor, allImageURLs, onLoadComplete })
   );
 }
 
-export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [], onLoadComplete }) {
+export default function ProjectsScene({ textureURL, videoURLs, allImageURLs = [], onLoadComplete }) {
   const [fogColor, setFogColor] = useState('#fb0097');
   const [backgroundColor, setBackgroundColor] = useState('#fb0097');
   const enableAntialias = shouldEnableAntialias();
@@ -147,7 +147,7 @@ export default function ProjectsScene({ textureURL, videoURL, allImageURLs = [],
     >
       <Scene
         textureURL={textureURL}
-        videoURL={videoURL}
+        videoURLs={videoURLs}
         fogColor={fogColor}
         allImageURLs={allImageURLs}
         onLoadComplete={onLoadComplete}
