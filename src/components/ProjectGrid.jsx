@@ -10,10 +10,13 @@ import tinycolor from "tinycolor2";
 import left from "..//images/angle-left.svg";
 import right from "../images/angle-right.svg";
 import close from "../images/window-close.svg";
+import me from "../images/me.png";
 
 function GradientFiller() {
   const layerARef = useRef(null);
   const layerBRef = useRef(null);
+  const containerRef = useRef(null);
+  const meRef = useRef(null);
 
   const generateGradient = () => {
     const colors = new GradientGenerator(2, true).colors;
@@ -45,13 +48,34 @@ function GradientFiller() {
     };
 
     scheduleNext();
-    return () => clearTimeout(timeoutId);
+
+    const animateMe = () => {
+      const container = containerRef.current;
+      const img = meRef.current;
+      if (!container || !img) return;
+      gsap.to(img, {
+        duration: 5 + Math.random() * 10,
+        x: Math.random() * (container.clientWidth - 30),
+        y: Math.random() * (container.clientHeight - 30),
+        alpha: Math.random() * 0.4,
+        ease: "quad.inOut",
+        onComplete: animateMe,
+      });
+    };
+
+    animateMe();
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (meRef.current) gsap.killTweensOf(meRef.current);
+    };
   }, []);
 
   return (
-    <li className="grid-filler" aria-hidden="true">
+    <li className="grid-filler" aria-hidden="true" ref={containerRef}>
       <div ref={layerARef} className="filler-layer" />
       <div ref={layerBRef} className="filler-layer filler-layer--top" />
+      <img ref={meRef} src={me} className="filler-me" alt="" />
     </li>
   );
 }

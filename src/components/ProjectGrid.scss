@@ -71,6 +71,16 @@
     .filler-layer--top {
       opacity: 0;
     }
+
+    .filler-me {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30px;
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+    }
   }
 
   li:hover,
