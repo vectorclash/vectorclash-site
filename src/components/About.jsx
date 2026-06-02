@@ -13,42 +13,82 @@ class About extends React.Component {
     this.state = {
       skills: skillsData,
     };
+    this.meMounted = false;
   }
 
   componentDidMount() {
     this.skillContainer = this.mount.current.querySelector(".skills");
-    ScrollTrigger.create({
-      trigger: this.skillContainer,
-      once: true,
-      onEnter: () => {
-        this.animateSkills();
-      },
-    });
-
     this.aboutContainer = this.mount.current.querySelector(".about-text");
-    ScrollTrigger.create({
-      trigger: this.aboutContainer,
-      once: true,
-      onEnter: () => {
-        this.animateAbout();
-      },
+
+    document.fonts.ready.then(() => {
+      this.skillsTl = this.buildSkillsTimeline();
+      this.aboutTl = this.buildAboutTimeline();
+
+      ScrollTrigger.create({
+        trigger: this.skillContainer,
+        start: "top bottom",
+        end: "top top",
+        scrub: 1,
+        animation: this.skillsTl,
+      });
+
+      ScrollTrigger.create({
+        trigger: this.aboutContainer,
+        start: "top bottom",
+        end: "top top",
+        scrub: 1,
+        animation: this.aboutTl,
+        onEnter: () => {
+          if (!this.meMounted) {
+            this.meMounted = true;
+            this.animateMe();
+          }
+        },
+      });
     });
   }
 
-  animateElement(element, delay = 0) {
-    gsap.fromTo(
-      element,
-      {
-        alpha: 0,
-      },
-      {
-        alpha: 1,
-        duration: 1,
-        ease: "quad.inOut",
-        delay: delay,
-        onComplete: this.animateMe.bind(this),
-      }
-    );
+  componentWillUnmount() {
+    if (this.skillsTl) this.skillsTl.kill();
+    if (this.aboutTl) this.aboutTl.kill();
+    gsap.killTweensOf(".geometric-me");
+  }
+
+  buildSkillsTimeline() {
+    const tl = gsap.timeline({ paused: true });
+
+    tl.fromTo(this.skillContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
+
+    const categories = this.skillContainer.querySelectorAll(".skill-category");
+    tl.fromTo(categories, { alpha: 0, y: 10 }, { duration: 0.5, alpha: 1, y: 0, stagger: 0.2 }, 0.5);
+
+    const skills = this.skillContainer.querySelectorAll("li");
+    skills.forEach((skill, i) => {
+      const pos = 0.5 + i * 0.15;
+      const mySize = skill.className.split("-")[2];
+      tl.fromTo(skill, { alpha: 0, y: 10 }, { duration: 1, alpha: 1, y: 0 }, pos);
+      tl.fromTo(skill.querySelector(".skill-bar-front"), { width: "0%" }, { duration: 1, width: mySize + "0%", ease: "bounce.out" }, pos + 0.25);
+      tl.fromTo(skill.querySelector(".skill-bar-back"), { alpha: 0 }, { duration: 1, alpha: 1, ease: "bounce.out" }, pos + 0.25);
+    });
+
+    return tl;
+  }
+
+  buildAboutTimeline() {
+    const tl = gsap.timeline({ paused: true });
+
+    tl.fromTo(this.aboutContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
+
+    const aboutSplit = new SplitText(this.aboutContainer.querySelectorAll("p"), { type: "lines" });
+    tl.from(aboutSplit.lines, {
+      duration: 0.5,
+      y: 10,
+      alpha: 0,
+      ease: "back.out",
+      stagger: { amount: 1 },
+    }, 0.5);
+
+    return tl;
   }
 
   animateMe() {
@@ -60,96 +100,6 @@ class About extends React.Component {
       alpha: Math.random() * 0.4,
       ease: "quad.inOut",
       onComplete: this.animateMe.bind(this),
-    });
-  }
-
-  animateSkills() {
-    this.animateElement(this.skillContainer);
-
-    // Animate category headers
-    let categories = this.skillContainer.querySelectorAll(".skill-category");
-    gsap.fromTo(
-      categories,
-      { alpha: 0, y: 10 },
-      {
-        duration: 0.5,
-        alpha: 1,
-        y: 0,
-        stagger: 0.2,
-        delay: 0.5,
-      }
-    );
-
-    // Animate individual skills
-    let skills = this.skillContainer.querySelectorAll("li");
-    for (let i = 0; i < skills.length; i++) {
-      const skill = skills[i];
-      this.animateSkillIn(skill, 0.5 + i * 0.15);
-    }
-  }
-
-  animateSkillIn(skill, delay) {
-    gsap.fromTo(
-      skill,
-      {
-        alpha: 0,
-        y: 10,
-      },
-      {
-        duration: 1,
-        alpha: 1,
-        y: 0,
-        delay: delay,
-      }
-    );
-
-    let mySize = skill.className.split("-")[2];
-
-    gsap.fromTo(
-      skill.querySelector(".skill-bar-front"),
-      {
-        width: "0%",
-      },
-      {
-        duration: 1,
-        width: mySize + "0%",
-        ease: "bounce.out",
-        delay: delay + 0.25
-      }
-    );
-
-    gsap.fromTo(
-      skill.querySelector(".skill-bar-back"),
-      {
-        alpha: 0,
-      },
-      {
-        duration: 1,
-        alpha: 1,
-        ease: "bounce.out",
-        delay: delay + 0.25,
-      }
-    );
-  }
-
-  animateAbout() {
-    this.animateElement(this.aboutContainer);
-
-    // Wait for fonts to load before using SplitText
-    document.fonts.ready.then(() => {
-      let aboutSplit = new SplitText(this.aboutContainer.querySelectorAll("p"), {
-        type: "lines",
-      });
-      gsap.from(aboutSplit.lines, {
-        duration: 0.5,
-        y: 10,
-        alpha: 0,
-        ease: "back.out",
-        stagger: {
-          amount: 1,
-        },
-        delay: 0.5
-      });
     });
   }
 
@@ -251,9 +201,9 @@ class About extends React.Component {
           <article className="about-text">
             <h3>What I do <HeaderIcon /></h3>
             <div>
-              <p>As a creative coder and motion engineer, I find a profound connection between coding and the artistry of animation. Crafting banner ads as well as delving into motion graphics with After Effects are part of my daily exploration, yet my true passion lies in how code can animate and bring static concepts to dynamic life. There’s an intriguing balance between technical precision and creative expression, particularly when venturing into 3D animation with Blender, where the limitless potential of digital environments captivates my imagination.</p>
-              <p>On the design front, Figma is my tool of choice for its seamless interface and the collaborative freedom it offers. It’s not just about creating visually appealing designs but also about ensuring they resonate on a functional level. Whether it’s through UI/UX design, animation, or coding, the journey from concept to execution is what I find most rewarding. It’s about crafting experiences that are not only innovative but also intuitive.</p>
-              <p>Ultimately, what I enjoy most is the synergy between these diverse skills. It’s a multidisciplinary approach that allows me to not only conceptualize but also bring these ideas to life in a way that is both technically sound and aesthetically compelling. From the intricacies of HTML/CSS/JavaScript to the creative prowess needed for effective design and animation, it’s this fusion of technology and art that defines my work.</p>
+              <p>As a creative coder and motion engineer, I find a profound connection between coding and the artistry of animation. Crafting banner ads as well as delving into motion graphics with After Effects are part of my daily exploration, yet my true passion lies in how code can animate and bring static concepts to dynamic life. There's an intriguing balance between technical precision and creative expression, particularly when venturing into 3D animation with Blender, where the limitless potential of digital environments captivates my imagination.</p>
+              <p>On the design front, Figma is my tool of choice for its seamless interface and the collaborative freedom it offers. It's not just about creating visually appealing designs but also about ensuring they resonate on a functional level. Whether it's through UI/UX design, animation, or coding, the journey from concept to execution is what I find most rewarding. It's about crafting experiences that are not only innovative but also intuitive.</p>
+              <p>Ultimately, what I enjoy most is the synergy between these diverse skills. It's a multidisciplinary approach that allows me to not only conceptualize but also bring these ideas to life in a way that is both technically sound and aesthetically compelling. From the intricacies of HTML/CSS/JavaScript to the creative prowess needed for effective design and animation, it's this fusion of technology and art that defines my work.</p>
               <p>
                 <a href="./banners/" style={{ textDecoration: "underline" }}>
                   HTML5 Banner Portfolio

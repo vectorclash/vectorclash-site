@@ -12,37 +12,28 @@ function Projects() {
   const [isProjectActive, setIsProjectActive] = useState(false);
 
   useEffect(() => {
-    const animateMount = () => {
-      gsap.fromTo(mountRef.current, {
-        alpha: 0
-      }, {
-        duration: 1,
-        alpha: 1,
-        ease: "quad.inOut",
-      });
+    const tl = gsap.timeline({ paused: true });
 
-      gsap.fromTo(
+    tl.fromTo(mountRef.current, { alpha: 0 }, { duration: 1, alpha: 1, ease: "quad.inOut" })
+      .fromTo(
         mountRef.current.querySelectorAll("li"),
-        {
-          alpha: 0,
-        },
-        {
-          duration: 1,
-          alpha: 1,
-          ease: "bounce.out",
-          stagger: {
-            amount: 0.5,
-          },
-          delay: 0.5,
-        }
+        { alpha: 0 },
+        { duration: 1, alpha: 1, ease: "bounce.out", stagger: { amount: 0.5 } },
+        0.5
       );
-    };
 
-    ScrollTrigger.create({
+    const st = ScrollTrigger.create({
       trigger: mountRef.current,
-      once: true,
-      onEnter: animateMount,
+      start: "top bottom",
+      end: "top top",
+      scrub: 1,
+      animation: tl,
     });
+
+    return () => {
+      st.kill();
+      tl.kill();
+    };
   }, []);
 
   return (

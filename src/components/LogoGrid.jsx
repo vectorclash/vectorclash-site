@@ -47,51 +47,39 @@ class LogoGrid extends React.Component {
   }
 
   componentDidMount() {
+    this.logosTl = this.buildLogosTimeline();
+
     ScrollTrigger.create({
       trigger: this.mount,
-      once: true,
-      onEnter: () => {
-        this.animateLogos();
-      },
+      start: "top bottom",
+      end: "top center",
+      scrub: 1,
+      animation: this.logosTl,
     });
   }
 
-  animateElement(element, delay = 0) {
-    gsap.fromTo(
-      element,
-      {
-        alpha: 0,
-      },
-      {
-        alpha: 1,
-        duration: 1,
-        ease: "quad.inOut",
-        delay: delay,
-      }
-    );
+  componentWillUnmount() {
+    if (this.logosTl) this.logosTl.kill();
   }
 
-  animateLogos() {
-    this.animateElement(this.mount);
+  buildLogosTimeline() {
+    const tl = gsap.timeline({ paused: true });
 
-    gsap.fromTo(
+    tl.fromTo(this.mount, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
+    tl.fromTo(
       this.mount.querySelectorAll(".logo-grid-item"),
-      {
-        alpha: 0,
-        y: 100,
-      },
+      { alpha: 0, y: 100 },
       {
         duration: 0.5,
         alpha: 1,
         y: 0,
-        stagger: {
-          amount: 1,
-          grid: "auto",
-          from: "start",
-        },
+        stagger: { amount: 1, grid: "auto", from: "start" },
         ease: "back.out",
-      }
+      },
+      0
     );
+
+    return tl;
   }
 
   logoOver(e) {

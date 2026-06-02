@@ -36,24 +36,22 @@ export function detectPerformanceTier() {
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
   if (gl) {
-    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-    if (debugInfo) {
-      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      // Check for integrated vs dedicated GPU
+    const renderer = gl.getParameter(gl.RENDERER);
+    if (renderer) {
       if (renderer.match(/Apple GPU|Apple M/i)) {
-        score += 3; // Apple Silicon is high performance
+        score += 3;
       } else if (renderer.match(/Intel.*HD|Intel.*UHD/i)) {
-        score += 1; // Intel integrated graphics
+        score += 1;
       } else if (renderer.match(/NVIDIA|AMD|Radeon/i)) {
-        score += 3; // Dedicated GPU
+        score += 3;
       } else {
-        score += 2; // Unknown, assume medium
+        score += 2;
       }
     } else {
       score += 2;
     }
   } else {
-    score += 1; // No WebGL support
+    score += 1;
   }
 
   // Mobile devices get penalized

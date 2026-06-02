@@ -16,12 +16,14 @@ class ContactFooter extends React.Component {
   }
 
   componentDidMount() {
+    this.contactTl = this.buildContactTimeline();
+
     ScrollTrigger.create({
       trigger: this.mount.current,
-      once: true,
-      onEnter: () => {
-        this.animateContact();
-      },
+      start: "top bottom",
+      end: "bottom bottom",
+      scrub: 1,
+      animation: this.contactTl,
     });
 
     this.colors = {
@@ -35,38 +37,21 @@ class ContactFooter extends React.Component {
 
   componentWillUnmount() {
     gsap.killTweensOf(this.colors);
+    if (this.contactTl) this.contactTl.kill();
   }
 
-  animateContact() {
-    gsap.fromTo(
-      this.mount.current,
-      {
-        alpha: 0,
-      },
-      {
-        duration: 1,
-        alpha: 1,
-        ease: "quad.inOut",
-      }
+  buildContactTimeline() {
+    const tl = gsap.timeline({ paused: true });
+
+    tl.fromTo(this.mount.current, { alpha: 0 }, { duration: 1, alpha: 1, ease: "quad.inOut" });
+    tl.fromTo(
+      this.mount.current.querySelectorAll("p, li, .copyright"),
+      { alpha: 0, y: 20 },
+      { duration: 0.5, alpha: 1, y: 0, stagger: { amount: 0.5 }, ease: "quad.inOut" },
+      1
     );
 
-    gsap.fromTo(
-      this.mount.current.querySelectorAll("p, li, .copyright"),
-      {
-        alpha: 0,
-        y: 20,
-      },
-      {
-        duration: 0.5,
-        alpha: 1,
-        y: 0,
-        stagger: {
-          amount: 0.5,
-        },
-        delay: 1,
-        ease: "quad.inOut",
-      }
-    );
+    return tl;
   }
 
   animateColors() {

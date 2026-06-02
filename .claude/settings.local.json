@@ -8,7 +8,9 @@
       "Bash(npm run *)",
       "Bash(node -e \"import\\('vite'\\).then\\(v => console.log\\(Object.keys\\(v\\)\\)\\)\")",
       "Bash(npm test *)",
-      "Bash(grep -E \"\\\\.\\(svg|png|jpg|jpeg\\)$\")"
+      "Bash(grep -E \"\\\\.\\(svg|png|jpg|jpeg\\)$\")",
+      "PowerShell(npm outdated 2>&1)",
+      "PowerShell(npm update 2>&1)"
     ]
   }
 }
