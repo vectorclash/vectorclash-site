@@ -34,7 +34,16 @@ jobs:
       # Same Hostinger server as chromaforge.app (host key pinned below is that server's real
       # ed25519 key, captured via ssh-keyscan 2026-07-10) -- just a different domain's
       # public_html. SSH host/port/user/path are fixed account facts, not secrets -- only the
-      # key is. --delete keeps the web root an exact mirror of build/.
+      # key is.
+      #
+      # --delete is scoped via --include/--exclude to ONLY the top-level entries that build/
+      # actually contains right now (computed below, e.g. assets/, projects/, index.html).
+      # Anything else already living in public_html/ (other subfolders, other tools someone
+      # FTP'd up manually) is excluded from the transfer, and rsync's default behavior is to
+      # also protect excluded destination paths from deletion (that only changes with
+      # --delete-excluded, which we deliberately do not pass). A bare `--delete` here once wiped
+      # out unrelated subfolders that had been set up directly on the server -- do not remove
+      # this scoping without re-reading that incident.
       - name: Deploy to Hostinger via rsync over SSH
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -43,8 +52,20 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           echo '[45.137.159.160]:65002 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN9ovrpXkuA4/afZmktfMJGvkX5pavmxwZP13E4lACJz' >> ~/.ssh/known_hosts
+
+          filter_args=()
+          for entry in build/*; do
+            name=$(basename "$entry")
+            filter_args+=(--include="/$name")
+            if [ -d "$entry" ]; then
+              filter_args+=(--include="/$name/***")
+            fi
+          done
+          filter_args+=(--exclude='*')
+
           for attempt in 1 2 3; do
             if rsync -az --delete --timeout=60 \
+              "${filter_args[@]}" \
               -e "ssh -i ~/.ssh/deploy_key -p 65002 -o ConnectTimeout=15 -o BatchMode=yes" \
               ./build/ u141529136@45.137.159.160:domains/vectorclash.com/public_html/; then
               echo "Deployed on attempt $attempt"
