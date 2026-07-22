@@ -66,10 +66,10 @@
     "field_videos": [{ "url": "/projects/honey/videos/honey.mp4" }]
   },
   {
-    "title": [{ "value": "ChromaForge" }],
+    "title": [{ "value": "Chromaforge" }],
     "body": [
       {
-        "value": "<p>ChromaForge began as a personal passion project—an exploration into the intersection of code, mathematics, and visual art through procedural generation. What started as creative experimentation evolved into a fully-featured React web application that serves as a generative art studio in the browser.</p><p>The application empowers users to create endlessly unique, vibrantly colorful artworks through algorithmic processes. Each piece is procedurally generated, meaning no two creations are ever exactly alike. The interface provides intuitive controls for generating, fine-tuning, saving, and downloading these digital artworks. Color manipulation is handled through tinycolor, while GSAP adds smooth, engaging transitions throughout the user experience. Since its initial release, ChromaForge has grown into a complete print-on-demand service—a platform where users can not only generate their own distinctive artwork but seamlessly transform their digital creations into wearable pieces by having them printed on their garment of choice, bridging the gap between digital art generation and physical fashion.</p><p><a href='https://chromaforge.app/' target='_blank'>View Project</a></p>"
+        "value": "<p>Chromaforge began as a personal passion project—an exploration into the intersection of code, mathematics, and visual art through procedural generation. What started as creative experimentation evolved into a fully-featured React web application that serves as a generative art studio in the browser.</p><p>The application empowers users to create endlessly unique, vibrantly colorful artworks through algorithmic processes. Each piece is procedurally generated, meaning no two creations are ever exactly alike. The interface provides intuitive controls for generating, fine-tuning, saving, and downloading these digital artworks. Color manipulation is handled through tinycolor, while GSAP adds smooth, engaging transitions throughout the user experience. Since its initial release, Chromaforge has grown into a complete print-on-demand service—a platform where users can not only generate their own distinctive artwork but seamlessly transform their digital creations into wearable pieces by having them printed on their garment of choice, bridging the gap between digital art generation and physical fashion.</p><p><a href='https://chromaforge.app/' target='_blank'>View Project</a></p>"
       }
     ],
     "field_tools": [
@@ -88,7 +88,10 @@
       { "url": "/projects/forge/images/forge_img07.jpg" },
       { "url": "/projects/forge/images/forge_img08.jpg" }
     ],
-    "field_videos": [{ "url": "/projects/forge/videos/FusedCryosphere-ebeb.mp4"}]
+    "field_videos": [
+      { "url": "/projects/forge/videos/FusedCryosphere-ebeb.mp4"},
+      { "url": "/projects/forge/videos/GeodesicVortex-49eade.mp4"}
+    ]
   },
   {
     "title": [{ "value": "Gap Denim" }],
