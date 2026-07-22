@@ -14,11 +14,30 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
-    // window.addEventListener('beforeunload', this.resetWindow)
-    // Wait for fonts to load before animating to prevent SplitText errors
+    this._lastWidth = window.innerWidth;
+    this.lockHeaderHeight();
+    this._resizeHandler = () => {
+      if (window.innerWidth !== this._lastWidth) {
+        this._lastWidth = window.innerWidth;
+        this.lockHeaderHeight();
+      }
+    };
+    window.addEventListener('resize', this._resizeHandler);
     document.fonts.ready.then(() => {
       this.animateElements();
     });
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._resizeHandler);
+  }
+
+  lockHeaderHeight() {
+    if (window.innerWidth <= 600) {
+      const h = window.innerHeight;
+      this.myRef.current.style.height = `${h}px`;
+      this.myRef.current.style.minHeight = `${h}px`;
+    }
   }
 
   resetWindow(e) {
