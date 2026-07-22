@@ -1,0 +1,57 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+# Serializes deploys so back-to-back pushes don't fire near-simultaneous SSH connections at
+# Hostinger -- same server/account as chromaforge.app, where that pattern once tripped a
+# connection-rate protection and failed a deploy's rsync. cancel-in-progress: false queues a
+# second run to start only once the first fully completes, instead of canceling it.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Same Hostinger server as chromaforge.app (host key pinned below is that server's real
+      # ed25519 key, captured via ssh-keyscan 2026-07-10) -- just a different domain's
+      # public_html. SSH host/port/user/path are fixed account facts, not secrets -- only the
+      # key is. --delete keeps the web root an exact mirror of build/.
+      - name: Deploy to Hostinger via rsync over SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo '[45.137.159.160]:65002 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN9ovrpXkuA4/afZmktfMJGvkX5pavmxwZP13E4lACJz' >> ~/.ssh/known_hosts
+          for attempt in 1 2 3; do
+            if rsync -az --delete --timeout=60 \
+              -e "ssh -i ~/.ssh/deploy_key -p 65002 -o ConnectTimeout=15 -o BatchMode=yes" \
+              ./build/ u141529136@45.137.159.160:domains/vectorclash.com/public_html/; then
+              echo "Deployed on attempt $attempt"
+              exit 0
+            fi
+            echo "Attempt $attempt failed; waiting 60s"
+            sleep 60
+          done
+          echo "All rsync attempts failed" >&2
+          exit 1
