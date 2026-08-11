@@ -76,7 +76,8 @@
       { "value": "React" },
       { "value": "Vite" },
       { "value": "GSAP" },
-      { "value": "tinycolor" }
+      { "value": "tinycolor" },
+      { "value": "Supabase" }
     ],
     "field_images": [
       { "url": "/projects/forge/images/forge_img01.jpg" },
