@@ -9,6 +9,21 @@ import ghIcon from "../images/gh-icon.svg";
 import AnimatedParticles from "./AnimatedParticles";
 import HeaderIcon from "./HeaderIcon";
 
+// How much taller the viewport gets when the mobile address bar collapses: the
+// gap between the large and small viewport units. Returns 0 on desktop, and on
+// browsers without svh/lvh support (the declarations are simply dropped there).
+function addressBarHeight() {
+  const probe = document.createElement("div");
+  probe.style.cssText =
+    "position:absolute;top:0;left:0;visibility:hidden;pointer-events:none;width:0;height:100svh";
+  document.body.appendChild(probe);
+  const small = probe.getBoundingClientRect().height;
+  probe.style.height = "100lvh";
+  const large = probe.getBoundingClientRect().height;
+  probe.remove();
+  return Math.max(large - small, 0);
+}
+
 class ContactFooter extends React.Component {
   constructor(props) {
     super(props);
@@ -18,10 +33,17 @@ class ContactFooter extends React.Component {
   componentDidMount() {
     this.contactTl = this.buildContactTimeline();
 
-    ScrollTrigger.create({
+    // "bottom bottom" would put the end at the very bottom of the document, but
+    // ScrollTrigger measures that against the viewport height at refresh time and
+    // then ignores the address bar collapsing on touch devices. Once the bar goes
+    // away the page can't scroll that far anymore, so the scrub stalls partway.
+    // Ending the address bar's height early keeps the end reachable in either
+    // state; on desktop the offset is 0, which is exactly "bottom bottom".
+    this.contactSt = ScrollTrigger.create({
       trigger: this.mount.current,
       start: "top bottom",
-      end: "bottom bottom",
+      end: () =>
+        "+=" + Math.max(this.mount.current.offsetHeight - addressBarHeight(), 1),
       scrub: 1,
       animation: this.contactTl,
     });
@@ -37,6 +59,7 @@ class ContactFooter extends React.Component {
 
   componentWillUnmount() {
     gsap.killTweensOf(this.colors);
+    if (this.contactSt) this.contactSt.kill();
     if (this.contactTl) this.contactTl.kill();
   }
 
