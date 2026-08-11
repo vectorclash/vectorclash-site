@@ -14,7 +14,9 @@ import { shouldEnableAntialias, getGLPrecision, shouldEnableBloom, detectPerform
 function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }) {
   const projectGroupRef = useRef();
   const videoGroupRef = useRef();
-  const { camera, gl } = useThree();
+  // Narrow selectors so a canvas resize doesn't re-render the whole scene.
+  const camera = useThree((state) => state.camera);
+  const gl = useThree((state) => state.gl);
   const [loadComplete, setLoadComplete] = useState(false);
 
   // Get performance tier for conditional effects

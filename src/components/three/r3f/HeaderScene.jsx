@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, Suspense } from 'react';
+import { useRef, useEffect, useState, useMemo, Suspense } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
@@ -11,6 +11,14 @@ import GradientGenerator from '../../utils/GradientGenerator';
 import StarLarge from '../../../images/star-sprite-large.png';
 import StarSmall from '../../../images/star-sprite-small.png';
 import { getParticleConfig, shouldEnableBloom, shouldEnableAntialias } from '../../utils/PerformanceDetector';
+
+// Hoisted so these stay referentially stable across renders — ParticleField and
+// ShapeSwarm memoize their random positions against the containerSize object, so
+// a fresh literal each render would re-scatter every particle.
+const SWARM_LARGE = { x: 120, y: 200, z: 50 };
+const SWARM_SMALL = { x: 30, y: 75, z: 20 };
+const SMALL_STAR_FIELD = { x: 150, y: 200, z: 350 };
+const LARGE_STAR_FIELD = { x: 120, y: 150, z: 300 };
 
 // Animated gradient background component
 function AnimatedGradientBackground() {
@@ -180,7 +188,11 @@ function AnimatedGradientBackground() {
 
 function Scene({ colors }) {
   const groupRef = useRef();
-  const { camera, gl } = useThree();
+  // Select narrowly: useThree() with no selector subscribes to every store
+  // change, so a canvas resize (e.g. the mobile address bar collapsing mid
+  // scroll) would re-render the whole scene.
+  const camera = useThree((state) => state.camera);
+  const gl = useThree((state) => state.gl);
   const [starSmallImage, setStarSmallImage] = useState(null);
   const [starLargeImage, setStarLargeImage] = useState(null);
 
@@ -190,6 +202,24 @@ function Scene({ colors }) {
   // Get performance-based configuration
   const particleConfig = getParticleConfig();
   const enableBloom = shouldEnableBloom();
+
+  // Roll each field's star size once. Randomizing inline in the JSX would hand
+  // every field a new size on any re-render, visibly resizing stars mid-scroll.
+  const smallFields = useMemo(
+    () =>
+      Array.from({ length: particleConfig.smallFields }, () => ({
+        size: 0.8 + Math.random() * 1.5,
+      })),
+    [particleConfig.smallFields]
+  );
+
+  const largeFields = useMemo(
+    () =>
+      Array.from({ length: particleConfig.largeFields }, () => ({
+        size: 15 + Math.random() * 35,
+      })),
+    [particleConfig.largeFields]
+  );
 
   useEffect(() => {
     // Load star images
@@ -265,35 +295,35 @@ function Scene({ colors }) {
 
       <group ref={groupRef} scale={[0.00002, 0.00002, 0.00002]} visible={false}>
         <WireframeBox size={2000} depth={12} color={fogColor} />
-        <ShapeSwarm amount={5} containerSize={{ x: 120, y: 200, z: 50 }} />
-        <ShapeSwarm amount={5} containerSize={{ x: 30, y: 75, z: 20 }} />
+        <ShapeSwarm amount={5} containerSize={SWARM_LARGE} />
+        <ShapeSwarm amount={5} containerSize={SWARM_SMALL} />
         <Suspense fallback={null}>
           <BrightCluster />
         </Suspense>
 
         {/* Small particles - optimized for visibility in front of camera */}
         {starSmallImage &&
-          Array.from({ length: particleConfig.smallFields }).map((_, i) => (
+          smallFields.map((field, i) => (
             <ParticleField
               key={`small-${i}`}
               particleNum={particleConfig.smallParticles}
               image={starSmallImage}
-              size={0.8 + Math.random() * 1.5}
+              size={field.size}
               opacity={0.6}
-              containerSize={{ x: 150, y: 200, z: 350 }}
+              containerSize={SMALL_STAR_FIELD}
             />
           ))}
 
         {/* Large particles - optimized for visibility */}
         {starLargeImage &&
-          Array.from({ length: particleConfig.largeFields }).map((_, i) => (
+          largeFields.map((field, i) => (
             <ParticleField
               key={`large-${i}`}
               particleNum={particleConfig.largeParticles}
               image={starLargeImage}
-              size={15 + Math.random() * 35}
+              size={field.size}
               opacity={0.8}
-              containerSize={{ x: 120, y: 150, z: 300 }}
+              containerSize={LARGE_STAR_FIELD}
             />
           ))}
       </group>
