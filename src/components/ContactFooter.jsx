@@ -8,6 +8,13 @@ import liIcon from "../images/li-icon.svg";
 import ghIcon from "../images/gh-icon.svg";
 import AnimatedParticles from "./AnimatedParticles";
 import HeaderIcon from "./HeaderIcon";
+import profileData from "../data/profile.json";
+
+const socialIcons = {
+  bluesky: bsIcon,
+  github: ghIcon,
+  linkedin: liIcon,
+};
 
 // How much taller the viewport gets when the mobile address bar collapses: the
 // gap between the large and small viewport units. Returns 0 on desktop, and on
@@ -106,61 +113,44 @@ class ContactFooter extends React.Component {
   }
 
   render() {
+    const { phone, email, social } = profileData.contact;
+    const copyright = `\u00A9 ${new Date().getFullYear()} ${profileData.name.full}`;
+
     return (
       <footer className="contact-footer container" ref={this.mount}>
         <article className="column">
           <div className="footer-left">
             <h3>Contact me <HeaderIcon /></h3>
             <p>
-              <a className="phone-link" href="tel:720-519-8217">
-                +1 720 519 8217
+              <a className="phone-link" href={phone.href}>
+                {phone.display}
               </a>
             </p>
             <p>
               <a
                 className="email-link"
-                href="mailto:aaron@vectorclash.com"
+                href={`mailto:${email}`}
               >
-                aaron@vectorclash.com
+                {email}
               </a>
             </p>
-            <div className="copyright">
-              &copy; {new Date().getFullYear()} Aaron Ezra Sterczewski
-            </div>
+            <div className="copyright">{copyright}</div>
           </div>
           <div className="footer-right">
             <ul className="social-links">
-              <li>
-                <a
-                  href="https://bsky.app/profile/vectorclash.bsky.social"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src={bsIcon} alt="Blue Sky" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://github.com/vectorclash/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src={ghIcon} alt="GitHub" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://www.linkedin.com/in/aaronezra/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src={liIcon} alt="Linkedin" />
-                </a>
-              </li>
+              {social.map((link) => (
+                <li key={link.id}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img src={socialIcons[link.id]} alt={link.label} />
+                  </a>
+                </li>
+              ))}
             </ul>
-            <div className="copyright">
-              &copy; {new Date().getFullYear()} Aaron Ezra Sterczewski
-            </div>
+            <div className="copyright">{copyright}</div>
           </div>
         </article>
         <AnimatedParticles particles="20" />
