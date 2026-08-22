@@ -1,20 +1,22 @@
 {
-  "short_name": "Vectorclash",
-  "name": "Vectorclash 2020 Site",
+  "name": "VECTORCLASH — Aaron Ezra Sterczewski",
+  "short_name": "VECTORCLASH",
+  "description": "The portfolio of Aaron Ezra Sterczewski, a creative developer and motion engineer building interactive 3D and animated web experiences.",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "apple-touch-icon.png",
+      "src": "/apple-touch-icon.png",
       "type": "image/png",
       "sizes": "180x180"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#CCFF00",
+  "background_color": "#000000"
 }

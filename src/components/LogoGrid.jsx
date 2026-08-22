@@ -26,22 +26,22 @@ class LogoGrid extends React.Component {
     super(props);
     this.state = {
       logos: [
-        jamba,
-        walmart,
-        microsoft,
-        churchs,
-        jimmyjohns,
-        monrovia,
-        subway,
-        gap,
-        att,
-        juniper,
-        vive,
-        sovos,
-        redrobin,
-        deltadental,
-        rocky,
-        atlassian
+        { src: jamba, name: "Jamba Juice" },
+        { src: walmart, name: "Walmart" },
+        { src: microsoft, name: "Microsoft" },
+        { src: churchs, name: "Church's Chicken" },
+        { src: jimmyjohns, name: "Jimmy John's" },
+        { src: monrovia, name: "Monrovia" },
+        { src: subway, name: "Subway" },
+        { src: gap, name: "Gap" },
+        { src: att, name: "AT&T" },
+        { src: juniper, name: "Juniper Networks" },
+        { src: vive, name: "HTC Vive" },
+        { src: sovos, name: "Sovos" },
+        { src: redrobin, name: "Red Robin" },
+        { src: deltadental, name: "Delta Dental" },
+        { src: rocky, name: "Rocky Brands" },
+        { src: atlassian, name: "Atlassian" }
       ],
     };
   }
@@ -111,7 +111,13 @@ class LogoGrid extends React.Component {
           <div className="logo-grid-container">
             {this.state.logos.map((logo, i) => (
               <div className="logo-grid-item" key={i}>
-                <img src={logo} alt="Logo" onMouseEnter={this.logoOver} />
+                <img
+                  src={logo.src}
+                  alt={`${logo.name} logo`}
+                  loading="lazy"
+                  decoding="async"
+                  onMouseEnter={this.logoOver}
+                />
               </div>
             ))}
           </div>
