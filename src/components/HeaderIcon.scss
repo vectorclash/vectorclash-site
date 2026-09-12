@@ -2,62 +2,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 8px;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
   vertical-align: middle;
   position: relative;
-  top: -0.1em;
+  top: -0.08em;
 
   svg {
     display: block;
+    width: 100%;
+    height: 100%;
     overflow: visible;
   }
 
-  // Outer square - slow clockwise rotation
-  .icon-square-outer {
-    fill: none;
+  line {
     stroke: #CCFF00;
-    stroke-width: 1.2;
-    opacity: 0.5;
-    animation: rotate 12s linear infinite;
-    transform-origin: 8px 8px;
-  }
-
-  // Middle square - counter-clockwise rotation
-  .icon-square-middle {
-    fill: none;
-    stroke: #CCFF00;
-    stroke-width: 1.4;
-    opacity: 0.7;
-    animation: rotateReverse 8s linear infinite;
-    transform-origin: 8px 8px;
-  }
-
-  // Inner square - fast clockwise rotation
-  .icon-square-inner {
-    fill: none;
-    stroke: #CCFF00;
-    stroke-width: 1.2;
-    opacity: 0.9;
-    animation: rotate 5s linear infinite;
-    transform-origin: 8px 8px;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
   }
 }
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes rotateReverse {
-  from {
-    transform: rotate(360deg);
-  }
-  to {
-    transform: rotate(0deg);
-  }
-}
-
