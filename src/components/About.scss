@@ -66,15 +66,17 @@
 
       a {
         color: white;
-        font-weight: bold;
-        transition: 0.2s;
-        text-decoration: none;
+        font-weight: bolder;
+        transition: 0.1s;
+        text-decoration: underline;
+        padding-bottom: 0px;
         border-bottom: 0px solid white;
       }
 
       a:hover {
-        color: #CCFF00;
-        border-bottom: 1px solid #CCFF00;
+        text-decoration: none;
+        padding-bottom: 3px;
+        border-bottom: 3px solid white;
       }
 
       p {
@@ -108,6 +110,8 @@
         padding: 0;
 
         li {
+          position: relative;
+          overflow: hidden;
           opacity: 0;
           padding: 6px 12px;
           font-size: 13px;
@@ -117,6 +121,30 @@
           border: 1px solid rgba(204, 255, 0, 0.35);
           border-radius: 999px;
           white-space: nowrap;
+          // Nothing here is clickable, so the arrow is the honest cursor --
+          // a pointer would promise a link the pill does not have.
+          cursor: default;
+
+          // The rollover shimmer: the full generated palette as a diagonal
+          // band, parked off the right edge and swept across once per hover.
+          // The pill itself is untouched at rest.
+          &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            background-image: var(--pill-shimmer);
+            background-size: 250% 100%;
+            background-position: 150% 0;
+            mix-blend-mode: screen;
+          }
+
+          &.is-shimmering::after {
+            opacity: 0.9;
+            animation: skill-pill-shimmer 0.7s ease-out;
+          }
         }
       }
     }
@@ -145,5 +173,21 @@
     height: 100%;
     min-height: 100%;
     z-index: 0;
+  }
+}
+
+@keyframes skill-pill-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about .column article .skill-list li.is-shimmering::after {
+    animation: none;
+    opacity: 0;
   }
 }

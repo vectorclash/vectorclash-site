@@ -1,5 +1,6 @@
 import React from "react";
 import { gsap, SplitText, ScrollTrigger } from "gsap/all";
+import tinycolor from "tinycolor2";
 import "./About.scss";
 import me from "../images/me.png";
 import HeaderIcon from "./HeaderIcon";
@@ -12,7 +13,38 @@ class About extends React.Component {
     this.state = {
       skills: skillsData,
     };
+    // One tetrad off a randomly spun chartreuse, picked once per load --
+    // the same palette trick the old gradient skill bars used. Here the
+    // whole four-colour ramp becomes the band that swipes across a pill on
+    // rollover, so the pills themselves stay as they were at rest.
+    const palette = tinycolor("#CCFF00")
+      .spin(Math.random() * 360)
+      .tetrad()
+      .map((color) => color.toHexString());
+
+    this.shimmerGradient =
+      "linear-gradient(105deg, transparent 28%, " +
+      palette
+        .map((color, i) => `${color} ${38 + i * 6}%`)
+        .join(", ") +
+      ", transparent 72%)";
     this.meMounted = false;
+    this.onSkillOver = this.onSkillOver.bind(this);
+  }
+
+  // The shimmer runs off a class rather than :hover so that rolling off
+  // mid-sweep does not cut it short -- the class is only dropped once the
+  // animation reports itself finished.
+  onSkillOver(e) {
+    const pill = e.currentTarget;
+    if (pill.classList.contains("is-shimmering")) return;
+
+    pill.classList.add("is-shimmering");
+    pill.addEventListener(
+      "animationend",
+      () => pill.classList.remove("is-shimmering"),
+      { once: true }
+    );
   }
 
   componentDidMount() {
@@ -118,7 +150,10 @@ class About extends React.Component {
     return (
       <section className="about container" ref={this.mount}>
         <div className="column">
-          <article className="skills">
+          <article
+            className="skills"
+            style={{ "--pill-shimmer": this.shimmerGradient }}
+          >
             <h3>Skills <HeaderIcon /></h3>
             {this.state.skills.map((skillGroup) => (
               <div
@@ -130,7 +165,9 @@ class About extends React.Component {
                 <h4 className="skill-category">{skillGroup.category}</h4>
                 <ul className="skill-list">
                   {skillGroup.items.map((skill) => (
-                    <li key={skill}>{skill}</li>
+                    <li key={skill} onMouseEnter={this.onSkillOver}>
+                      {skill}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -144,7 +181,7 @@ class About extends React.Component {
               <p>Most of my work lives in the browser, in React and GSAP, and increasingly three.js when an idea calls for real-time 3D. I care about the engineering underneath the surface: the 3D scenes here scale their effects to the visitor's GPU, and the scroll choreography survives a mobile address bar collapsing mid-gesture. The other half of the practice is design proper &mdash; Figma, and a long-running interest in color as a system rather than a palette, which is where Chromaforge came from. It has since grown into a print-on-demand product with real users.</p>
               <p>
                 A selection of the banner work is collected separately:{" "}
-                <a href="./banners/" style={{ textDecoration: "underline" }}>
+                <a href="./banners/">
                   HTML5 Banner Portfolio
                 </a>
                 .
