@@ -6,6 +6,7 @@
       "JavaScript",
       "HTML & CSS",
       "Sass",
+      "Tailwind CSS",
       "Web Components",
       "Vite",
       "Webpack"
@@ -16,11 +17,24 @@
     "items": [
       "GSAP",
       "ScrollTrigger",
-      "SplitText",
-      "Scroll interaction",
       "SVG animation",
+      "CSS animation",
+      "Scroll choreography",
+      "Interaction design",
+      "Reduced-motion support"
+    ]
+  },
+  {
+    "category": "Motion Graphics",
+    "items": [
       "After Effects",
-      "Adobe Animate"
+      "Adobe Animate",
+      "HTML5 banner animation",
+      "Social video",
+      "Seamless loops",
+      "Ad-format delivery",
+      "WebCodecs video export",
+      "Batch export automation"
     ]
   },
   {
@@ -28,12 +42,21 @@
     "items": [
       "three.js",
       "React Three Fiber",
-      "drei",
       "Postprocessing",
+      "GLSL shaders",
       "Generative geometry",
       "Audio-reactive visuals",
-      "GPU performance tiering",
+      "Performance tuning",
       "Blender"
+    ]
+  },
+  {
+    "category": "Generative & Color Systems",
+    "items": [
+      "Canvas 2D",
+      "Generative design",
+      "Color systems",
+      "Print-resolution rendering"
     ]
   },
   {
@@ -41,10 +64,10 @@
     "items": [
       "Figma",
       "UI/UX design",
-      "Color systems",
-      "Generative design",
+      "Design tokens",
       "AI-assisted development",
       "Supabase",
+      "Stripe",
       "WordPress integration",
       "Git"
     ]
@@ -54,10 +77,8 @@
     "secondary": true,
     "items": [
       "TypeScript",
-      "GLSL shaders",
+      "drei",
       "Next.js",
-      "Tailwind CSS",
-      "Design tokens",
       "Accessibility (WCAG)"
     ]
   }
