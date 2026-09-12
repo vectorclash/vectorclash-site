@@ -13,7 +13,7 @@
       opacity: 0;
 
       .skill-group {
-        margin-bottom: 35px;
+        margin-bottom: 32px;
 
         &:last-child {
           margin-bottom: 0;
@@ -25,9 +25,28 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 15px;
+        margin-bottom: 14px;
         color: #CCFF00;
         opacity: 0;
+      }
+
+      // The secondary group ("Also working with") is deliberately quieter than
+      // the categories above it: same layout, lower contrast, so it reads as
+      // adjacent familiarity rather than core competency.
+      .skill-group-secondary {
+        margin-top: 44px;
+        padding-top: 32px;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+        .skill-category {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        .skill-list li {
+          color: rgba(255, 255, 255, 0.6);
+          border-color: rgba(255, 255, 255, 0.18);
+          background-color: transparent;
+        }
       }
     }
 
@@ -59,7 +78,12 @@
       }
 
       p {
-        line-height: 20px;
+        line-height: 22px;
+        margin-bottom: 18px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
       }
     }
 
@@ -77,78 +101,22 @@
 
       .skill-list {
         list-style-type: none;
-        margin-bottom: 60px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
 
         li {
-          position: relative;
-          margin-bottom: 30px;
           opacity: 0;
-
-          .skill-bar-back {
-            position: absolute;
-            top: 25px;
-            left: 0;
-            width: 100%;
-            height: 15px;
-            z-index: 0;
-            position: absolute;
-            background-color: black;
-            border-radius: 7px;
-            box-shadow: 5px 5px 10px rgba(#27003e, 0.4);
-            transform-origin: left;
-          }
-
-          .skill-bar-front {
-            position: absolute;
-            top: 25px;
-            left: 0;
-            max-width: 100%;
-            height: 15px;
-            z-index: 1;
-            // background: linear-gradient(42deg, #5100c6, #ff0073, #ffd600);
-            border-radius: 7px;
-            transform-origin: left;
-          }
-        }
-
-        .skill-level-1 .skill-bar-front {
-          width: 10%;
-        }
-
-        .skill-level-2 .skill-bar-front {
-          width: 20%;
-        }
-
-        .skill-level-3 .skill-bar-front {
-          width: 30%;
-        }
-
-        .skill-level-4 .skill-bar-front {
-          width: 40%;
-        }
-
-        .skill-level-5 .skill-bar-front {
-          width: 50%;
-        }
-
-        .skill-level-6 .skill-bar-front {
-          width: 60%;
-        }
-
-        .skill-level-7 .skill-bar-front {
-          width: 70%;
-        }
-
-        .skill-level-8 .skill-bar-front {
-          width: 80%;
-        }
-
-        .skill-level-9 .skill-bar-front {
-          width: 90%;
-        }
-
-        .skill-level-10 .skill-bar-front {
-          width: 100%;
+          padding: 6px 12px;
+          font-size: 13px;
+          line-height: 1.3;
+          color: white;
+          background-color: rgba(0, 0, 0, 0.35);
+          border: 1px solid rgba(204, 255, 0, 0.35);
+          border-radius: 999px;
+          white-space: nowrap;
         }
       }
     }

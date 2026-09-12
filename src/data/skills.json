@@ -1,32 +1,64 @@
 [
   {
-    "category": "Front-End Development",
+    "category": "Interface Engineering",
     "items": [
-      { "title": "HTML/CSS/JavaScript", "level": 10 },
-      { "title": "React/Vue/Angular", "level": 8 },
-      { "title": "Three.js/WebGL", "level": 8 }
+      "React",
+      "JavaScript",
+      "HTML & CSS",
+      "Sass",
+      "Web Components",
+      "Vite",
+      "Webpack"
     ]
   },
   {
-    "category": "Motion & Animation",
+    "category": "Motion & Interaction",
     "items": [
-      { "title": "After Effects", "level": 7 },
-      { "title": "GSAP", "level": 9 },
-      { "title": "Blender", "level": 7 }
+      "GSAP",
+      "ScrollTrigger",
+      "SplitText",
+      "Scroll interaction",
+      "SVG animation",
+      "After Effects",
+      "Adobe Animate"
     ]
   },
   {
-    "category": "Design & Prototyping",
+    "category": "3D & Real-Time Graphics",
     "items": [
-      { "title": "Figma", "level": 8 },
-      { "title": "UI/UX Design", "level": 6 }
+      "three.js",
+      "React Three Fiber",
+      "drei",
+      "Postprocessing",
+      "Generative geometry",
+      "Audio-reactive visuals",
+      "GPU performance tiering",
+      "Blender"
     ]
   },
   {
-    "category": "Tools & Workflow",
+    "category": "Design & Workflow",
     "items": [
-      { "title": "Git/Version Control", "level": 9 },
-      { "title": "Build Tools (Vite/Webpack)", "level": 8 }
+      "Figma",
+      "UI/UX design",
+      "Color systems",
+      "Generative design",
+      "AI-assisted development",
+      "Supabase",
+      "WordPress integration",
+      "Git"
+    ]
+  },
+  {
+    "category": "Also working with",
+    "secondary": true,
+    "items": [
+      "TypeScript",
+      "GLSL shaders",
+      "Next.js",
+      "Tailwind CSS",
+      "Design tokens",
+      "Accessibility (WCAG)"
     ]
   }
 ]

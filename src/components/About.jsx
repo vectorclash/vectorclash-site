@@ -1,6 +1,5 @@
 import React from "react";
 import { gsap, SplitText, ScrollTrigger } from "gsap/all";
-import tinycolor from "tinycolor2";
 import "./About.scss";
 import me from "../images/me.png";
 import HeaderIcon from "./HeaderIcon";
@@ -59,16 +58,28 @@ class About extends React.Component {
 
     tl.fromTo(this.skillContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
 
-    const categories = this.skillContainer.querySelectorAll(".skill-category");
-    tl.fromTo(categories, { alpha: 0, y: 10 }, { duration: 0.5, alpha: 1, y: 0, stagger: 0.2 }, 0.5);
-
-    const skills = this.skillContainer.querySelectorAll("li");
-    skills.forEach((skill, i) => {
-      const pos = 0.5 + i * 0.15;
-      const mySize = skill.className.split("-")[2];
-      tl.fromTo(skill, { alpha: 0, y: 10 }, { duration: 1, alpha: 1, y: 0 }, pos);
-      tl.fromTo(skill.querySelector(".skill-bar-front"), { width: "0%" }, { duration: 1, width: mySize + "0%", ease: "bounce.out" }, pos + 0.25);
-      tl.fromTo(skill.querySelector(".skill-bar-back"), { alpha: 0 }, { duration: 1, alpha: 1, ease: "bounce.out" }, pos + 0.25);
+    const groups = this.skillContainer.querySelectorAll(".skill-group");
+    groups.forEach((group, i) => {
+      const pos = 0.5 + i * 0.3;
+      tl.fromTo(
+        group.querySelector(".skill-category"),
+        { alpha: 0, y: 10 },
+        { duration: 0.5, alpha: 1, y: 0, ease: "quad.out" },
+        pos
+      );
+      tl.fromTo(
+        group.querySelectorAll("li"),
+        { alpha: 0, y: 8, scale: 0.9 },
+        {
+          duration: 0.5,
+          alpha: 1,
+          y: 0,
+          scale: 1,
+          ease: "back.out",
+          stagger: { amount: 0.25 },
+        },
+        pos + 0.15
+      );
     });
 
     return tl;
@@ -103,96 +114,23 @@ class About extends React.Component {
     });
   }
 
-  onSkillOver(e) {
-    let mySize = e.currentTarget.className.split("-")[2];
-    let myHalfSize = Math.round(e.currentTarget.className.split("-")[2] / 2);
-
-    gsap.fromTo(
-      e.currentTarget.querySelector(".skill-bar-front"),
-      {
-        width: mySize + "0%",
-      },
-      {
-        duration: 0.5,
-        width: myHalfSize + "0%",
-        yoyo: true,
-        repeat: 1,
-        ease: "quad.inOut",
-        yoyoEase: "bounce.out",
-      }
-    );
-  }
-
   render() {
-    let colors = tinycolor("#CCFF00")
-      .spin(Math.random() * 360)
-      .tetrad();
-
-    let gradientStringFull =
-      "linear-gradient(42deg, " +
-      colors[0].toHexString() +
-      ", " +
-      colors[1].toHexString() +
-      ", " +
-      colors[2].toHexString() +
-      ", " +
-      colors[3].toHexString() +
-      ")";
-
-    let gradientStringPartial =
-      "linear-gradient(42deg, " +
-      colors[0].toHexString() +
-      ", " +
-      colors[1].toHexString() +
-      ", " +
-      colors[2].toHexString() +
-      ")";
-
-    let gradientStringLow =
-      "linear-gradient(42deg, " +
-      colors[0].toHexString() +
-      ", " +
-      colors[1].toHexString() +
-      ")";
-
-    const barStyleFull = {
-      backgroundImage: gradientStringFull,
-    };
-    const barStylePartial = {
-      backgroundImage: gradientStringPartial,
-    };
-    const barStyleLow = {
-      backgroundImage: gradientStringLow,
-    };
-
     return (
       <section className="about container" ref={this.mount}>
         <div className="column">
           <article className="skills">
             <h3>Skills <HeaderIcon /></h3>
-            {this.state.skills.map((skillGroup, groupIndex) => (
-              <div key={groupIndex} className="skill-group">
+            {this.state.skills.map((skillGroup) => (
+              <div
+                key={skillGroup.category}
+                className={
+                  "skill-group" + (skillGroup.secondary ? " skill-group-secondary" : "")
+                }
+              >
                 <h4 className="skill-category">{skillGroup.category}</h4>
                 <ul className="skill-list">
-                  {skillGroup.items.map((skill, skillIndex) => (
-                    <li
-                      className={"skill-level-" + skill.level}
-                      key={`${groupIndex}-${skillIndex}`}
-                      onMouseEnter={this.onSkillOver}
-                    >
-                      {skill.title}
-                      <div className="skill-bar-back"></div>
-                      <div
-                        className="skill-bar-front"
-                        style={
-                          skill.level >= 9
-                            ? barStyleFull
-                            : skill.level >= 6
-                            ? barStylePartial
-                            : barStyleLow
-                        }
-                      ></div>
-                    </li>
+                  {skillGroup.items.map((skill) => (
+                    <li key={skill}>{skill}</li>
                   ))}
                 </ul>
               </div>
@@ -210,7 +148,7 @@ class About extends React.Component {
                 </a>
               </p>
             </div>
-            <img src={me} className="geometric-me" alt="Geometric Aaron" />
+            <img src={me} className="geometric-me" alt="" aria-hidden="true" />
           </article>
         </div>
       </section>

@@ -84,7 +84,9 @@ vectorclash-site/
 
 The site uses local JSON files for content management:
 - `src/data/projects.json` - Portfolio projects
-- `src/data/skills.json` - Technical skills and categories
+- `src/data/skills.json` - Skill categories, rendered as tag groups. A group
+  flagged `"secondary": true` renders in a lower-contrast style below a divider,
+  for adjacent familiarity rather than core competency.
 - `src/data/profile.json` - Personal information and resume link
 
 ## License
