@@ -1,6 +1,6 @@
 # VECTORCLASH
 
-Portfolio website for Aaron Ezra Sterczewski - UI and web motion engineer.
+Portfolio website for Aaron Ezra Sterczewski - design engineer.
 
 ## About
 
@@ -74,10 +74,10 @@ vectorclash-site/
 │   ├── components/     # React components
 │   ├── data/           # JSON data files (projects, skills, profile)
 │   ├── images/         # Image files
-│   ├── App.js          # Main app component
-│   └── main.jsx        # Entry point
+│   ├── App.jsx         # Main app component
+│   └── index.jsx       # Entry point
 ├── public/             # Public assets
-└── dist/               # Production build output
+└── build/              # Production build output
 ```
 
 ## Data Management

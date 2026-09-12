@@ -138,7 +138,11 @@ class Header extends React.Component {
           </h1>
           <p dangerouslySetInnerHTML={{ __html: profileData.intro }} />
           <div className="header-buttons">
-            <a href={profileData.resume.url} target="_blank">
+            <a
+              href={profileData.resume.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {profileData.resume.text} {<PDFIcon />}
             </a>
           </div>
