@@ -64,6 +64,14 @@
 
     p {
       font-size: 30px;
+
+      // inline-block so it takes the same transforms as the word wrappers
+      // SplitText builds around every other word.
+      .nowrap {
+        display: inline-block;
+        white-space: nowrap;
+      }
+
       margin-bottom: 100px;
       user-select: none;
       opacity: 0;

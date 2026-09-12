@@ -101,9 +101,22 @@ class Header extends React.Component {
     const pElement = this.myRef.current.querySelector("p");
     gsap.set(pElement, { autoAlpha: 1 });
 
-    let subHeadlineSplit = new SplitText(pElement, { type: "words" });
+    // .nowrap is left whole so the closing words cannot break apart and
+    // strand a single word on its own line at narrow widths.
+    let subHeadlineSplit = new SplitText(pElement, {
+      type: "words",
+      ignore: ".nowrap",
+    });
 
-    tl.fromTo(subHeadlineSplit.words, {
+    // An ignored element is left out of split.words, so it has to be added
+    // back as a target by hand -- it sits last in the paragraph, which keeps
+    // the stagger in reading order.
+    const subHeadlineTargets = [
+      ...subHeadlineSplit.words,
+      ...pElement.querySelectorAll(".nowrap"),
+    ];
+
+    tl.fromTo(subHeadlineTargets, {
       x: 30,
       alpha: 0,
     }, {

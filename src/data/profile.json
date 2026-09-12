@@ -5,7 +5,7 @@
     "last": "Sterczewski"
   },
   "greeting": "Hello! My name is",
-  "intro": "I'm a <b>design engineer</b> building interfaces that move, and I love color",
+  "intro": "I'm a <b>design engineer</b> building interfaces that move, and I treat color as <span class=\"nowrap\">a system.</span>",
   "resume": {
     "text": "Résumé",
     "url": "./documents/resume.pdf"
