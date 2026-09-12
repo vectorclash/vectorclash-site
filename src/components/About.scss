@@ -136,6 +136,9 @@
             pointer-events: none;
             opacity: 0;
             background-image: var(--pill-shimmer);
+            // Without this the band tiles, and the tail of the repeat
+            // slides into the pill's left edge as the sweep exits right.
+            background-repeat: no-repeat;
             background-size: 250% 100%;
             background-position: 150% 0;
             mix-blend-mode: screen;
