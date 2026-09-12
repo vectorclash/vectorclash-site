@@ -83,7 +83,10 @@ vectorclash-site/
 ## Data Management
 
 The site uses local JSON files for content management:
-- `src/data/projects.json` - Portfolio projects
+- `src/data/projects.json` - Portfolio projects. The grid shuffles on every load,
+  so set `"pinned": true` on a project to lock it to the front; multiple pinned
+  projects lead in the order they appear in the file, and the rest stay shuffled.
+  `"disabled": true` withholds a project from the grid entirely.
 - `src/data/skills.json` - Skill categories, rendered as tag groups. A group
   flagged `"secondary": true` renders in a lower-contrast style below a divider,
   for adjacent familiarity rather than core competency.

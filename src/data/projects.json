@@ -68,6 +68,7 @@
   },
   {
     "title": [{ "value": "Chromaforge" }],
+    "pinned": true,
     "body": [
       {
         "value": "<p>Chromaforge began as a question I wanted to answer for myself: how much of what makes a palette work is structural, and whether that structure could be generated rather than picked by hand. The experiment became a React application—a generative art studio running in the browser, where the algorithm proposes the color relationships and the artwork follows from them. Every decision in it is mine, design and engineering both, arrived at by iteration rather than by specification.</p><p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states. Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p><p><a href='https://chromaforge.app/' target='_blank' rel='noopener noreferrer'>View Project</a></p>"

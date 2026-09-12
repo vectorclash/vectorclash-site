@@ -8,7 +8,15 @@ import projectsData from "../data/projects.json";
 function Projects() {
   const mountRef = useRef(null);
   const threeContainerRef = useRef(null);
-  const projects = useMemo(() => gsap.utils.shuffle(projectsData.filter(p => !p.disabled)), []);
+  const projects = useMemo(() => {
+    const active = projectsData.filter((p) => !p.disabled);
+    // Projects flagged "pinned" lead the grid in the order they appear in the
+    // data; everything else keeps the shuffle, so the tail still varies between
+    // visits without the lead project being left to chance.
+    const pinned = active.filter((p) => p.pinned);
+    const rest = gsap.utils.shuffle(active.filter((p) => !p.pinned));
+    return [...pinned, ...rest];
+  }, []);
   const [isProjectActive, setIsProjectActive] = useState(false);
 
   useEffect(() => {
