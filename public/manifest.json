@@ -1,7 +1,7 @@
 {
   "name": "VECTORCLASH — Aaron Ezra Sterczewski",
   "short_name": "VECTORCLASH",
-  "description": "The portfolio of Aaron Ezra Sterczewski, a creative developer and motion engineer building interactive 3D and animated web experiences.",
+  "description": "The portfolio of Aaron Ezra Sterczewski, a design engineer building interactive, animated interfaces with React, GSAP, and three.js.",
   "icons": [
     {
       "src": "/favicon.ico",
