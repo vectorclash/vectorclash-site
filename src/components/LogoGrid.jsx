@@ -83,19 +83,41 @@ class LogoGrid extends React.Component {
   }
 
   logoOver(e) {
-    gsap.fromTo(
-      e.currentTarget,
+    const logo = e.currentTarget;
+
+    // Let a flip finish rather than restarting it under a twitchy cursor.
+    if (gsap.isTweening(logo)) return;
+
+    // Perspective lives on .logo-grid-item in CSS -- it is what keeps this
+    // from reading as a flat horizontal squash, since without it a rotationY
+    // is just a scale on X. The flip goes all the way around instead of
+    // turning back at edge-on, and the logo pushes toward the viewer
+    // through the middle of it.
+    const tl = gsap.timeline();
+
+    tl.fromTo(
+      logo,
+      { rotationY: 0 },
       {
-        rotationY: 0,
-      },
-      {
-        rotationY: 90,
-        duration: 0.2,
-        yoyo: true,
-        repeat: 1,
-        ease: "quad.inOut",
+        rotationY: 360,
+        duration: 0.7,
+        ease: "power2.inOut",
+        transformOrigin: "50% 50%",
       }
     );
+
+    tl.to(logo, { z: 90, scale: 1.12, duration: 0.35, ease: "power2.out" }, 0);
+    tl.to(logo, { z: 0, scale: 1, duration: 0.35, ease: "power2.in" }, 0.35);
+
+    // A small tilt that settles after the spin, so it lands with some weight
+    // rather than snapping flat.
+    tl.fromTo(
+      logo,
+      { rotationZ: 0 },
+      { rotationZ: 6, duration: 0.35, ease: "power2.out" },
+      0
+    );
+    tl.to(logo, { rotationZ: 0, duration: 0.5, ease: "back.out(3)" }, 0.35);
   }
 
   render() {

@@ -28,6 +28,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        // The hover flip's depth comes from here rather than from the tween:
+        // set on the parent it is part of the scene from the first frame,
+        // where a tweened transformPerspective only lands once the rotation
+        // has rendered once.
+        perspective: 500px;
 
         img {
           object-fit: contain;
