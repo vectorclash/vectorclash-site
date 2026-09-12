@@ -4,24 +4,21 @@
     "items": [
       "React",
       "JavaScript",
+      "TypeScript",
       "HTML & CSS",
       "Sass",
       "Tailwind CSS",
       "Web Components",
-      "Vite",
-      "Webpack"
+      "Vite"
     ]
   },
   {
     "category": "Motion & Interaction",
     "items": [
       "GSAP",
-      "ScrollTrigger",
+      "Scroll animation",
       "SVG animation",
-      "CSS animation",
-      "Scroll choreography",
-      "Interaction design",
-      "Reduced-motion support"
+      "Interaction design"
     ]
   },
   {
@@ -29,34 +26,18 @@
     "items": [
       "After Effects",
       "Adobe Animate",
-      "HTML5 banner animation",
-      "Social video",
-      "Seamless loops",
-      "Ad-format delivery",
-      "WebCodecs video export",
-      "Batch export automation"
+      "HTML5 banners",
+      "Social video"
     ]
   },
   {
-    "category": "3D & Real-Time Graphics",
+    "category": "3D & Real-Time",
     "items": [
       "three.js",
       "React Three Fiber",
-      "Postprocessing",
-      "GLSL shaders",
-      "Generative geometry",
-      "Audio-reactive visuals",
-      "Performance tuning",
+      "WebGL",
+      "GLSL",
       "Blender"
-    ]
-  },
-  {
-    "category": "Generative & Color Systems",
-    "items": [
-      "Canvas 2D",
-      "Generative design",
-      "Color systems",
-      "Print-resolution rendering"
     ]
   },
   {
@@ -64,22 +45,10 @@
     "items": [
       "Figma",
       "UI/UX design",
-      "Design tokens",
-      "AI-assisted development",
-      "Supabase",
-      "Stripe",
-      "WordPress integration",
-      "Git"
-    ]
-  },
-  {
-    "category": "Also working with",
-    "secondary": true,
-    "items": [
-      "TypeScript",
-      "drei",
-      "Next.js",
-      "Accessibility (WCAG)"
+      "Design systems",
+      "Color systems",
+      "Generative design",
+      "AI-assisted development"
     ]
   }
 ]
