@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#CCFF00" />
 
+    <!-- Inline so the very first paint is already the page's base tone. As a
+         rule in the bundled stylesheet it only applies once that file has been
+         fetched, and the browser shows its default white until then. -->
+    <style>
+      html { background-color: #333333; }
+    </style>
+
     <title>VECTORCLASH | Aaron Ezra Sterczewski, Design Engineer</title>
     <meta
       name="description"
@@ -12,6 +19,21 @@
     />
     <meta name="author" content="Aaron Ezra Sterczewski" />
     <link rel="canonical" href="https://vectorclash.com/" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Moved here from an @import at the top of App.scss, which the browser
+         could not discover until that stylesheet had downloaded and parsed.
+         Left render-blocking on purpose: deferring it (media="print" swap) only
+         bought ~35ms of first paint, and it delays when the font files are
+         requested. The header splits its headline on document.fonts.ready,
+         which already resolves early (before React has mounted any text), so
+         the split leans on the timeline's 1s delay for the faces to arrive --
+         no reason to make that window tighter than it is. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap"
+    />
 
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

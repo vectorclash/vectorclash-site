@@ -1,4 +1,15 @@
+// The page sits on a flat #333 until the bundle parses and React paints this
+// gradient, which arrived as a hard cut -- the first of the load flashes. Easing
+// it up from transparent turns that swap into the lights coming on. It runs as a
+// keyframe rather than a class toggle so there is no frame where the element is
+// mounted at full opacity before a transition can be armed.
+@keyframes three-background-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .three-background {
+  animation: three-background-in 900ms ease-out both;
   position: absolute;
   top: 0;
   left: 0;
@@ -6,6 +17,23 @@
   height: 100%;
   z-index: 0;
   overflow-y: hidden;
+
+  // r3f puts the style prop on a wrapper div around the canvas, not on the
+  // canvas itself -- this is the element HeaderScene toggles opacity on once
+  // the scene has drawn its first frame.
+  > div {
+    transition: opacity 900ms ease-out;
+  }
+
+  // Respect a reduced-motion preference: still fade, but quickly, so neither
+  // reveal is a sudden change either.
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 200ms;
+
+    > div {
+      transition-duration: 200ms;
+    }
+  }
 
   canvas {
     position: absolute;

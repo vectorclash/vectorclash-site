@@ -328,6 +328,21 @@ function AnimatedGradientBackground({ colors }) {
   );
 }
 
+// Fires once the renderer has actually produced a frame. onCreated is too
+// early -- it runs when the GL context exists, before anything is drawn -- so
+// revealing on it still showed one frame of bare clear colour.
+function FirstFrameSignal({ onReady }) {
+  const fired = useRef(false);
+
+  useFrame(() => {
+    if (fired.current) return;
+    fired.current = true;
+    onReady();
+  });
+
+  return null;
+}
+
 function Scene({ colors }) {
   const groupRef = useRef();
   // Select narrowly: useThree() with no selector subscribes to every store
@@ -483,7 +498,7 @@ function Scene({ colors }) {
   );
 }
 
-export default function HeaderScene({ colors }) {
+export default function HeaderScene({ colors, fallback, ready, onReady }) {
   const fallbackColor = paletteAverage(colors);
   const enableAntialias = shouldEnableAntialias();
   const [canvasRef, frameloop] = useRenderWhenVisible();
@@ -506,9 +521,15 @@ export default function HeaderScene({ colors }) {
           type: THREE.PCFSoftShadowMap,
         },
       }}
-      style={{ background: fallbackColor }}
+      // Cross-fades up over the CSS gradient underneath, which carries the same
+      // palette, so the handover reads as the field gaining depth rather than
+      // as the background being replaced.
+      // The transition itself lives in ThreeHeaderBackground.scss so that the
+      // reduced-motion rule covers this fade and the gradient's together.
+      style={{ background: fallback || fallbackColor, opacity: ready ? 1 : 0 }}
       onCreated={({ gl }) => gl.setClearColor(fallbackColor)}
     >
+      <FirstFrameSignal onReady={onReady} />
       <Scene colors={colors} />
     </Canvas>
   );

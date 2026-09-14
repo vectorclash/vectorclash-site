@@ -1,5 +1,10 @@
 .header {
-  background-image: linear-gradient(42deg, #ff0457, #12002f);
+  // Was a hardcoded red/navy gradient, which had nothing to do with the palette
+  // this load actually generated -- it painted for a beat on every load and then
+  // was covered by the real gradient fading in, reading as a flash of the wrong
+  // colour. The base tone matches html, so the palette now fades up from one
+  // consistent ground.
+  background-color: #333333;
   height: 100vh;
   min-height: 777px;
 
