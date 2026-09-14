@@ -10,7 +10,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    sourcemap: true
+    // 'hidden' still writes the map for local debugging but omits the
+    // //# sourceMappingURL comment, so the deploy does not advertise a 7MB
+    // download to every visitor's devtools.
+    sourcemap: 'hidden'
   },
   test: {
     globals: true,

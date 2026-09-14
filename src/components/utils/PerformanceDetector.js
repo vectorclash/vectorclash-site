@@ -69,7 +69,6 @@ export function detectPerformanceTier() {
     cachedTier = 'low';
   }
 
-  console.log(`[PerformanceDetector] Detected tier: ${cachedTier} (score: ${score})`);
   return cachedTier;
 }
 
