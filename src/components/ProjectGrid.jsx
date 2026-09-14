@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, memo } from "react";
 import { createRoot } from "react-dom/client";
 import gsap from "gsap/all";
 import ProjectsScene from "./three/r3f/ProjectsScene";
@@ -93,10 +93,26 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const [isProjectTransitioning, setIsProjectTransitioning] = useState(false);
   const [activeThumbnailID, setActiveThumbnailID] = useState(null);
   const [isProjectLoading, setIsProjectLoading] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const mountRef = useRef(null);
   const r3fRootRef = useRef(null);
   const projectLoadTimeoutRef = useRef(null);
+  const closeTimelineRef = useRef(null);
+  const openTimelineRef = useRef(null);
+  const returningToGridRef = useRef(false);
+
+  const killOpenTimeline = () => {
+    if (openTimelineRef.current) {
+      openTimelineRef.current.kill();
+      openTimelineRef.current = null;
+    }
+  };
+
+  // The parent dims the section while a project is open. It is told the project
+  // has closed as soon as the exit animation starts, so the backdrop cross-fades
+  // underneath the outgoing panel instead of after it.
+  const isProjectVisuallyOpen = isProjectActive && !isClosing;
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -132,12 +148,25 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   // Notify parent component when project active state changes
   useEffect(() => {
     if (onProjectActiveChange) {
-      onProjectActiveChange(isProjectActive);
+      onProjectActiveChange(isProjectVisuallyOpen);
     }
-  }, [isProjectActive, onProjectActiveChange]);
+  }, [isProjectVisuallyOpen, onProjectActiveChange]);
 
-  // Handle project activation and deactivation
   useEffect(() => {
+    return () => {
+      if (closeTimelineRef.current) {
+        closeTimelineRef.current.kill();
+        closeTimelineRef.current = null;
+      }
+      killOpenTimeline();
+    };
+  }, []);
+
+  // Handle project activation and deactivation. This runs as a layout effect so
+  // that the canvas is hidden in the same frame the grid is painted back in;
+  // as a passive effect the browser could paint the grid over a still-visible
+  // scene for a frame.
+  useLayoutEffect(() => {
     if (!mountRef.current) return;
 
     const projectContent = mountRef.current.querySelector(".project-content");
@@ -176,7 +205,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         gsap.set(threeContainerRef.current, { alpha: 0 });
       }
 
-      // Sequence: Show loader (500ms) → Hide loader → Animate in content
+      // Sequence: Show loader (500ms) → Hide loader → Animate in content.
+      // The whole entrance is one timeline held in a ref so that closing part
+      // way through can kill it outright. As separate delayed tweens it kept
+      // writing opacity and y on the same elements as the exit animation, and
+      // the two fought each other frame by frame.
       if (projectLoadTimeoutRef.current) {
         clearTimeout(projectLoadTimeoutRef.current);
       }
@@ -184,100 +217,76 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         // Hide loader
         setIsProjectLoading(false);
 
-        // Fade in project content container first
-        if (projectContent) {
-          gsap.to(projectContent, {
-            opacity: 1,
-            duration: 0.1,
-            ease: "power2.out"
-          });
-        }
-
-        // Animate header elements
         const header = mountRef.current?.querySelector(".project-header");
         const projectTitle = header?.querySelector("h2");
         const tools = header?.querySelector(".tools");
         const controls = header?.querySelector(".project-controls");
+        const description = projectContent?.querySelector(".project-description");
+        const galleryMain = projectContent?.querySelector(".gallery-main");
+        const thumbnails = projectContent?.querySelectorAll(".thumbnail");
 
+        killOpenTimeline();
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            openTimelineRef.current = null;
+          },
+        });
+        openTimelineRef.current = tl;
+
+        // Fade in project content container first
+        if (projectContent) {
+          tl.to(projectContent, { opacity: 1, duration: 0.1, ease: "power2.out" }, 0);
+        }
+
+        // Animate header elements
         if (projectTitle) {
-          gsap.to(projectTitle, {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            ease: "power2.out"
-          });
+          tl.to(projectTitle, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0);
         }
 
         if (tools) {
-          gsap.to(tools, {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            delay: 0.05,
-            ease: "power2.out"
-          });
+          tl.to(tools, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.05);
         }
 
         if (controls) {
-          gsap.to(controls, {
-            opacity: 0.8,
-            x: 0,
-            duration: 0.5,
-            delay: 0.1,
-            ease: "power2.out"
-          });
+          tl.to(controls, { opacity: 0.8, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
         }
 
-        if (projectContent) {
-          // Animate description
-          const description = projectContent.querySelector(".project-description");
-          if (description) {
-            gsap.set(description, { y: 30, opacity: 0 });
-            gsap.to(description, {
-              opacity: 1,
-              y: 0,
-              duration: 0.5,
-              delay: 0.1,
-              ease: "power2.out"
-            });
-          }
+        // Animate description
+        if (description) {
+          tl.fromTo(
+            description,
+            { y: 30, opacity: 0 },
+            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+            0.1
+          );
+        }
 
-          // Animate gallery main image
-          const galleryMain = projectContent.querySelector(".gallery-main");
-          if (galleryMain) {
-            gsap.set(galleryMain, { y: 30, opacity: 0 });
-            gsap.to(galleryMain, {
-              opacity: 1,
-              y: 0,
-              duration: 0.5,
-              delay: 0.15,
-              ease: "power2.out"
-            });
-          }
+        // Animate gallery main image
+        if (galleryMain) {
+          tl.fromTo(
+            galleryMain,
+            { y: 30, opacity: 0 },
+            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+            0.15
+          );
+        }
 
-          // Animate thumbnails with stagger - slide up from below
-          const thumbnails = projectContent.querySelectorAll(".thumbnail");
-          if (thumbnails.length > 0) {
-            gsap.set(thumbnails, { y: 30, opacity: 0 }); // Start 30px below
-            gsap.to(thumbnails, {
-              opacity: 1,
-              y: 0,
-              duration: 0.5,
-              delay: 0.2,
-              stagger: 0.04,
-              ease: "bounce.out"
-            });
-          }
+        // Animate thumbnails with stagger - slide up from below
+        if (thumbnails && thumbnails.length > 0) {
+          tl.fromTo(
+            thumbnails,
+            { y: 30, opacity: 0 },
+            { opacity: 1, y: 0, duration: 0.5, stagger: 0.04, ease: "bounce.out" },
+            0.2
+          );
         }
 
         // Fade in Three.js background
         if (threeContainerRef.current) {
-          gsap.to(threeContainerRef.current, {
-            alpha: 1,
-            duration: 0.6,
-            ease: "power2.out",
-          });
+          tl.to(threeContainerRef.current, { alpha: 1, duration: 0.6, ease: "power2.out" }, 0);
         }
+
         projectLoadTimeoutRef.current = null;
       }, 1000);
     } else if (!isProjectActive) {
@@ -285,6 +294,8 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         clearTimeout(projectLoadTimeoutRef.current);
         projectLoadTimeoutRef.current = null;
       }
+
+      killOpenTimeline();
 
       setCurrentTexture(null);
       setCurrentVideo(null);
@@ -295,6 +306,27 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       if (threeContainerRef.current) {
         gsap.killTweensOf(threeContainerRef.current);
         gsap.set(threeContainerRef.current, { alpha: 0 });
+      }
+
+      // Returning from a project: stagger the tiles back in rather than having
+      // the whole grid appear at once where the panel used to be.
+      if (returningToGridRef.current) {
+        returningToGridRef.current = false;
+        const tiles = mountRef.current.querySelectorAll("li");
+        if (tiles.length > 0) {
+          gsap.fromTo(
+            tiles,
+            { opacity: 0, y: 16 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.45,
+              ease: "power2.out",
+              stagger: { amount: 0.25 },
+              clearProps: "opacity,transform",
+            }
+          );
+        }
       }
     }
   }, [isProjectActive, activeProjectID]);
@@ -352,7 +384,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   };
 
   const onProjectPrevClick = () => {
-    if (isProjectTransitioning) return;
+    if (isProjectTransitioning || isClosing) return;
 
     setIsProjectTransitioning(true);
 
@@ -372,11 +404,83 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   };
 
   const onProjectCloseClick = () => {
-    setIsProjectActive(false);
+    if (isClosing) return;
+
+    if (projectLoadTimeoutRef.current) {
+      clearTimeout(projectLoadTimeoutRef.current);
+      projectLoadTimeoutRef.current = null;
+    }
+
+    killOpenTimeline();
+
+    setIsClosing(true);
+    setIsProjectLoading(false);
+    // A prev/next cross-fade may have been interrupted below; clear its lock so
+    // the controls are not left disabled when a project is next opened.
+    setIsProjectTransitioning(false);
+
+    const detail = mountRef.current;
+    const threeContainer = threeContainerRef.current;
+
+    const finish = () => {
+      closeTimelineRef.current = null;
+      returningToGridRef.current = true;
+      setIsClosing(false);
+      setIsProjectActive(false);
+    };
+
+    if (!detail) {
+      finish();
+      return;
+    }
+
+    const projectContent = detail.querySelector(".project-content");
+    const pieces = [
+      detail.querySelector(".project-header h2"),
+      detail.querySelector(".project-header .tools"),
+      detail.querySelector(".project-header .project-controls"),
+      detail.querySelector(".project-description"),
+      detail.querySelector(".gallery-main"),
+      ...detail.querySelectorAll(".thumbnail"),
+    ].filter(Boolean);
+
+    // Nothing else may be tweening these elements once the exit starts: the
+    // entrance timeline is already dead, but a project prev/next cross-fade can
+    // still be running on the content wrapper.
+    gsap.killTweensOf([...pieces, detail]);
+    if (projectContent) {
+      gsap.killTweensOf(projectContent);
+    }
+
+    const tl = gsap.timeline({ onComplete: finish });
+    closeTimelineRef.current = tl;
+
+    if (pieces.length > 0) {
+      tl.to(
+        pieces,
+        {
+          opacity: 0,
+          y: 12,
+          duration: 0.25,
+          ease: "power2.in",
+          stagger: { amount: 0.12, from: "end" },
+        },
+        0
+      );
+    }
+
+    tl.to(detail, { opacity: 0, duration: 0.3, ease: "power2.in" }, 0.15);
+
+    if (threeContainer) {
+      // The scene outlives the panel by a beat, so the dark backdrop is what is
+      // left behind rather than the grid arriving on top of a live canvas.
+      gsap.killTweensOf(threeContainer);
+      tl.to(threeContainer, { alpha: 0, duration: 0.45, ease: "power2.inOut" }, 0);
+    }
   };
 
   const onProjectNextClick = () => {
-    if (isProjectTransitioning) return;
+    if (isProjectTransitioning || isClosing) return;
 
     setIsProjectTransitioning(true);
 
