@@ -1,4 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
+import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
@@ -6,20 +7,32 @@ import tinycolor from 'tinycolor2';
 // Module-level variable to persist across component remounts
 let hasEverAnimated = false;
 
-export default function ProjectShape({ size = 300, textureURL, preloadedTextures, allImageURLs }) {
+// Loads the images of the open project only. Every image of every project used
+// to be fetched at page load so that this one lookup could never miss -- 43
+// full-size JPEGs downloaded and decoded to texture a single cube face. Scoped
+// to one project it is at most eight, and they are the eight the gallery
+// thumbnails can actually switch to, so switching within a project is still
+// instant and never re-suspends.
+export default function ProjectShape({ size = 300, textureURL, imageURLs }) {
   const groupRef = useRef();
   const meshRef = useRef();
   const previousTextureURL = useRef(null);
 
-  // Find the matching texture from preloaded textures
+  const loaded = useTexture(imageURLs, (result) => {
+    // The shape is viewed from the inside (BackSide), so the map is flipped
+    // horizontally to read the right way round.
+    const textures = Array.isArray(result) ? result : [result];
+    textures.forEach((t) => {
+      t.wrapS = THREE.RepeatWrapping;
+      t.repeat.x = -1;
+    });
+  });
+
   const texture = useMemo(() => {
-    if (!preloadedTextures || !allImageURLs || !textureURL) return null;
-
-    const textureIndex = allImageURLs.indexOf(textureURL);
-    if (textureIndex === -1) return null;
-
-    return Array.isArray(preloadedTextures) ? preloadedTextures[textureIndex] : preloadedTextures;
-  }, [textureURL, preloadedTextures, allImageURLs]);
+    const textures = Array.isArray(loaded) ? loaded : [loaded];
+    const index = imageURLs.indexOf(textureURL);
+    return index === -1 ? null : textures[index];
+  }, [textureURL, loaded, imageURLs]);
 
   const wireframeColors = useMemo(() => ({
     color1: tinycolor('#CCFF00').spin(Math.random() * 360).toHexString(),

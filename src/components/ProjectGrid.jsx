@@ -1,7 +1,9 @@
-import { useState, useEffect, useLayoutEffect, useRef, memo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, memo, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import gsap from "gsap/all";
-import ProjectsScene from "./three/r3f/ProjectsScene";
+// Shares the async three/r3f chunk with HeaderScene, so by the time a project
+// is opened this is almost always already resolved.
+const ProjectsScene = lazy(() => import("./three/r3f/ProjectsScene"));
 import GradientGenerator from "./utils/GradientGenerator";
 import HexagonLoader from "./HexagonLoader";
 import "./ProjectGrid.scss";
@@ -11,6 +13,12 @@ import left from "..//images/angle-left.svg";
 import right from "../images/angle-right.svg";
 import close from "../images/window-close.svg";
 import me from "../images/me.png";
+
+// Grid tiles render at roughly 390x220 and gallery thumbnails at 100-150px
+// wide, so both were being handed 1920x1080 sources -- around 2MB of decode
+// work for the seven tiles alone. The 800px derivatives sit next to each
+// original; the full-size file is still what the lightbox and the 3D shape use.
+const thumbURL = (url) => url.replace(/\.jpg$/, "_thumb.jpg");
 
 function GradientFiller() {
   const layerARef = useRef(null);
@@ -29,6 +37,8 @@ function GradientFiller() {
     let timeoutId;
 
     const transition = () => {
+      if (!layerARef.current || !layerBRef.current) return;
+
       const next = generateGradient();
       layerBRef.current.style.backgroundImage = next;
       gsap.to(layerBRef.current, {
@@ -36,6 +46,9 @@ function GradientFiller() {
         duration: 3.5,
         ease: 'power2.inOut',
         onComplete: () => {
+          // A project opening mid-fade unmounts the filler while this tween is
+          // still running, and the callback then reached for a detached node.
+          if (!layerARef.current || !layerBRef.current) return;
           layerARef.current.style.backgroundImage = next;
           gsap.set(layerBRef.current, { opacity: 0 });
           scheduleNext();
@@ -68,6 +81,7 @@ function GradientFiller() {
     return () => {
       clearTimeout(timeoutId);
       if (meRef.current) gsap.killTweensOf(meRef.current);
+      if (layerBRef.current) gsap.killTweensOf(layerBRef.current);
     };
   }, []);
 
@@ -85,6 +99,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const [activeProjectID, setActiveProjectID] = useState(null);
   const [currentTexture, setCurrentTexture] = useState(null);
   const [currentVideo, setCurrentVideo] = useState(null);
+  const [currentImageURLs, setCurrentImageURLs] = useState([]);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [previousImageIndex, setPreviousImageIndex] = useState(0);
@@ -121,29 +136,34 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     r3fRootRef.current = createRoot(threeContainerRef.current);
     renderThreeScene();
 
-    // Add click listener to deactivate thumbnails when clicking outside
-    const handleDocumentClick = (e) => {
-      if (activeThumbnailID !== null && mountRef.current) {
-        const clickedInsideGrid = mountRef.current.contains(e.target);
-        if (!clickedInsideGrid) {
-          setActiveThumbnailID(null);
-        }
-      }
-    };
-    document.addEventListener('click', handleDocumentClick);
-
     return () => {
       if (r3fRootRef.current) {
         r3fRootRef.current.unmount();
       }
-      document.removeEventListener('click', handleDocumentClick);
     };
   }, [threeContainerRef]);
+
+  // Disarm a tapped tile when the next tap lands outside the grid. This has to
+  // live in its own effect keyed on activeThumbnailID: bound once alongside the
+  // r3f root it captured the initial null and the guard could never pass, so on
+  // touch an armed tile stayed armed no matter where you tapped next.
+  useEffect(() => {
+    if (activeThumbnailID === null) return;
+
+    const handleDocumentClick = (e) => {
+      if (mountRef.current && !mountRef.current.contains(e.target)) {
+        setActiveThumbnailID(null);
+      }
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, [activeThumbnailID]);
 
   // Update Three.js scene when texture or video changes
   useEffect(() => {
     renderThreeScene();
-  }, [currentTexture, currentVideo]);
+  }, [currentTexture, currentVideo, currentImageURLs]);
 
   // Notify parent component when project active state changes
   useEffect(() => {
@@ -187,9 +207,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         newVideo = project.field_videos.map(v => v.url);
       }
 
-      const newTexture = project.field_images[0].url;
+      const newImageURLs = project.field_images.map((img) => img.url);
+      const newTexture = newImageURLs[0];
       const newColor = tinycolor("#CCFF00").spin(Math.random() * 360);
 
+      setCurrentImageURLs(newImageURLs);
       setCurrentTexture(newTexture);
       setCurrentVideo(newVideo);
       setActiveImageIndex(0);
@@ -299,6 +321,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
       setCurrentTexture(null);
       setCurrentVideo(null);
+      setCurrentImageURLs([]);
       setActiveImageIndex(0);
       setIsGalleryOpen(false);
       setIsProjectLoading(false);
@@ -320,9 +343,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             {
               opacity: 1,
               y: 0,
-              duration: 0.45,
+              duration: 0.35,
               ease: "power2.out",
-              stagger: { amount: 0.25 },
+              stagger: { amount: 0.18 },
               clearProps: "opacity,transform",
             }
           );
@@ -334,21 +357,15 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const renderThreeScene = () => {
     if (!r3fRootRef.current) return;
 
-    // Collect all image URLs from all projects for preloading
-    const allImageURLs = projects.reduce((urls, project) => {
-      if (project.field_images && project.field_images.length > 0) {
-        return [...urls, ...project.field_images.map(img => img.url)];
-      }
-      return urls;
-    }, []);
-
     r3fRootRef.current.render(
-      <ProjectsScene
-        key="projects-scene"
-        textureURL={currentTexture}
-        videoURLs={currentVideo}
-        allImageURLs={allImageURLs}
-      />
+      <Suspense fallback={null}>
+        <ProjectsScene
+          key="projects-scene"
+          textureURL={currentTexture}
+          videoURLs={currentVideo}
+          imageURLs={currentImageURLs}
+        />
+      </Suspense>
     );
   };
 
@@ -381,6 +398,17 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       setIsProjectActive(true);
       setActiveProjectID(index);
     }
+  };
+
+  // Enter and Space open a project outright. The two-tap arming that touch
+  // uses has no keyboard equivalent -- focus already does what the first tap is
+  // for -- so this deliberately bypasses it.
+  const onProjectKeyDown = (index, e) => {
+    if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
+    e.preventDefault();
+    setIsProjectActive(true);
+    setActiveProjectID(index);
+    setActiveThumbnailID(null);
   };
 
   const onProjectPrevClick = () => {
@@ -461,21 +489,22 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         {
           opacity: 0,
           y: 12,
-          duration: 0.25,
+          duration: 0.18,
           ease: "power2.in",
-          stagger: { amount: 0.12, from: "end" },
+          stagger: { amount: 0.07, from: "end" },
         },
         0
       );
     }
 
-    tl.to(detail, { opacity: 0, duration: 0.3, ease: "power2.in" }, 0.15);
+    tl.to(detail, { opacity: 0, duration: 0.2, ease: "power2.in" }, 0.06);
 
     if (threeContainer) {
-      // The scene outlives the panel by a beat, so the dark backdrop is what is
-      // left behind rather than the grid arriving on top of a live canvas.
+      // The scene still outlives the panel, but only just -- the whole exit is
+      // 0.30s now rather than 0.45s. The backdrop is what is left behind rather
+      // than the grid arriving on top of a live canvas.
       gsap.killTweensOf(threeContainer);
-      tl.to(threeContainer, { alpha: 0, duration: 0.45, ease: "power2.inOut" }, 0);
+      tl.to(threeContainer, { alpha: 0, duration: 0.3, ease: "power2.inOut" }, 0);
     }
   };
 
@@ -584,27 +613,33 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             </ul>
           </div>
           <div className="project-controls">
-            <div
+            <button
+              type="button"
               className="prev-button"
               onClick={onProjectPrevClick}
               title="Previous Project"
+              aria-label="Previous Project"
             >
-              <img src={left} alt="Previous Project" />
-            </div>
-            <div
+              <img src={left} alt="" />
+            </button>
+            <button
+              type="button"
               className="close-button"
               onClick={onProjectCloseClick}
               title="Close"
+              aria-label="Close Project"
             >
-              <img src={close} alt="Close Project" />
-            </div>
-            <div
+              <img src={close} alt="" />
+            </button>
+            <button
+              type="button"
               className="next-button"
               onClick={onProjectNextClick}
               title="Next Project"
+              aria-label="Next Project"
             >
-              <img src={right} alt="Next Project" />
-            </div>
+              <img src={right} alt="" />
+            </button>
           </div>
         </div>
 
@@ -645,7 +680,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
                   key={i}
                   onClick={() => onImageClick(i)}
                 >
-                  <img src={image.url} alt="" />
+                  <img src={thumbURL(image.url)} alt="" loading="lazy" />
                 </div>
               ))}
             </div>
@@ -734,14 +769,21 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         <li
           key={i}
           className={activeThumbnailID === i ? 'active' : ''}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open project: ${project.title[0].value}`}
           onMouseEnter={(e) => onProjectOver(i, e)}
+          // Keyboard focus recolours the tile the same way a pointer does,
+          // otherwise tabbing through the grid moves an invisible cursor.
+          onFocus={(e) => onProjectOver(i, e)}
           onClick={() => onProjectClick(i)}
+          onKeyDown={(e) => onProjectKeyDown(i, e)}
         >
           <h4>{project.title[0].value}</h4>
           <div
             className="background"
             style={{
-              backgroundImage: "url(" + project.field_images[0].url + ")",
+              backgroundImage: "url(" + thumbURL(project.field_images[0].url) + ")",
             }}
           ></div>
         </li>

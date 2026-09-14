@@ -1,10 +1,8 @@
 import { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
 import { EffectComposer, Noise } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
-import * as THREE from 'three';
 import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
@@ -12,37 +10,16 @@ import VideoShape from './VideoShape';
 import { shouldEnableAntialias, getGLPrecision, shouldEnableBloom, detectPerformanceTier } from '../../utils/PerformanceDetector';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
 
-function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }) {
+function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const projectGroupRef = useRef();
   const videoGroupRef = useRef();
   // Narrow selectors so a canvas resize doesn't re-render the whole scene.
   const camera = useThree((state) => state.camera);
   const gl = useThree((state) => state.gl);
-  const [loadComplete, setLoadComplete] = useState(false);
 
   // Get performance tier for conditional effects
   const performanceTier = detectPerformanceTier();
   const enablePostprocessing = performanceTier === 'high' || performanceTier === 'medium';
-
-  // Preload all textures
-  const preloadedTextures = useTexture(allImageURLs, (loadedTextures) => {
-    // Configure all textures
-    const texturesArray = Array.isArray(loadedTextures) ? loadedTextures : [loadedTextures];
-    texturesArray.forEach(texture => {
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.repeat.x = -1;
-    });
-
-    // Mark as loaded after a short delay
-    if (!loadComplete) {
-      setTimeout(() => {
-        setLoadComplete(true);
-        if (onLoadComplete) {
-          onLoadComplete();
-        }
-      }, 100);
-    }
-  });
 
   useEffect(() => {
     const scrollTarget = { offsetY: 0 };
@@ -99,7 +76,9 @@ function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }
 
       <group ref={projectGroupRef}>
         <Suspense fallback={null}>
-          {textureURL && <ProjectShape key="project-shape" size={300} textureURL={textureURL} preloadedTextures={preloadedTextures} allImageURLs={allImageURLs} />}
+          {textureURL && imageURLs.length > 0 && (
+            <ProjectShape key="project-shape" size={300} textureURL={textureURL} imageURLs={imageURLs} />
+          )}
         </Suspense>
       </group>
 
@@ -120,7 +99,7 @@ function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }
   );
 }
 
-export default function ProjectsScene({ textureURL, videoURLs, allImageURLs = [], onLoadComplete }) {
+export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] }) {
   // This canvas is mounted for the life of the page and merely faded to zero
   // opacity when no project is open, so on-screen alone is not enough to decide
   // whether it is worth drawing. A null textureURL is the existing signal that
@@ -160,8 +139,7 @@ export default function ProjectsScene({ textureURL, videoURLs, allImageURLs = []
         textureURL={textureURL}
         videoURLs={videoURLs}
         fogColor={fogColor}
-        allImageURLs={allImageURLs}
-        onLoadComplete={onLoadComplete}
+        imageURLs={imageURLs}
       />
     </Canvas>
   );
