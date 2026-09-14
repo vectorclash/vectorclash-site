@@ -1,45 +1,36 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import tinycolor from "tinycolor2";
 import { gsap, DrawSVGPlugin } from "gsap/all";
 import "./HexagonLoader.scss";
 
-class HexagonLoader extends React.Component {
-  constructor(props) {
-    super(props);
-    this.mount = React.createRef();
-  }
+gsap.registerPlugin(DrawSVGPlugin);
 
-  componentDidMount() {
-    gsap.registerPlugin(DrawSVGPlugin);
-    this.animateHexagon();
-  }
+const randomHex = (spin) => tinycolor("#CCFF00").spin(spin).toHexString();
 
-  animateHexagon() {
-    if (this.mount.current) {
-      let glow = this.mount.current.querySelectorAll(".hexagon-glow");
+function HexagonLoader() {
+  const mountRef = useRef(null);
+
+  useEffect(() => {
+    // The loop self-reschedules while the loader is on screen. The handle is
+    // kept so unmounting stops it immediately rather than letting one more
+    // pass fire against a detached node.
+    let scheduled = null;
+
+    const animateHexagon = () => {
+      if (!mountRef.current) return;
+
+      const glow = mountRef.current.querySelectorAll(".hexagon-glow");
       gsap.set(glow, {
-        background:
-          "linear-gradient( 42deg, " +
-          tinycolor("#CCFF00")
-            .spin(Math.random() * 360)
-            .toHexString() +
-          ", " +
-          tinycolor("#CCFF00")
-            .spin(Math.random() * 360)
-            .toHexString() +
-          ", " +
-          tinycolor("#CCFF00")
-            .spin(Math.random() * 360)
-            .toHexString() +
-          ")",
+        background: `linear-gradient( 42deg, ${randomHex(
+          Math.random() * 360
+        )}, ${randomHex(Math.random() * 360)}, ${randomHex(
+          Math.random() * 360
+        )})`,
       });
 
       gsap.fromTo(
         glow,
-        {
-          opacity: 0,
-          scale: 0.5,
-        },
+        { opacity: 0, scale: 0.5 },
         {
           duration: 1,
           opacity: 1,
@@ -50,89 +41,57 @@ class HexagonLoader extends React.Component {
         }
       );
 
-      let polygons = this.mount.current.querySelectorAll("polygon");
-      for (var i = 0; i < polygons.length; i++) {
-        let ranChance = Math.random();
-        if (ranChance > 0.7) {
-          gsap.fromTo(
-            polygons[i],
-            {
-              drawSVG: "0%",
-              strokeWidth: 0,
-            },
-            {
-              duration: 1,
-              drawSVG: "100%",
-              strokeWidth: 10,
-              stroke: tinycolor("#CCFF00")
-                .spin(i * 25)
-                .toHexString(),
-              ease: "quad.inOut",
-            }
-          );
+      const polygons = mountRef.current.querySelectorAll("polygon");
+      for (let i = 0; i < polygons.length; i++) {
+        // Roughly a third of the rings draw the other way round, so the
+        // hexagons do not all sweep in lockstep.
+        const drawsForward = Math.random() > 0.7;
 
-          gsap.fromTo(
-            polygons[i],
-            {
-              drawSVG: "100% 0%",
-            },
-            {
-              duration: 1,
-              drawSVG: "100% 100%",
-              strokeWidth: 0,
-              stroke: tinycolor("#CCFF00")
-                .spin(Math.random() * 360)
-                .toHexString(),
-              ease: "quad.inOut",
-              delay: 1,
-            }
-          );
-        } else {
-          gsap.fromTo(
-            polygons[i],
-            {
-              drawSVG: "100% 100%",
-              strokeWidth: 0,
-            },
-            {
-              duration: 1,
-              drawSVG: "100% 0%",
-              strokeWidth: 10,
-              stroke: tinycolor("#CCFF00")
-                .spin(i * 40)
-                .toHexString(),
-              ease: "quad.inOut",
-            }
-          );
+        gsap.fromTo(
+          polygons[i],
+          {
+            drawSVG: drawsForward ? "0%" : "100% 100%",
+            strokeWidth: 0,
+          },
+          {
+            duration: 1,
+            drawSVG: drawsForward ? "100%" : "100% 0%",
+            strokeWidth: 10,
+            stroke: randomHex(i * (drawsForward ? 25 : 40)),
+            ease: "quad.inOut",
+          }
+        );
 
-          gsap.fromTo(
-            polygons[i],
-            {
-              drawSVG: "100% 0%",
-            },
-            {
-              duration: 1,
-              drawSVG: "0% 0%",
-              strokeWidth: 0,
-              stroke: tinycolor("#CCFF00")
-                .spin(Math.random() * 360)
-                .toHexString(),
-              ease: "quad.inOut",
-              delay: 1,
-            }
-          );
-        }
+        gsap.fromTo(
+          polygons[i],
+          { drawSVG: "100% 0%" },
+          {
+            duration: 1,
+            drawSVG: drawsForward ? "100% 100%" : "0% 0%",
+            strokeWidth: 0,
+            stroke: randomHex(Math.random() * 360),
+            ease: "quad.inOut",
+            delay: 1,
+          }
+        );
       }
-      gsap.delayedCall(2, this.animateHexagon.bind(this));
-    }
-  }
 
-  render() {
-    return (
-      <div
-        className="hexagon-loader"
-        ref={this.mount}
-      >
+      scheduled = gsap.delayedCall(2, animateHexagon);
+    };
+
+    animateHexagon();
+
+    return () => {
+      if (scheduled) scheduled.kill();
+      if (mountRef.current) {
+        gsap.killTweensOf(mountRef.current.querySelectorAll("polygon"));
+        gsap.killTweensOf(mountRef.current.querySelectorAll(".hexagon-glow"));
+      }
+    };
+  }, []);
+
+  return (
+    <div className="hexagon-loader" ref={mountRef}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
           <polygon points="300,228 363,264 363,336 300,372 237,336 237,264 " />
           <polygon points="300,220.8 369.3,260.4 369.3,339.6 300,379.2 230.7,339.6 230.7,260.4 " />
@@ -151,10 +110,9 @@ class HexagonLoader extends React.Component {
           <polygon points="300,26.6 539.2,163.3 539.2,436.7 300,573.4 60.8,436.7 60.8,163.3 " />
           <polygon points="300,-0.8 563.2,149.6 563.2,450.4 300,600.8 36.8,450.4 36.8,149.6 " />
         </svg>
-        <div className="hexagon-glow"></div>
-      </div>
-    );
-  }
+      <div className="hexagon-glow"></div>
+    </div>
+  );
 }
 
 export default HexagonLoader;

@@ -1,83 +1,87 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import tinycolor from "tinycolor2";
 import { gsap, DrawSVGPlugin } from "gsap/all";
 
 import "./Logo.scss";
 
-class Logo extends React.Component {
-  constructor() {
-    super();
-    this.animateRef = this.animateLogo.bind(this);
-  }
+gsap.registerPlugin(DrawSVGPlugin);
 
-  componentDidMount() {
-    gsap.registerPlugin(DrawSVGPlugin);
-    gsap.delayedCall(1, this.animateRef);
-  }
+function Logo() {
+  const mountRef = useRef(null);
 
-  resetLogo() {
-    let lines = this.mount.querySelectorAll("line");
-    for (let i = 0; i < lines.length; i++) {
-      lines[i].style.stroke = "#FFFFFF";
-    }
-  }
+  useEffect(() => {
+    // animateLogo reschedules itself indefinitely. The handle is kept so the
+    // cleanup can cancel it -- as a class this had no componentWillUnmount, so
+    // a remount would have found the node gone and thrown on the next pass.
+    let scheduled = null;
 
-  animateLogo() {
-    let lines = this.mount.querySelectorAll("line");
-    let mainColor = tinycolor("#CCFF00").spin(Math.random() * 360);
-
-    for (let i = 0; i < lines.length; i++) {
-      let alphaChance = Math.random();
-
-      if (alphaChance > 0.4) {
-        let colorChance = Math.random();
-
-        if (colorChance > 0.8) {
-          lines[i].style.stroke = mainColor
-            .spin(-15 + Math.random() * 30)
-            .toHexString();
-        } else {
-          let ranGreyscale = 100 + Math.random() * 155;
-          lines[i].style.stroke = tinycolor({
-            r: ranGreyscale,
-            g: ranGreyscale,
-            b: ranGreyscale,
-          }).toHexString();
-        }
-
-        gsap.from(lines[i], {
-          duration: 0.5,
-          drawSVG: "0%",
-          delay: i * 0.02,
-          ease: "quad.inOut",
-        });
-      } else {
-        lines[i].style.stroke = "none";
+    const resetLogo = () => {
+      const lines = mountRef.current.querySelectorAll("line");
+      for (let i = 0; i < lines.length; i++) {
+        lines[i].style.stroke = "#FFFFFF";
       }
-    }
+    };
 
-    gsap.to(this.mount, {
-      duration: 0.2,
-      scale: 0.95,
-      yoyo: true,
-      repeat: 1,
-      ease: "quad.out",
-    });
+    const animateLogo = () => {
+      if (!mountRef.current) return;
 
-    gsap.delayedCall(4 + Math.random() * 11, () => {
-      this.resetLogo();
-      this.animateLogo();
-    });
-  }
+      const lines = mountRef.current.querySelectorAll("line");
+      const mainColor = tinycolor("#CCFF00").spin(Math.random() * 360);
 
-  render() {
-    return (
-      <div
-        className="logo"
-        ref={(mount) => {
-          this.mount = mount;
-        }}
-      >
+      for (let i = 0; i < lines.length; i++) {
+        const alphaChance = Math.random();
+
+        if (alphaChance > 0.4) {
+          const colorChance = Math.random();
+
+          if (colorChance > 0.8) {
+            lines[i].style.stroke = mainColor
+              .spin(-15 + Math.random() * 30)
+              .toHexString();
+          } else {
+            const ranGreyscale = 100 + Math.random() * 155;
+            lines[i].style.stroke = tinycolor({
+              r: ranGreyscale,
+              g: ranGreyscale,
+              b: ranGreyscale,
+            }).toHexString();
+          }
+
+          gsap.from(lines[i], {
+            duration: 0.5,
+            drawSVG: "0%",
+            delay: i * 0.02,
+            ease: "quad.inOut",
+          });
+        } else {
+          lines[i].style.stroke = "none";
+        }
+      }
+
+      gsap.to(mountRef.current, {
+        duration: 0.2,
+        scale: 0.95,
+        yoyo: true,
+        repeat: 1,
+        ease: "quad.out",
+      });
+
+      scheduled = gsap.delayedCall(4 + Math.random() * 11, () => {
+        resetLogo();
+        animateLogo();
+      });
+    };
+
+    scheduled = gsap.delayedCall(1, animateLogo);
+
+    return () => {
+      if (scheduled) scheduled.kill();
+      if (mountRef.current) gsap.killTweensOf(mountRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="logo" ref={mountRef}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 313.4 303.4">
           <line x1="306" y1="252" x2="306" y2="108" />
           <line x1="180" y1="36" x2="306" y2="108" />
@@ -124,9 +128,8 @@ class Logo extends React.Component {
             S260.6,34,180,34L180,34z"
           />
         </svg>
-      </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default Logo;

@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { gsap, SplitText, ScrollTrigger } from "gsap/all";
 import tinycolor from "tinycolor2";
 import "./About.scss";
@@ -6,173 +6,186 @@ import me from "../images/me.png";
 import HeaderIcon from "./HeaderIcon";
 import skillsData from "../data/skills.json";
 
-class About extends React.Component {
-  constructor(props) {
-    super(props);
-    this.mount = React.createRef();
-    this.state = {
-      skills: skillsData,
-    };
-    // One tetrad off a randomly spun chartreuse, picked once per load --
-    // the same palette trick the old gradient skill bars used. Here the
-    // whole four-colour ramp becomes the band that swipes across a pill on
-    // rollover, so the pills themselves stay as they were at rest.
+// The shimmer runs off a class rather than :hover so that rolling off
+// mid-sweep does not cut it short -- the class is only dropped once the
+// animation reports itself finished.
+function onSkillOver(e) {
+  const pill = e.currentTarget;
+  if (pill.classList.contains("is-shimmering")) return;
+
+  pill.classList.add("is-shimmering");
+  pill.addEventListener(
+    "animationend",
+    () => pill.classList.remove("is-shimmering"),
+    { once: true }
+  );
+}
+
+function About() {
+  const mount = useRef(null);
+
+  // One tetrad off a randomly spun chartreuse, picked once per load --
+  // the same palette trick the old gradient skill bars used. Here the
+  // whole four-colour ramp becomes the band that swipes across a pill on
+  // rollover, so the pills themselves stay as they were at rest.
+  const shimmerGradient = useMemo(() => {
     const palette = tinycolor("#CCFF00")
       .spin(Math.random() * 360)
       .tetrad()
       .map((color) => color.toHexString());
 
-    this.shimmerGradient =
+    return (
       "linear-gradient(105deg, transparent 28%, " +
-      palette
-        .map((color, i) => `${color} ${38 + i * 6}%`)
-        .join(", ") +
-      ", transparent 72%)";
-    this.meMounted = false;
-    this.onSkillOver = this.onSkillOver.bind(this);
-  }
-
-  // The shimmer runs off a class rather than :hover so that rolling off
-  // mid-sweep does not cut it short -- the class is only dropped once the
-  // animation reports itself finished.
-  onSkillOver(e) {
-    const pill = e.currentTarget;
-    if (pill.classList.contains("is-shimmering")) return;
-
-    pill.classList.add("is-shimmering");
-    pill.addEventListener(
-      "animationend",
-      () => pill.classList.remove("is-shimmering"),
-      { once: true }
+      palette.map((color, i) => `${color} ${38 + i * 6}%`).join(", ") +
+      ", transparent 72%)"
     );
-  }
+  }, []);
 
-  componentDidMount() {
-    this.skillContainer = this.mount.current.querySelector(".skills");
-    this.aboutContainer = this.mount.current.querySelector(".about-text");
+  useEffect(() => {
+    const skillContainer = mount.current.querySelector(".skills");
+    const aboutContainer = mount.current.querySelector(".about-text");
 
-    document.fonts.ready.then(() => {
-      this.skillsTl = this.buildSkillsTimeline();
-      this.aboutTl = this.buildAboutTimeline();
+    let skillsTl = null;
+    let aboutTl = null;
+    let aboutSplit = null;
+    const triggers = [];
+    let meMounted = false;
+    let cancelled = false;
 
-      ScrollTrigger.create({
-        trigger: this.skillContainer,
-        start: "top bottom",
-        end: "top top",
-        scrub: 1,
-        animation: this.skillsTl,
+    const buildSkillsTimeline = () => {
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo(skillContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
+
+      const groups = skillContainer.querySelectorAll(".skill-group");
+      groups.forEach((group, i) => {
+        const pos = 0.5 + i * 0.3;
+        tl.fromTo(
+          group.querySelector(".skill-category"),
+          { alpha: 0, y: 10 },
+          { duration: 0.5, alpha: 1, y: 0, ease: "quad.out" },
+          pos
+        );
+        tl.fromTo(
+          group.querySelectorAll("li"),
+          { alpha: 0, y: 8, scale: 0.9 },
+          {
+            duration: 0.5,
+            alpha: 1,
+            y: 0,
+            scale: 1,
+            ease: "back.out",
+            stagger: { amount: 0.25 },
+          },
+          pos + 0.15
+        );
       });
 
-      ScrollTrigger.create({
-        trigger: this.aboutContainer,
-        start: "top bottom",
-        end: "top top",
-        scrub: 1,
-        animation: this.aboutTl,
-        onEnter: () => {
-          if (!this.meMounted) {
-            this.meMounted = true;
-            this.animateMe();
-          }
-        },
-      });
-    });
-  }
+      return tl;
+    };
 
-  componentWillUnmount() {
-    if (this.skillsTl) this.skillsTl.kill();
-    if (this.aboutTl) this.aboutTl.kill();
-    gsap.killTweensOf(".geometric-me");
-  }
+    const buildAboutTimeline = () => {
+      const tl = gsap.timeline({ paused: true });
 
-  buildSkillsTimeline() {
-    const tl = gsap.timeline({ paused: true });
+      tl.fromTo(aboutContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
 
-    tl.fromTo(this.skillContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
-
-    const groups = this.skillContainer.querySelectorAll(".skill-group");
-    groups.forEach((group, i) => {
-      const pos = 0.5 + i * 0.3;
-      tl.fromTo(
-        group.querySelector(".skill-category"),
-        { alpha: 0, y: 10 },
-        { duration: 0.5, alpha: 1, y: 0, ease: "quad.out" },
-        pos
-      );
-      tl.fromTo(
-        group.querySelectorAll("li"),
-        { alpha: 0, y: 8, scale: 0.9 },
+      aboutSplit = new SplitText(aboutContainer.querySelectorAll("p"), { type: "lines" });
+      tl.from(
+        aboutSplit.lines,
         {
           duration: 0.5,
-          alpha: 1,
-          y: 0,
-          scale: 1,
+          y: 10,
+          alpha: 0,
           ease: "back.out",
-          stagger: { amount: 0.25 },
+          stagger: { amount: 1 },
         },
-        pos + 0.15
+        0.5
+      );
+
+      return tl;
+    };
+
+    const animateMe = () => {
+      if (cancelled || !mount.current) return;
+
+      gsap.to(".geometric-me", {
+        duration: 5 + Math.random() * 10,
+        x: Math.random() * aboutContainer.clientWidth,
+        y: Math.random() * aboutContainer.clientHeight,
+        alpha: Math.random() * 0.4,
+        ease: "quad.inOut",
+        onComplete: animateMe,
+      });
+    };
+
+    document.fonts.ready.then(() => {
+      if (cancelled) return;
+
+      skillsTl = buildSkillsTimeline();
+      aboutTl = buildAboutTimeline();
+
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: skillContainer,
+          start: "top bottom",
+          end: "top top",
+          scrub: 1,
+          animation: skillsTl,
+        })
+      );
+
+      triggers.push(
+        ScrollTrigger.create({
+          trigger: aboutContainer,
+          start: "top bottom",
+          end: "top top",
+          scrub: 1,
+          animation: aboutTl,
+          onEnter: () => {
+            if (!meMounted) {
+              meMounted = true;
+              animateMe();
+            }
+          },
+        })
       );
     });
 
-    return tl;
-  }
+    // The ScrollTriggers used to outlive the component -- only the timelines
+    // were killed, leaving two triggers pointing at detached elements.
+    return () => {
+      cancelled = true;
+      triggers.forEach((trigger) => trigger.kill());
+      if (skillsTl) skillsTl.kill();
+      if (aboutTl) aboutTl.kill();
+      if (aboutSplit) aboutSplit.revert();
+      gsap.killTweensOf(".geometric-me");
+    };
+  }, []);
 
-  buildAboutTimeline() {
-    const tl = gsap.timeline({ paused: true });
-
-    tl.fromTo(this.aboutContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
-
-    const aboutSplit = new SplitText(this.aboutContainer.querySelectorAll("p"), { type: "lines" });
-    tl.from(aboutSplit.lines, {
-      duration: 0.5,
-      y: 10,
-      alpha: 0,
-      ease: "back.out",
-      stagger: { amount: 1 },
-    }, 0.5);
-
-    return tl;
-  }
-
-  animateMe() {
-    let parent = this.mount.current.querySelector(".about-text");
-    gsap.to(".geometric-me", {
-      duration: 5 + Math.random() * 10,
-      x: Math.random() * parent.clientWidth,
-      y: Math.random() * parent.clientHeight,
-      alpha: Math.random() * 0.4,
-      ease: "quad.inOut",
-      onComplete: this.animateMe.bind(this),
-    });
-  }
-
-  render() {
-    return (
-      <section className="about container" ref={this.mount}>
-        <div className="column">
-          <article
-            className="skills"
-            style={{ "--pill-shimmer": this.shimmerGradient }}
-          >
-            <h3>Skills <HeaderIcon /></h3>
-            {this.state.skills.map((skillGroup) => (
-              <div
-                key={skillGroup.category}
-                className={
-                  "skill-group" + (skillGroup.secondary ? " skill-group-secondary" : "")
-                }
-              >
-                <h4 className="skill-category">{skillGroup.category}</h4>
-                <ul className="skill-list">
-                  {skillGroup.items.map((skill) => (
-                    <li key={skill} onMouseEnter={this.onSkillOver}>
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </article>
+  return (
+    <section className="about container" ref={mount}>
+      <div className="column">
+        <article className="skills" style={{ "--pill-shimmer": shimmerGradient }}>
+          <h3>Skills <HeaderIcon /></h3>
+          {skillsData.map((skillGroup) => (
+            <div
+              key={skillGroup.category}
+              className={
+                "skill-group" + (skillGroup.secondary ? " skill-group-secondary" : "")
+              }
+            >
+              <h4 className="skill-category">{skillGroup.category}</h4>
+              <ul className="skill-list">
+                {skillGroup.items.map((skill) => (
+                  <li key={skill} onMouseEnter={onSkillOver}>
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </article>
           <article className="about-text">
             <h3>What I do <HeaderIcon /></h3>
             <div>
@@ -189,10 +202,9 @@ class About extends React.Component {
             </div>
             <img src={me} className="geometric-me" alt="" aria-hidden="true" />
           </article>
-        </div>
-      </section>
-    );
-  }
+      </div>
+    </section>
+  );
 }
 
 export default About;
