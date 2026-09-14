@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
 import gsap from "gsap/all";
 // Shares the async three/r3f chunk with HeaderScene, so by the time a project
 // is opened this is almost always already resolved.
@@ -108,6 +109,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const [isProjectTransitioning, setIsProjectTransitioning] = useState(false);
   const [activeThumbnailID, setActiveThumbnailID] = useState(null);
   const [isProjectLoading, setIsProjectLoading] = useState(false);
+  // The loader outlives the loading state by the length of its fade: it is
+  // still on screen, on its way out, while the panel is expanding underneath.
+  const [isLoaderMounted, setIsLoaderMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
   const mountRef = useRef(null);
@@ -200,6 +204,17 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
       // Show loader
       setIsProjectLoading(true);
+      setIsLoaderMounted(true);
+
+      // The panel does not unmount between prev/next, so an expansion or a
+      // loader fade interrupted by the swap would otherwise leave its inline
+      // height and opacity behind on the elements this pass reuses.
+      gsap.set(mountRef.current, { clearProps: "height,overflow" });
+      const staleLoader = mountRef.current.querySelector(".project-loader");
+      if (staleLoader) {
+        gsap.killTweensOf(staleLoader);
+        gsap.set(staleLoader, { clearProps: "opacity,top" });
+      }
 
       // Set up project data
       let newVideo = null;
@@ -227,8 +242,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         gsap.set(threeContainerRef.current, { alpha: 0 });
       }
 
-      // Sequence: Show loader (500ms) → Hide loader → Animate in content.
-      // The whole entrance is one timeline held in a ref so that closing part
+      // Sequence: hold the loader over the collapsed panel → expand the panel
+      // to its measured height while the loader fades and the content rises
+      // in → bring the scene up once the height has settled. The whole
+      // entrance is one timeline held in a ref so that closing part
       // way through can kill it outright. As separate delayed tweens it kept
       // writing opacity and y on the same elements as the exit animation, and
       // the two fought each other frame by frame.
@@ -236,8 +253,44 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         clearTimeout(projectLoadTimeoutRef.current);
       }
       projectLoadTimeoutRef.current = setTimeout(() => {
-        // Hide loader
-        setIsProjectLoading(false);
+        const detail = mountRef.current;
+        if (!detail) return;
+
+        // Expanding the panel means tweening between two real heights, so both
+        // have to be measured in this one callback: the collapsed box as it
+        // stands, then the full layout. flushSync is what makes the second
+        // measurement possible -- a plain setState would not reach the DOM
+        // until after this callback returns. The fromTo below sets the
+        // collapsed height back on the same tick, so the expanded state is
+        // never painted.
+        const collapsedHeight = detail.offsetHeight;
+        const loader = detail.querySelector(".project-loader");
+
+        flushSync(() => setIsProjectLoading(false));
+
+        const expandedHeight = detail.offsetHeight;
+
+        // The scene canvas is height:100% of a section that is about to grow
+        // for the length of the expansion, so it was resizing every frame of
+        // it -- and with the postprocessing composer mounted, reallocating its
+        // render targets every frame too. That is what was arriving half drawn
+        // and snapping into place at the end. Pinning the container to the
+        // height the section is about to have takes the resize out of the
+        // animation entirely: one resize, here, while the canvas is still at
+        // zero alpha and nobody can see it. By the time the tween clears this
+        // the section has caught up, so the pin comes off against an identical
+        // height and costs a second resize of nothing.
+        const section = threeContainerRef.current?.parentElement;
+        if (section) {
+          gsap.set(threeContainerRef.current, { height: section.offsetHeight });
+        }
+
+        // The loader is centred on the panel, so left to itself it would ride
+        // downwards as the panel grows. Pinning it to where it already is
+        // keeps it still while it fades.
+        if (loader) {
+          gsap.set(loader, { top: collapsedHeight / 2 });
+        }
 
         const header = mountRef.current?.querySelector(".project-header");
         const projectTitle = header?.querySelector("h2");
@@ -249,12 +302,50 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
         killOpenTimeline();
 
+        // Named because the scene fade below is timed off the end of it.
+        const EXPAND_DURATION = 0.55;
+
         const tl = gsap.timeline({
           onComplete: () => {
             openTimelineRef.current = null;
           },
         });
         openTimelineRef.current = tl;
+
+        // Grow the panel to its measured height under the content fading in,
+        // clipped while it does so the content cannot spill out of the box on
+        // the way up. clearProps hands the height back to the layout at the
+        // end, so nothing is pinned to a stale measurement afterwards.
+        tl.fromTo(
+          detail,
+          { height: collapsedHeight, overflow: "hidden" },
+          {
+            height: expandedHeight,
+            duration: EXPAND_DURATION,
+            ease: "power2.inOut",
+            clearProps: "height,overflow",
+          },
+          0
+        );
+
+        // Unmounted the moment it finishes fading, not when the timeline does.
+        // Held to the end it was an invisible mix-blend-mode element sitting
+        // over the section for another second, still running its own loop, and
+        // still there when the scene faded up behind it -- a blend group inside
+        // an opacity:0 ancestor is exactly where a browser will paint the
+        // group's rectangle instead of nothing.
+        if (loader) {
+          tl.to(
+            loader,
+            {
+              opacity: 0,
+              duration: 0.35,
+              ease: "power2.in",
+              onComplete: () => setIsLoaderMounted(false),
+            },
+            0
+          );
+        }
 
         // Fade in project content container first
         if (projectContent) {
@@ -304,9 +395,24 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           );
         }
 
-        // Fade in Three.js background
+        // Fade in the Three.js background only once the panel has settled at
+        // full height. Even pinned, the canvas is showing a shape centred on
+        // the finished section, which during the expansion is still below the
+        // fold -- fading it in early would have it creep up out of the growing
+        // box rather than arrive in place.
         if (threeContainerRef.current) {
-          tl.to(threeContainerRef.current, { alpha: 1, duration: 0.6, ease: "power2.out" }, 0);
+          tl.to(
+            threeContainerRef.current,
+            {
+              alpha: 1,
+              duration: 0.6,
+              ease: "power2.out",
+              // The pin comes off here rather than with the height tween, so
+              // nothing touches the canvas size while it is fading up.
+              clearProps: "height",
+            },
+            EXPAND_DURATION + 0.1
+          );
         }
 
         projectLoadTimeoutRef.current = null;
@@ -325,10 +431,13 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       setActiveImageIndex(0);
       setIsGalleryOpen(false);
       setIsProjectLoading(false);
+      setIsLoaderMounted(false);
 
       if (threeContainerRef.current) {
         gsap.killTweensOf(threeContainerRef.current);
-        gsap.set(threeContainerRef.current, { alpha: 0 });
+        // clearProps as well as alpha: a close part way through the entrance
+        // kills the tween that would otherwise have taken the height pin off.
+        gsap.set(threeContainerRef.current, { alpha: 0, clearProps: "height" });
       }
 
       // Returning from a project: stagger the tiles back in rather than having
@@ -379,6 +488,19 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       color: textColor,
       borderColor: textColor,
     });
+  };
+
+  // Clicking a tile focuses it as well as hovering it, and the focus handler
+  // rolling a fresh palette there swapped the tile's colours for the frame
+  // before the project opened. Only keyboard focus needs the treatment --
+  // a pointer has already had the hover. Older engines without :focus-visible
+  // throw on the selector; there the previous behaviour is the safe answer.
+  const isKeyboardFocus = (el) => {
+    try {
+      return el.matches(":focus-visible");
+    } catch {
+      return true;
+    }
   };
 
   const onProjectClick = (index) => {
@@ -442,7 +564,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     killOpenTimeline();
 
     setIsClosing(true);
-    setIsProjectLoading(false);
+    // Closing part way through the load deliberately leaves the panel collapsed
+    // and the loader mounted: both fade out with the panel below, where
+    // dropping them here would snap the panel to full height under the exit.
+    // The !isProjectActive branch resets them once the panel is gone.
     // A prev/next cross-fade may have been interrupted below; clear its lock so
     // the controls are not left disabled when a project is next opened.
     setIsProjectTransitioning(false);
@@ -597,8 +722,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     const currentImage = project.field_images[safeImageIndex];
 
     return (
-      <div className="project-detail" ref={mountRef}>
-        {isProjectLoading && (
+      <div
+        className={`project-detail ${isProjectLoading ? "is-loading" : ""}`}
+        ref={mountRef}
+      >
+        {isLoaderMounted && (
           <div className="project-loader">
             <HexagonLoader />
           </div>
@@ -775,7 +903,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           onMouseEnter={(e) => onProjectOver(i, e)}
           // Keyboard focus recolours the tile the same way a pointer does,
           // otherwise tabbing through the grid moves an invisible cursor.
-          onFocus={(e) => onProjectOver(i, e)}
+          onFocus={(e) => {
+            if (isKeyboardFocus(e.currentTarget)) onProjectOver(i, e);
+          }}
           onClick={() => onProjectClick(i)}
           onKeyDown={(e) => onProjectKeyDown(i, e)}
         >

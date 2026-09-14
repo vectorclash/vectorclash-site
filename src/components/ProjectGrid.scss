@@ -136,17 +136,50 @@
     }
   }
 
+  // While the project loads the panel is collapsed to a box a little under a
+  // screen tall, so "centre of the panel" and "centre of what you can see" are
+  // the same point at every width. Centring on the full panel only looked right
+  // on desktop by coincidence: on mobile the description, gallery and
+  // thumbnails stack to two or three screens, which is what the old 200px
+  // offset was compensating for.
+  &.is-loading {
+    // The floor is not arbitrary: the loader's glow is a 150px circle under a
+    // 42px blur, so its real footprint is a little over 400px, and the panel
+    // is clipped while it expands. Anything shorter than this crops the glow
+    // to the panel's box.
+    min-height: clamp(440px, 60vh, 520px);
+
+    @media only screen and (max-width: 600px) {
+      min-height: clamp(440px, 60svh, 520px);
+    }
+
+    .project-header,
+    .project-content,
+    .project-pagination {
+      display: none;
+    }
+  }
+
   .project-loader {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
-
-    @media only screen and (max-width: 1024px) {
-      top: 200px;
-      transform: translateX(-50%);
-    }
+    // The glow's blur reaches roughly 126px past the 150px circle, which put it
+    // outside this element's own box -- and a box is exactly what a compositor
+    // has to rasterise into when the element is promoted to its own layer for
+    // the fade. The padding brings the whole footprint inside the bounds, so
+    // there is nothing left outside them to crop. It costs no layout: the
+    // element is absolutely positioned and centred on its own box.
+    padding: 132px;
+    // Which does leave a 414px box sitting over the header for the length of
+    // the fade, and the close button is underneath it.
+    pointer-events: none;
+    // Held for the element's whole life so the layer is not created and torn
+    // down around the tween, which is where a one-frame repaint at the old
+    // bounds comes from.
+    will-change: opacity;
   }
 
   .project-header {
@@ -338,6 +371,10 @@
         img {
           width: 100%;
           height: auto;
+          // Every project image is 1920x1080. Without the ratio reserved the
+          // slot is zero-height until the JPEG decodes and the panel jumps
+          // taller underneath the entrance animation.
+          aspect-ratio: 16 / 9;
           display: block;
         }
 
