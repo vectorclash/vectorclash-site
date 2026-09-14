@@ -10,6 +10,7 @@ import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
 import { shouldEnableAntialias, getGLPrecision, shouldEnableBloom, detectPerformanceTier } from '../../utils/PerformanceDetector';
+import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
 
 function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }) {
   const projectGroupRef = useRef();
@@ -120,6 +121,11 @@ function Scene({ textureURL, videoURLs, fogColor, allImageURLs, onLoadComplete }
 }
 
 export default function ProjectsScene({ textureURL, videoURLs, allImageURLs = [], onLoadComplete }) {
+  // This canvas is mounted for the life of the page and merely faded to zero
+  // opacity when no project is open, so on-screen alone is not enough to decide
+  // whether it is worth drawing. A null textureURL is the existing signal that
+  // nothing is being shown.
+  const [canvasRef, frameloop] = useRenderWhenVisible(Boolean(textureURL || videoURLs));
   const [fogColor, setFogColor] = useState('#fb0097');
   const [backgroundColor, setBackgroundColor] = useState('#fb0097');
   const enableAntialias = shouldEnableAntialias();
@@ -137,6 +143,9 @@ export default function ProjectsScene({ textureURL, videoURLs, allImageURLs = []
 
   return (
     <Canvas
+      ref={canvasRef}
+      frameloop={frameloop}
+      dpr={[1, 1.5]}
       camera={{ position: [0, 2, 160], fov: 50, near: 0.1, far: 20000 }}
       gl={{
         antialias: enableAntialias,
