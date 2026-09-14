@@ -14,7 +14,7 @@ export default function ThreeHeaderBackground() {
       colorAmount += Math.round(Math.random() * 3);
     }
 
-    return new GradientGenerator(colorAmount, colorRandom).colors;
+    return new GradientGenerator(colorAmount, colorRandom, true).colors;
   }, []);
 
   return (
