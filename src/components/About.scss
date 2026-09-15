@@ -125,27 +125,30 @@
           // a pointer would promise a link the pill does not have.
           cursor: default;
 
-          // The rollover shimmer: the full generated palette as a diagonal
-          // band, parked off the right edge and swept across once per hover.
-          // The pill itself is untouched at rest.
+          // Parked off the edge, so the band is invisible until something
+          // drives it across: the entry tween, or the rollover keyframes.
+          --pill-shimmer-pos: 150%;
+
+          // The shimmer: the full generated palette as a diagonal band, swept
+          // across once as the pill enters and again on each rollover. The
+          // pill itself is untouched at rest.
           &::after {
             content: "";
             position: absolute;
             inset: 0;
             border-radius: inherit;
             pointer-events: none;
-            opacity: 0;
+            opacity: 0.9;
             background-image: var(--pill-shimmer);
             // Without this the band tiles, and the tail of the repeat
             // slides into the pill's left edge as the sweep exits right.
             background-repeat: no-repeat;
             background-size: 250% 100%;
-            background-position: 150% 0;
+            background-position: var(--pill-shimmer-pos) 0;
             mix-blend-mode: screen;
           }
 
           &.is-shimmering::after {
-            opacity: 0.9;
             animation: skill-pill-shimmer 0.7s ease-out;
           }
         }
@@ -185,12 +188,5 @@
   }
   to {
     background-position: -50% 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .about .column article .skill-list li.is-shimmering::after {
-    animation: none;
-    opacity: 0;
   }
 }

@@ -9,9 +9,8 @@ import skillsData from "../data/skills.json";
 // The shimmer runs off a class rather than :hover so that rolling off
 // mid-sweep does not cut it short -- the class is only dropped once the
 // animation reports itself finished.
-function onSkillOver(e) {
-  const pill = e.currentTarget;
-  if (pill.classList.contains("is-shimmering")) return;
+function shimmer(pill) {
+  if (!pill || pill.classList.contains("is-shimmering")) return;
 
   pill.classList.add("is-shimmering");
   pill.addEventListener(
@@ -19,6 +18,18 @@ function onSkillOver(e) {
     () => pill.classList.remove("is-shimmering"),
     { once: true }
   );
+}
+
+// A mouse gets the sweep on rollover. A tap fires pointerenter too, but only
+// the first time -- the pill stays "entered" until the finger lands somewhere
+// else, so a second tap on the same pill would enter nothing. Touch is driven
+// off pointerdown instead, which fires on every tap.
+function onSkillPointerEnter(e) {
+  if (e.pointerType === "mouse") shimmer(e.currentTarget);
+}
+
+function onSkillPointerDown(e) {
+  if (e.pointerType !== "mouse") shimmer(e.currentTarget);
 }
 
 function About() {
@@ -68,12 +79,17 @@ function About() {
         );
         tl.fromTo(
           group.querySelectorAll("li"),
-          { alpha: 0, y: 8, scale: 0.9 },
+          // The sweep is a property of the same tween rather than a second
+          // animation chased after it, so a pill scales up, fades in and
+          // takes the shimmer as one movement -- and the palette introduces
+          // itself on touch devices that never get a rollover.
+          { alpha: 0, y: 8, scale: 0.9, "--pill-shimmer-pos": "150%" },
           {
             duration: 0.5,
             alpha: 1,
             y: 0,
             scale: 1,
+            "--pill-shimmer-pos": "-50%",
             ease: "back.out",
             stagger: { amount: 0.25 },
           },
@@ -178,7 +194,11 @@ function About() {
               <h4 className="skill-category">{skillGroup.category}</h4>
               <ul className="skill-list">
                 {skillGroup.items.map((skill) => (
-                  <li key={skill} onMouseEnter={onSkillOver}>
+                  <li
+                    key={skill}
+                    onPointerEnter={onSkillPointerEnter}
+                    onPointerDown={onSkillPointerDown}
+                  >
                     {skill}
                   </li>
                 ))}
