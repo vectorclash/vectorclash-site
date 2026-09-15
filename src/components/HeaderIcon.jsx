@@ -98,11 +98,7 @@ const subscribe = (lines) => {
   const subscriber = { lines, phase: (nextPhase += PHASE_STEP) };
   subscribers.add(subscriber);
 
-  const stillFrame = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (stillFrame) {
-    drawOne(subscriber, 2600);
-  } else if (frameId === null) {
+  if (frameId === null) {
     lastFrame = 0;
     frameId = requestAnimationFrame(tick);
   } else {

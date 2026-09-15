@@ -524,8 +524,8 @@ export default function HeaderScene({ colors, fallback, ready, onReady }) {
       // Cross-fades up over the CSS gradient underneath, which carries the same
       // palette, so the handover reads as the field gaining depth rather than
       // as the background being replaced.
-      // The transition itself lives in ThreeHeaderBackground.scss so that the
-      // reduced-motion rule covers this fade and the gradient's together.
+      // The transition itself lives in ThreeHeaderBackground.scss, alongside
+      // the gradient's, so the two are timed from one place.
       style={{ background: fallback || fallbackColor, opacity: ready ? 1 : 0 }}
       onCreated={({ gl }) => gl.setClearColor(fallbackColor)}
     >
