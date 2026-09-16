@@ -116,7 +116,7 @@ const SKIN_SETTINGS = {
     color: 0xc8d4e0,
     // As a share of the envelope, so the gap holds if the cluster is resized.
     offset: 0.15,
-    opacity: 0.45,
+    opacity: 0.05,
   },
 };
 
