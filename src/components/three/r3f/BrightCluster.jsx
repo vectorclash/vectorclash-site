@@ -14,6 +14,12 @@ import merkaba from '../../../assets/models/basic-merkaba.glb';
 // variant has the identical alpha channel and white RGB, which is exactly what
 // a tinted three.js sprite needs.
 import StarLarge from '../../../images/star-sprite-large-3d.png';
+import ClusterSkin, {
+  createSkinData,
+  MODEL_PLANE_OFFSET,
+  MODEL_TIP,
+} from './ClusterSkin';
+import { detectPerformanceTier } from '../../utils/PerformanceDetector';
 import {
   PATTERNS,
   buildSeeds,
@@ -47,6 +53,43 @@ const LOOSEN = 0.25;
 
 const HOLD = 12;
 const BLEND = 4.5;
+
+// How the cluster is drawn.
+//   'solids'  the twelve merkabas, as they have always been
+//   'wrap'    one continuous surface shrinkwrapped onto their union instead
+//   'cage'    the solids, plus that surface as a dense wireframe standing off
+//             them, so the wire reads as a shell around the crystal
+// Every mode wraps the same solid: the plane normals come off
+// basic-merkaba.glb, so switching does not move anything.
+const CLUSTER_SKIN = 'cage';
+
+// Vertices on the wrap, as three's polyhedron detail. Spacing falls off as
+// 1/detail, and spacing is what decides how sharp a tip comes out and how fine
+// the sawtooth along each edge is -- 48 is ~144k vertices at 0.54 degrees.
+//
+// The filled wrap and the cage want opposite things from it. Filled, more
+// detail is strictly better. As a wireframe every one of those triangles draws
+// its edges, so the same 48 is a solid wash of line; 12 is dense enough to read
+// as a woven shell, which is the point of the cage.
+const SKIN_SETTINGS = {
+  wrap: {
+    detail: { low: 16, medium: 32, high: 48 },
+    wireframe: false,
+    color: 0x333333,
+    offset: 0,
+    opacity: 1,
+  },
+  cage: {
+    detail: { low: 10, medium: 12, high: 12 },
+    wireframe: true,
+    // Light, because the solids underneath are 0x333333 and a dark wire on a
+    // dark crystal is just noise.
+    color: 0xc8d4e0,
+    // As a share of the envelope, so the gap holds if the cluster is resized.
+    offset: 0.15,
+    opacity: 0.45,
+  },
+};
 
 // The lit spheres that orbit the cluster and aim their spotlights at the
 // origin. They used to take waypoints from a +-75 box, which put 69% of them
@@ -154,6 +197,21 @@ function MerkabaCluster({ geometry }) {
     return buildSeeds(COUNT);
   }, []);
 
+  const skinData = useMemo(
+    () => (CLUSTER_SKIN === 'solids' ? null : createSkinData()),
+    []
+  );
+  const skin = useMemo(() => {
+    const cfg = SKIN_SETTINGS[CLUSTER_SKIN];
+    if (!cfg) return null;
+    const tier = detectPerformanceTier();
+    return {
+      ...cfg,
+      detail: cfg.detail[tier] || cfg.detail.medium,
+      offset: cfg.offset * ENVELOPE,
+    };
+  }, []);
+
   const shapeMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -184,6 +242,7 @@ function MerkabaCluster({ geometry }) {
       eWorld: new THREE.Euler(),
       euler: new THREE.Euler(),
       matrix: new THREE.Matrix4(),
+      skinM4: new THREE.Matrix4(),
       ctx: { yaw: 0 },
       gov: newGovernor(),
     }),
@@ -328,6 +387,35 @@ function MerkabaCluster({ geometry }) {
     for (let i = 0; i < COUNT; i++) {
       if (meshes.current[i]) meshes.current[i].position.copy(pts[i]);
     }
+
+    // The wrap reads the same centres, rotations and sizes the solids just
+    // took, so it cannot drift out of step with them.
+    if (skinData) {
+      const { skinM4 } = scratch;
+      let rMax = 0;
+
+      for (let i = 0; i < COUNT; i++) {
+        const mesh = meshes.current[i];
+        if (!mesh) continue;
+
+        const size = mesh.scale.x;
+        skinData.shape[i].set(
+          pts[i].x,
+          pts[i].y,
+          pts[i].z,
+          size * MODEL_PLANE_OFFSET
+        );
+        skinM4.makeRotationFromQuaternion(mesh.quaternion);
+        // A pure rotation's inverse is its transpose, so this is the world ->
+        // shape transform without an actual inversion.
+        skinData.invRot[i].setFromMatrix4(skinM4).transpose();
+
+        rMax = Math.max(rMax, pts[i].length() + size * MODEL_TIP);
+      }
+
+      skinData.uCount.value = COUNT;
+      skinData.uRMax.value = rMax + 1;
+    }
   });
 
   return (
@@ -341,10 +429,22 @@ function MerkabaCluster({ geometry }) {
           }}
           geometry={geometry}
           material={shapeMaterial}
+          visible={CLUSTER_SKIN !== 'wrap'}
           castShadow
           receiveShadow
         />
       ))}
+
+      {skinData && skin && (
+        <ClusterSkin
+          data={skinData}
+          detail={skin.detail}
+          wireframe={skin.wireframe}
+          color={skin.color}
+          offset={skin.offset}
+          opacity={skin.opacity}
+        />
+      )}
     </group>
   );
 }
