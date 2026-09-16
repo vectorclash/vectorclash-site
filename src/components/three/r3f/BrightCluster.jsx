@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useGLTF, useTexture } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/all';
@@ -60,6 +60,29 @@ const SIZE_RATIO = 1.4;
 // per transition in merkabaPatterns.js -- see the conductor-aid section there.
 // The state for the current transition lives on the conductor ref below.
 
+// Everything in here is framed against the shorter axis of the canvas. On a
+// desktop header the camera's 60-degree vertical field is the tighter of the
+// two, and every size below was chosen against it; on a phone held upright the
+// frame is roughly half as wide as it is tall, the horizontal field becomes the
+// tight one, and a composition sized for the vertical runs off both edges.
+//
+// Scaling by the aspect ratio below 1 is the whole correction: it keeps the
+// cluster at exactly the share of the tight axis it already holds on the desk,
+// so nothing is retuned and the desktop framing is untouched (aspect > 1 gives
+// a scale of 1). The floor stops a very tall, very narrow window from shrinking
+// it into a bauble -- past that point a little bleed off the sides reads better
+// than an object lost in the middle.
+//
+// It is applied to the whole group, not to the merkabas alone. Shrinking the
+// cluster while the lit spheres kept a fixed orbit would not have been a
+// smaller version of the same picture: the shell would have sat proportionally
+// much further out, the lights would have spent even more of their time off a
+// frame that is already narrow, and the cluster would have been lit from
+// further away than it was ever lit on a desktop. A uniform scale keeps every
+// ratio in the composition intact, and the two light constants that a scale
+// does not reach are corrected explicitly where they are declared.
+const MIN_FIT = 0.5;
+
 // How the cluster is drawn.
 //   'solids'  the twelve merkabas, as they have always been
 //   'wrap'    one continuous surface shrinkwrapped onto their union instead
@@ -102,11 +125,28 @@ const SKIN_SETTINGS = {
 // inside the cluster's own reach (~83 units once the shapes grew): most of the
 // time they were lighting it from within, and from outside it read flat.
 // Waypoints now sit on a shell clear of that reach.
+//
+// Both radii are local to the cluster group, so the shell is carried by the
+// MIN_FIT scale along with everything else: the lights hold their distance
+// *relative to the cluster* on every screen rather than their distance in
+// world units.
 const SPOT_RMIN = 95;
 const SPOT_RMAX = 150;
+
+// A spotlight's reach is not a distance in the scene graph, so a group scale
+// does not touch it: three computes irradiance as intensity / d^decay, windowed
+// by pow2(1 - (d/distance)^4), and d is the only term a scale moves. Left
+// alone on a phone the lights would close to half their radius at full power
+// and, at decay 1, put twice the light on the cluster -- past the bloom
+// threshold, so it would not read as brighter so much as hazed over. Scaling
+// both by the same factor holds the illumination exactly where it was: the
+// intensity cancels the shorter d, and the cutoff keeps the falloff curve the
+// same shape rather than flattening it.
+const SPOT_INTENSITY = 3500;
+const SPOT_DISTANCE = 500;
 // The camera frames +-75 units vertically at the cluster's depth but +-133
-// horizontally, so an unconstrained shell spends most of its time above or
-// below the frame. Flattening it towards the equator takes the shapes from
+// horizontally on a desktop header, so an unconstrained shell spends most of
+// its time above or below the frame. Flattening it towards the equator takes the shapes from
 // on-screen 32% of the time to 46%, which is as far as this goes while still
 // clearing the cluster.
 const SPOT_Y_LIMIT = 0.5;
@@ -469,7 +509,7 @@ function MerkabaCluster({ geometry }) {
   );
 }
 
-function BrightShape({ color, initialDirection, haloTexture }) {
+function BrightShape({ color, initialDirection, haloTexture, fit }) {
   const groupRef = useRef();
   const spotLightRef = useRef();
   // A little larger than before to hold their size at nearly twice the orbit
@@ -573,8 +613,8 @@ function BrightShape({ color, initialDirection, haloTexture }) {
       <spotLight
         ref={spotLightRef}
         color={color}
-        intensity={3500}
-        distance={500}
+        intensity={SPOT_INTENSITY * fit}
+        distance={SPOT_DISTANCE * fit}
         angle={Math.PI / 4}
         penumbra={0.3}
         decay={1}
@@ -590,6 +630,15 @@ export default function BrightCluster() {
   const groupRef = useRef();
   const { nodes } = useGLTF(merkaba);
   const haloTexture = useTexture(StarLarge);
+
+  // Select narrowly: the canvas pixel size is all this needs, and subscribing
+  // to the whole store would re-render on every camera tween. Pixels rather
+  // than r3f's `viewport`, because viewport is measured at the camera's
+  // distance from the origin and the header tweens the camera on scroll -- the
+  // ratio of the two is the same either way, but taking it from size means the
+  // fit cannot breathe as the page moves.
+  const size = useThree((state) => state.size);
+  const fit = Math.max(MIN_FIT, Math.min(1, size.width / size.height));
 
   useEffect(() => {
     haloTexture.colorSpace = THREE.SRGBColorSpace;
@@ -629,7 +678,9 @@ export default function BrightCluster() {
   }, []);
 
   return (
-    <group ref={groupRef}>
+    // The tween above drives rotation.y only, so the scale here is never
+    // fought over.
+    <group ref={groupRef} scale={fit}>
       <MerkabaCluster geometry={geometry} />
 
       {/* Bright shapes with lights */}
@@ -639,6 +690,7 @@ export default function BrightCluster() {
           color={color.toHexString()}
           initialDirection={brightShapeDirections[i]}
           haloTexture={haloTexture}
+          fit={fit}
         />
       ))}
     </group>
