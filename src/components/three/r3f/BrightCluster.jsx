@@ -66,14 +66,24 @@ const SIZE_RATIO = 1.4;
 // frame is roughly half as wide as it is tall, the horizontal field becomes the
 // tight one, and a composition sized for the vertical runs off both edges.
 //
-// Scaling by the aspect ratio below 1 is the whole correction: it keeps the
-// cluster at exactly the share of the tight axis it already holds on the desk,
-// so nothing is retuned and the desktop framing is untouched (aspect > 1 gives
-// a scale of 1). The floor stops a very tall, very narrow window from shrinking
-// it into a bauble -- past that point a little bleed off the sides reads better
-// than an object lost in the middle.
+// Scaling by the aspect ratio below 1 fits the cluster to that tight axis
+// exactly, holding the share of it the cluster already occupies on a desktop
+// (aspect > 1 gives a scale of 1, so desktop framing is untouched). That turned
+// out to be too literal a correction: on a phone it lands near 0.46 and the
+// cluster stops reading as a backing for the type at all -- it becomes a small
+// object floating in a lot of empty frame, which is a worse failure than the
+// overflow it fixes. Some bleed past the edges is what makes it a backing.
 //
-// It is applied to the whole group, not to the merkabas alone. Shrinking the
+// So only part of the correction is taken. At strength 1 the cluster fits the
+// narrow axis exactly; at 0 it is left at desktop size and overflows; 0.5 is
+// half way between, which measured against the two extremes is where it still
+// fills a phone without running off it. This also bounds the scale at
+// 1 - FIT_STRENGTH without needing a separate floor, and keeps the ordering
+// across devices intact -- an iPad in portrait is wider than a phone and so is
+// corrected less, where a flat floor would have given them both the same size.
+//
+// Whatever it works out to is applied to the whole group, not to the merkabas
+// alone. Shrinking the
 // cluster while the lit spheres kept a fixed orbit would not have been a
 // smaller version of the same picture: the shell would have sat proportionally
 // much further out, the lights would have spent even more of their time off a
@@ -81,7 +91,7 @@ const SIZE_RATIO = 1.4;
 // further away than it was ever lit on a desktop. A uniform scale keeps every
 // ratio in the composition intact, and the two light constants that a scale
 // does not reach are corrected explicitly where they are declared.
-const MIN_FIT = 0.5;
+const FIT_STRENGTH = 0.5;
 
 // How the cluster is drawn.
 //   'solids'  the twelve merkabas, as they have always been
@@ -127,7 +137,7 @@ const SKIN_SETTINGS = {
 // Waypoints now sit on a shell clear of that reach.
 //
 // Both radii are local to the cluster group, so the shell is carried by the
-// MIN_FIT scale along with everything else: the lights hold their distance
+// FIT_STRENGTH scale along with everything else: the lights hold their distance
 // *relative to the cluster* on every screen rather than their distance in
 // world units.
 const SPOT_RMIN = 95;
@@ -638,7 +648,7 @@ export default function BrightCluster() {
   // ratio of the two is the same either way, but taking it from size means the
   // fit cannot breathe as the page moves.
   const size = useThree((state) => state.size);
-  const fit = Math.max(MIN_FIT, Math.min(1, size.width / size.height));
+  const fit = 1 - FIT_STRENGTH * (1 - Math.min(1, size.width / size.height));
 
   useEffect(() => {
     haloTexture.colorSpace = THREE.SRGBColorSpace;
