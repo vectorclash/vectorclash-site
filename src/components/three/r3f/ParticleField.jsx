@@ -3,19 +3,20 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import CanvasRadialGradient from '../CanvasRadialGradient';
 
-// The gradient-masked sprite depends on nothing but the source image, and the
-// header only ever uses two (a large star and a small one) across its ~37
-// fields. Building it per field meant 37 canvas composites and 37 uploads of
-// what were, in pairs, byte-identical textures. Cached by image instead, so
-// each sprite is built once and every field that wants it shares the result.
-const spriteTextures = new WeakMap();
+// The gradient-masked sprite is built from CanvasRadialGradient, which rolls a
+// fresh hue every time it is constructed -- so the header's ~37 fields each
+// arrived in their own tint. Building one per field meant 37 canvas composites
+// and 37 uploads at startup; caching one per image cut that to two, and painted
+// every star in the header one of two colours.
+//
+// A small pool per image keeps both: the number of composites stays bounded,
+// and fields draw from the pool at random, so the header still comes up in a
+// spread of tints rather than a pair of them.
+const SPRITE_VARIANTS = 10;
 
-function spriteTexture(image) {
-  if (!image) return null;
+const spritePools = new WeakMap();
 
-  const cached = spriteTextures.get(image);
-  if (cached) return cached;
-
+function buildSprite(image) {
   const canvas = document.createElement('canvas');
   canvas.width = image.width;
   canvas.height = image.height;
@@ -28,8 +29,24 @@ function spriteTexture(image) {
 
   const tex = new THREE.Texture(canvas);
   tex.needsUpdate = true;
-  spriteTextures.set(image, tex);
   return tex;
+}
+
+function spriteTexture(image) {
+  if (!image) return null;
+
+  let pool = spritePools.get(image);
+  if (!pool) {
+    pool = new Array(SPRITE_VARIANTS).fill(null);
+    spritePools.set(image, pool);
+  }
+
+  // Filled lazily, so a header that only ever mounts a handful of fields only
+  // ever composites a handful of sprites.
+  const variant = Math.floor(Math.random() * SPRITE_VARIANTS);
+  if (!pool[variant]) pool[variant] = buildSprite(image);
+
+  return pool[variant];
 }
 
 export default function ParticleField({
@@ -42,7 +59,8 @@ export default function ParticleField({
   const pointsRef = useRef();
 
   // Shared, so this component does not dispose it -- the texture outlives any
-  // single field and is keyed to the image, which lives as long as the scene.
+  // single field and lives in a pool keyed to the image, which lasts as long
+  // as the scene.
   const texture = useMemo(() => spriteTexture(image), [image]);
 
   const positions = useMemo(() => {
