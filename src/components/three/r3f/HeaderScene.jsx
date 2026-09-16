@@ -55,8 +55,41 @@ const SOURCE_ORBITS = Array.from({ length: COLOR_SLOTS }, (_, i) => {
   };
 });
 
-function paletteSlots(colors) {
-  const stops = colors.map((c) => new THREE.Color(c.toHexString()));
+// Interpolating colour in sRGB drags any blend between two distant hues
+// through a washed-out middle -- the grey-brown band that shows up halfway
+// along a ramp between, say, a blue stop and an orange one. OKLab puts the
+// midpoint of two stops where the eye expects it, and being a linear space the
+// mesh field's weighted average of eight sources stays meaningful. Slots are
+// uploaded as OKLab and converted back once, at the end of the shader.
+function linearToOklab(r, g, b) {
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+
+  return [
+    0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s,
+  ];
+}
+
+function oklabToLinear([L, A, B]) {
+  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3;
+  const m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3;
+  const s = (L - 0.0894841775 * A - 1.2914855480 * B) ** 3;
+
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+  ];
+}
+
+function oklabSlots(colors) {
+  const stops = colors.map((c) => {
+    const col = new THREE.Color(c.toHexString());
+    return linearToOklab(col.r, col.g, col.b);
+  });
   const out = new Float32Array(COLOR_SLOTS * 3);
 
   for (let i = 0; i < COLOR_SLOTS; i++) {
@@ -64,34 +97,67 @@ function paletteSlots(colors) {
     const lo = stops[Math.floor(x)];
     const hi = stops[Math.min(Math.ceil(x), stops.length - 1)];
     const f = x - Math.floor(x);
-    out[i * 3] = lo.r + (hi.r - lo.r) * f;
-    out[i * 3 + 1] = lo.g + (hi.g - lo.g) * f;
-    out[i * 3 + 2] = lo.b + (hi.b - lo.b) * f;
+
+    for (let k = 0; k < 3; k++) {
+      out[i * 3 + k] = lo[k] + (hi[k] - lo[k]) * f;
+    }
   }
 
   return out;
 }
 
-// The mesh field has no single middle stop the way a linear ramp did, so the
-// fog, the fill light and the CSS fallback take a luminance-weighted average
-// of the palette instead of whichever colour happened to sit in the middle.
+// Neither field has a single middle stop the way a plain ramp did, so the fog,
+// the fill light and the CSS fallback take an average of the whole palette.
+// Averaged in linear light it came out brighter than the field it was standing
+// in for -- linear is how light adds up, not how a screenful of colour looks --
+// so the clear colour and the CSS gradient sat above the shader and the
+// handover between them read as a dimming. The average is taken in OKLab, the
+// same space the field mixes in, which puts it where the eye puts it. Stops
+// are still weighted towards the lighter end, so a palette with one bright
+// stop in it does not average away to its shadows.
 function paletteAverage(colors) {
-  const acc = new THREE.Color(0, 0, 0);
+  const acc = [0, 0, 0];
   let total = 0;
 
   colors.forEach((c) => {
     const col = new THREE.Color(c.toHexString());
-    const weight = 0.2126 * col.r + 0.7152 * col.g + 0.0722 * col.b + 0.05;
-    acc.r += col.r * weight;
-    acc.g += col.g * weight;
-    acc.b += col.b * weight;
+    const lab = linearToOklab(col.r, col.g, col.b);
+    const weight = lab[0] + 0.05;
+
+    for (let k = 0; k < 3; k++) acc[k] += lab[k] * weight;
     total += weight;
   });
 
-  acc.r /= total;
-  acc.g /= total;
-  acc.b /= total;
-  return `#${acc.getHexString()}`;
+  const [r, g, b] = oklabToLinear(acc.map((v) => v / total));
+
+  return `#${new THREE.Color()
+    .setRGB(Math.max(r, 0), Math.max(g, 0), Math.max(b, 0), THREE.LinearSRGBColorSpace)
+    .getHexString()}`;
+}
+
+// Fog should match the field -- blending the far edge of the scene into the
+// background is the whole job. The line work and the fill light should not:
+// now that a palette can key deep, its average is close to black, and the
+// wireframe and the swarm would go down with it. They take the field's hue,
+// lifted to a level they stay readable against it at.
+const ACCENT_FLOOR = 0.58;
+// Held in a band rather than only floored: lifting a saturated hue to a
+// readable lightness without capping it turns the wireframe neon.
+const ACCENT_CHROMA = [0.35, 0.7];
+
+function paletteAccent(hex) {
+  const col = new THREE.Color(hex);
+  const hsl = { h: 0, s: 0, l: 0 };
+
+  col.getHSL(hsl, THREE.SRGBColorSpace);
+  col.setHSL(
+    hsl.h,
+    Math.min(Math.max(hsl.s, ACCENT_CHROMA[0]), ACCENT_CHROMA[1]),
+    Math.max(hsl.l, ACCENT_FLOOR),
+    THREE.SRGBColorSpace
+  );
+
+  return `#${col.getHexString()}`;
 }
 
 // Which background field the header runs. Both map the palette to *screen*
@@ -105,11 +171,12 @@ function paletteAverage(colors) {
 //   'mesh'  eight colour sources on slow independent orbits, blended by
 //           inverse-square weight and shaded with a little noise. Much busier.
 //
-// Either way two palettes stay resident and uMix crossfades between them on the
-// same 5-15s / 5s-dissolve cadence.
+// Either way two palettes stay resident and uMix drives the same change: every
+// 5-15s each slot rotates around the hue wheel to its counterpart over 7s,
+// holding its chroma rather than fading through it. See blend().
 const HERO_FIELD = 'ramp';
 
-// Only the mesh field needs noise, so the ramp shader is built without it.
+// Only the mesh field needs noise; the ramp is built without it.
 const NOISE_HELPERS = (octaves) => `
         float hash21(vec2 p) {
           p = fract(p * vec2(123.34, 345.45));
@@ -149,12 +216,7 @@ const FIELD_BODIES = {
           float d = (p.x * cos(a) + p.y * sin(a)) / (abs(cos(a)) + abs(sin(a))) + 0.5;
           d += sin(uTime * 0.13) * 0.07;
 
-          vec3 col = palRamp(d);
-
-          // A grain of dither, which keeps the wide soft blend off banding.
-          col += (dither(gl_FragCoord.xy) - 0.5) * 0.02;
-
-          fragColor = vec4(col, 1.0);
+          fragColor = vec4(present(palRamp(d)), 1.0);
         }
 `,
 
@@ -176,12 +238,12 @@ const FIELD_BODIES = {
           vec3 col = acc / wsum;
 
           // Slow luminance turbulence, so the blend has some weather in it.
+          // Only OKLab's L is scaled: scaling the whole triple would drag the
+          // a/b axes towards zero and wash the hue out along with it.
           float n = fbm(p * 1.15 + vec2(uTime * 0.02, uTime * -0.015));
-          col *= 0.93 + 0.14 * n;
+          col.x *= 0.93 + 0.14 * n;
 
-          col += (dither(gl_FragCoord.xy) - 0.5) * 0.02;
-
-          fragColor = vec4(col, 1.0);
+          fragColor = vec4(present(col), 1.0);
         }
 `,
 };
@@ -201,9 +263,49 @@ ${isMesh ? `        // Solved on the CPU once a frame -- see SOURCE_ORBITS.
         // GLSL3 leaves the fragment output to the material, so declare it.
         layout(location = 0) out vec4 fragColor;
 
-        // Both palettes are resident; uMix dissolves between them slot for slot.
+        // How far apart the slots turn over. Enough that the palette changes
+        // stop by stop rather than all at once; not so much that the ramp is
+        // carrying two unrelated palettes at either end.
+        const float STAGGER = 0.30;
+
+        const float PI  = 3.14159265359;
+        const float TAU = 6.28318530718;
+${isMesh ? NOISE_HELPERS(octaves) : ''}
+        // Crossfading two saturated palettes takes every stop through a duller
+        // middle to get where it is going: straight-line interpolation between
+        // two hues passes near the neutral axis, so the hero visibly loses
+        // chroma halfway through a change however soft the blend is. Read in
+        // polar OKLab instead, a stop has a hue angle and a chroma, and it can
+        // rotate around the wheel to its new hue -- the short way -- holding
+        // its chroma the whole way. The colour turns rather than being
+        // replaced, and it never passes through grey to do it.
+        vec3 blend(vec3 a, vec3 b, float t) {
+          float ha = atan(a.z, a.y), hb = atan(b.z, b.y);
+          float ca = length(a.yz), cb = length(b.yz);
+
+          // A near-neutral stop has no hue of its own to travel from -- atan on
+          // a zero vector answers 0, the red axis -- so it would swing through
+          // reds on its way to a chromatic partner. It borrows the other end's
+          // hue instead, and simply gains or loses chroma where it stands.
+          if (ca < 0.004) ha = hb;
+          if (cb < 0.004) hb = ha;
+
+          // Wrapped into -PI..PI, so a stop always takes the shorter arc rather
+          // than unwinding the long way round the wheel.
+          float dh = mod(hb - ha + PI, TAU) - PI;
+          float h = ha + dh * t;
+          float c = mix(ca, cb, t);
+
+          return vec3(mix(a.x, b.x, t), c * cos(h), c * sin(h));
+        }
+
+        // Both palettes are resident; each slot rotates from one to the other,
+        // trailing the slot before it a little so the palette turns over stop
+        // by stop instead of in one piece.
         vec3 stop(int i) {
-          return mix(uColorsA[i], uColorsB[i], uMix);
+          float lead = float(i) / float(${COLOR_SLOTS} - 1) * STAGGER;
+          float t = clamp(uMix * (1.0 + STAGGER) - lead, 0.0, 1.0);
+          return blend(uColorsA[i], uColorsB[i], t);
         }
 
         // Walk the stops as a gradient, eased between each pair.
@@ -221,7 +323,39 @@ ${isMesh ? `        // Solved on the CPU once a frame -- see SOURCE_ORBITS.
         float dither(vec2 fragCoord) {
           return fract(52.9829189 * fract(dot(fragCoord, vec2(0.06711056, 0.00583715))));
         }
-${isMesh ? NOISE_HELPERS(octaves) : ''}${FIELD_BODIES[HERO_FIELD]}      `;
+
+        vec3 oklabToLinear(vec3 c) {
+          float l_ = c.x + 0.3963377774 * c.y + 0.2158037573 * c.z;
+          float m_ = c.x - 0.1055613458 * c.y - 0.0638541728 * c.z;
+          float s_ = c.x - 0.0894841775 * c.y - 1.2914855480 * c.z;
+          vec3 lms = vec3(l_ * l_ * l_, m_ * m_ * m_, s_ * s_ * s_);
+
+          return mat3(
+             4.0767416621, -1.2684380046, -0.0041960863,
+            -3.3077115913,  2.6097574011, -0.7034186147,
+             0.2309699292, -0.3413193965,  1.7076147010
+          ) * lms;
+        }
+
+        // The field mixes in OKLab; the screen wants sRGB. Three injects its
+        // linear-to-sRGB encode into built-in materials only, never into a
+        // ShaderMaterial, so a raw shader has to carry it. Without this every
+        // value written lands about a stop and a half dark -- which barely
+        // touches a fully saturated stop, whose channels sit at 0 or 1, but
+        // turns any midtone to mud. That is what the palette's shaded stops
+        // were hitting.
+        vec3 present(vec3 lab) {
+          vec3 lin = max(oklabToLinear(lab), 0.0);
+          vec3 srgb = mix(
+            lin * 12.92,
+            1.055 * pow(lin, vec3(1.0 / 2.4)) - 0.055,
+            step(vec3(0.0031308), lin)
+          );
+
+          // A grain of dither, which keeps the wide soft blend off banding.
+          return srgb + (dither(gl_FragCoord.xy) - 0.5) * 0.015;
+        }
+${FIELD_BODIES[HERO_FIELD]}      `;
 }
 
 // Animated gradient background. The field is chosen by HERO_FIELD above.
@@ -238,7 +372,7 @@ function AnimatedGradientBackground({ colors }) {
     // Seeded here rather than in an effect. Zeroed colour uniforms render pure
     // black, and any frame that lands between the first render and the effect
     // commit would show it -- which is the black flash on a cold load.
-    const slots = paletteSlots(colors);
+    const slots = oklabSlots(colors);
 
     const uniforms = {
       uTime: { value: 0 },
@@ -274,13 +408,13 @@ function AnimatedGradientBackground({ colors }) {
         const toB = material.uniforms.uMix.value < 0.5;
         const target = toB ? 'uColorsB' : 'uColorsA';
         material.uniforms[target].value.set(
-          paletteSlots(new GradientGenerator(randomColorCount(), false, true).colors)
+          oklabSlots(new GradientGenerator(randomColorCount(), false, true).colors)
         );
 
         gsap.to(material.uniforms.uMix, {
           value: toB ? 1 : 0,
-          duration: 5,
-          ease: 'power2.inOut',
+          duration: 7,
+          ease: 'sine.inOut',
         });
 
         scheduleNextChange();
@@ -354,6 +488,7 @@ function Scene({ colors }) {
   const [starLargeImage, setStarLargeImage] = useState(null);
 
   const fogColor = useMemo(() => paletteAverage(colors), [colors]);
+  const accentColor = useMemo(() => paletteAccent(fogColor), [fogColor]);
 
   // Get performance-based configuration
   const particleConfig = getParticleConfig();
@@ -447,10 +582,10 @@ function Scene({ colors }) {
       <AnimatedGradientBackground colors={colors} />
       <fog attach="fog" args={[fogColor, 1, 1000]} />
       <ambientLight intensity={0.2} color={0xfafafa} />
-      <directionalLight intensity={0.2} color={fogColor} />
+      <directionalLight intensity={0.2} color={accentColor} />
 
       <group ref={groupRef} scale={[0.00002, 0.00002, 0.00002]} visible={false}>
-        <WireframeBox size={2000} depth={12} color={fogColor} />
+        <WireframeBox size={2000} depth={12} color={accentColor} />
         <ShapeSwarm amount={5} containerSize={SWARM_LARGE} />
         <ShapeSwarm amount={5} containerSize={SWARM_SMALL} />
         <Suspense fallback={null}>
@@ -488,7 +623,12 @@ function Scene({ colors }) {
         <EffectComposer>
           <Bloom
             intensity={1}
-            luminanceThreshold={0.3}
+            // Raised with the output encode. The background used to be written
+            // unencoded and so sat well under the old threshold; now that it
+            // lands at the brightness it was picked at, 0.3 would bloom the
+            // whole field and haze the hero over. This keeps bloom on the
+            // stars and the cluster, which is what it was ever for.
+            luminanceThreshold={0.7}
             luminanceSmoothing={0.9}
             mipmapBlur
           />
