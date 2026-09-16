@@ -124,14 +124,33 @@ function gridCols(n) { return Math.max(2, Math.round(Math.sqrt(n * 1.3))); }
 // covariance is decomposed, and the two principal spreads are pulled towards
 // a major and a minor target. Only the in-plane components move; depth is
 // left alone, so nothing about the pattern's perspective changes. `hold`
-// scales how much of the correction a given pattern accepts, and the gains
-// are smoothed over ~0.6s so a fast pattern cannot make the cluster pump.
+// scales how much of the correction a given pattern accepts, and the
+// correction is smoothed over ~0.6s so a fast pattern cannot make the cluster
+// pump.
+//
+// What is smoothed is the correction *tensor*, not the two gains separately,
+// and that distinction is the whole reason this does not pop. The principal
+// axis of a near-isotropic cloud is ill-conditioned: when the two spreads are
+// within a percent of each other the axis can swing tens of degrees on one
+// frame's worth of movement. Smoothing two scalars named "major" and "minor"
+// carries their lagged values straight across such a swap -- the gain that
+// belonged to the horizontal axis is suddenly applied to the vertical one --
+// and since the two still differ while they are catching up, all twelve
+// shapes shear at once. Measured over twenty simulated minutes that was a
+// 60-degree axis swing in a single frame turning 0.35 units of real motion
+// into 3.10, which is exactly the cluster appearing to cut to a new
+// configuration with no transition.
+//
+// Folding both gains into one symmetric 2x2 before smoothing removes the
+// failure by construction: near isotropy the two targets converge, so the
+// tensor tends to a multiple of the identity and which way the axis points
+// stops mattering at all.
 var TARGET_MAJ = 0.64;
 var TARGET_MIN = 0.46;
 var GAIN_MIN = 0.72, GAIN_MAX = 2.1, GAIN_TAU = 0.6;
 
 function newGovernor() {
-  return { g1: 1, g2: 1, Saa: null, Sab: 0, Sbb: 0 };
+  return { Mxx: 1, Mxy: 0, Myy: 1 };
 }
 
 function governor(g, pts, n, R, hold, yaw, dt) {
@@ -157,19 +176,6 @@ function governor(g, pts, n, R, hold, yaw, dt) {
   }
   Saa /= n; Sab /= n; Sbb /= n;
 
-  // Smoothed before it is decomposed, not after. The eigenvectors of a
-  // near-isotropic cloud are ill-conditioned -- when the two spreads are
-  // close, the principal axis can swing far on a frame's worth of movement,
-  // and since the two gains differ the cluster takes a visible twitch. Damping
-  // the tensor keeps the axis it yields continuous. Measured over twelve
-  // simulated minutes this was the single worst position jump in the run.
-  if (g.Saa === null) { g.Saa = Saa; g.Sab = Sab; g.Sbb = Sbb; }
-  var kt = 1 - Math.exp(-Math.min(dt, 0.25) / GAIN_TAU);
-  g.Saa += (Saa - g.Saa) * kt;
-  g.Sab += (Sab - g.Sab) * kt;
-  g.Sbb += (Sbb - g.Sbb) * kt;
-  Saa = g.Saa; Sab = g.Sab; Sbb = g.Sbb;
-
   var tr = Saa + Sbb;
   var disc = Math.sqrt(Math.max(tr * tr * 0.25 - (Saa * Sbb - Sab * Sab), 0));
   var l1 = tr * 0.5 + disc, l2 = tr * 0.5 - disc;
@@ -184,25 +190,38 @@ function governor(g, pts, n, R, hold, yaw, dt) {
 
   var t1 = Math.min(Math.max(1 + (TARGET_MAJ * R / s1 - 1) * hold, GAIN_MIN), GAIN_MAX);
   var t2 = Math.min(Math.max(1 + (TARGET_MIN * R / s2 - 1) * hold, GAIN_MIN), GAIN_MAX);
+
+  // The frame's correction written out as a symmetric tensor in screen axes:
+  // t1 along the major axis u, t2 along the minor axis v = perp(u). u and -u
+  // give the same tensor, so the sign the eigenvector happens to come out
+  // with is irrelevant here, as it was in the principal-frame form.
+  var vx = -uy, vy = ux;
+  var Txx = t1 * ux * ux + t2 * vx * vx;
+  var Txy = t1 * ux * uy + t2 * vx * vy;
+  var Tyy = t1 * uy * uy + t2 * vy * vy;
+
   var k = 1 - Math.exp(-Math.min(dt, 0.25) / GAIN_TAU);
-  g.g1 += (t1 - g.g1) * k;
-  g.g2 += (t2 - g.g2) * k;
+  g.Mxx += (Txx - g.Mxx) * k;
+  g.Mxy += (Txy - g.Mxy) * k;
+  g.Myy += (Tyy - g.Myy) * k;
 
   for (i = 0; i < n; i++) {
     p = pts[i];
     a = p.x * ch + p.z * sh - ca;
     b = p.y - cb;
-    // Into the principal frame, scale, and back out.
-    var c1 = a * ux + b * uy, c2 = -a * uy + b * ux;
-    c1 *= g.g1; c2 *= g.g2;
-    var na = c1 * ux - c2 * uy, nb = c1 * uy + c2 * ux;
-    var da = na - a, db = nb - b;
+    var da = (g.Mxx * a + g.Mxy * b) - a;
+    var db = (g.Mxy * a + g.Myy * b) - b;
     p.x += da * ch;
     p.z += da * sh;
     p.y += db;
   }
 
-  return { major: s1 * g.g1 / R, minor: s2 * g.g2 / R };
+  // The spreads the cluster is actually left showing, as a share of R: the
+  // tensor's own action along each principal axis, not the targets it was
+  // asked for, since the smoothing means it is always some way behind them.
+  var m1 = g.Mxx * ux * ux + 2 * g.Mxy * ux * uy + g.Myy * uy * uy;
+  var m2 = g.Mxx * vx * vx + 2 * g.Mxy * vx * vy + g.Myy * vy * vy;
+  return { major: s1 * m1 / R, minor: s2 * m2 / R };
 }
 
 // ---------------------------------------------------------------- patterns
