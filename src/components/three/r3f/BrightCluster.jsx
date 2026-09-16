@@ -22,6 +22,13 @@ import ClusterSkin, {
 import { detectPerformanceTier } from '../../utils/PerformanceDetector';
 import {
   PATTERNS,
+  pickPattern,
+  patternTime,
+  newMood,
+  stepMood,
+  drawHold,
+  drawBlend,
+  drawLoosen,
   buildSeeds,
   thomasReset,
   thomasStep,
@@ -47,12 +54,11 @@ const ENVELOPE = 24;
 // which is the whole point of running it this dense.
 const SIZE_RATIO = 1.4;
 
-// A solid morphing into another solid reads as a shrug, so the envelope opens
-// through the middle of a dissolve and closes again on the far side.
-const LOOSEN = 0.25;
-
-const HOLD = 12;
-const BLEND = 4.5;
+// Nothing about the conductor's timing is a constant any more. How long a
+// pattern is held, how long the dissolve into it takes, how far the envelope
+// opens through that dissolve, and which pattern is chosen at all are drawn
+// per transition in merkabaPatterns.js -- see the conductor-aid section there.
+// The state for the current transition lives on the conductor ref below.
 
 // How the cluster is drawn.
 //   'solids'  the twelve merkabas, as they have always been
@@ -257,8 +263,15 @@ function MerkabaCluster({ geometry }) {
     to: 0,
     k: 1,
     blending: false,
-    holdLeft: HOLD,
+    holdLeft: drawHold(0),
     clock: 0,
+    // The weather. Drifts once per change; see stepMood.
+    mood: newMood(),
+    // Duration of the dissolve currently running, and how far the envelope
+    // opens through it. Both are drawn when it starts, so they are constant
+    // for its length and k stays linear in time.
+    blend: 1,
+    loosen: 0,
   });
 
   const orient = (i, t, seed, R, pattern, pos, ctx, q, camLocal) => {
@@ -311,7 +324,7 @@ function MerkabaCluster({ geometry }) {
     thomasStep(delta);
 
     if (c.blending) {
-      c.k += delta / BLEND;
+      c.k += delta / c.blend;
       if (c.k >= 1) {
         c.k = 1;
         c.blending = false;
@@ -320,24 +333,31 @@ function MerkabaCluster({ geometry }) {
     } else {
       c.holdLeft -= delta;
       if (c.holdLeft <= 0) {
-        let next;
-        do {
-          next = Math.floor(Math.random() * PATTERNS.length);
-        } while (next === c.from && PATTERNS.length > 1);
+        // The mood moves first, then picks against where it landed: the walk
+        // is what gives the cluster runs of calm and runs of agitation rather
+        // than an even sprinkle of both. Everything else about the transition
+        // is drawn fresh, so no two are alike even between the same pair.
+        c.mood = stepMood(c.mood);
+        const next = pickPattern(c.from, c.mood);
         c.to = next;
         c.k = 0;
         c.blending = true;
-        // The punchy ones are punctuation, not a resting state.
-        c.holdLeft = HOLD * (PATTERNS[next].punchy ? 0.55 : 1);
+        c.blend = drawBlend(next);
+        c.loosen = drawLoosen(c.blend);
+        c.holdLeft = drawHold(next);
       }
     }
 
     const ke = smooth(c.k);
-    const t = c.clock;
     const A = PATTERNS[c.from];
     const B = PATTERNS[c.to];
+    // Each pattern reads the cluster's clock through its own `rate`. Constant
+    // per pattern, so a pattern's phase is still continuous in c.clock and a
+    // dissolve still samples both sides at the same instant of real time.
+    const tA = patternTime(A, c.clock);
+    const tB = patternTime(B, c.clock);
     const R = c.blending
-      ? ENVELOPE * (1 + LOOSEN * Math.sin(Math.PI * ke))
+      ? ENVELOPE * (1 + c.loosen * Math.sin(Math.PI * ke))
       : ENVELOPE;
 
     // Planar patterns cancel the group's spin so their plane stays square to
@@ -358,14 +378,14 @@ function MerkabaCluster({ geometry }) {
       const mesh = meshes.current[i];
       if (!mesh) continue;
 
-      A.pos(i, COUNT, t, seed, R, pA, ctx);
-      const sa = A.scl(i, COUNT, t, seed);
-      orient(i, t, seed, R, A, pA, ctx, qA, camLocal);
+      A.pos(i, COUNT, tA, seed, R, pA, ctx);
+      const sa = A.scl(i, COUNT, tA, seed);
+      orient(i, tA, seed, R, A, pA, ctx, qA, camLocal);
 
       if (c.blending) {
-        B.pos(i, COUNT, t, seed, R, pB, ctx);
-        const sb = B.scl(i, COUNT, t, seed);
-        orient(i, t, seed, R, B, pB, ctx, qB, camLocal);
+        B.pos(i, COUNT, tB, seed, R, pB, ctx);
+        const sb = B.scl(i, COUNT, tB, seed);
+        orient(i, tB, seed, R, B, pB, ctx, qB, camLocal);
         pts[i].lerpVectors(pA, pB, ke);
         mesh.scale.setScalar(
           ((sa + (sb - sa) * ke) * ENVELOPE * SIZE_RATIO) / GEO_R

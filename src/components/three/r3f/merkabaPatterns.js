@@ -16,6 +16,25 @@ import * as THREE from 'three';
  *   scl(i, n, t, s)               -> scale multiplier
  *   face                          -> 'center' | 'align' | 'tangent' | 'camera' | 'spin'
  *   hold                          -> 0 (leave alone) .. 1 (footprint fully locked)
+ *   calm                          -> 0 (most agitated) .. 1 (stillest)
+ *   rate                          -> time multiplier, default 1
+ *
+ * `calm` is the conductor's weighting, not anything the pattern reads: it sets
+ * both how often a pattern is picked and how long it is held once it is. The
+ * cluster sits behind the header type for the whole time someone is reading
+ * it, so the resting states have to be what it is usually doing and the big
+ * gestures have to be punctuation. Weighting selection alone was not enough --
+ * a rare pattern held as long as a common one still puts the cluster in an
+ * agitated state a third of the time -- so the two knobs pull together and the
+ * share of time skews much harder than the pick rate alone does.
+ *
+ * `rate` scales the pattern's own clock. The frantic ones were written at
+ * speeds that read fine in isolation in the motion lab and too fast behind
+ * type; slowing them here rather than editing their coefficients keeps each
+ * pattern's internal relationships (phase offsets, stagger, the ratio between
+ * a sweep and its return) exactly as they were tuned. Phase stays continuous
+ * because the multiplier is constant per pattern: a pattern's clock runs at
+ * its own rate whether or not it is the one on screen.
  *
  * ctx.yaw is the cluster group's current Y rotation. Planar patterns cancel it
  * so their plane stays square to the camera instead of turning edge-on.
@@ -228,6 +247,7 @@ function governor(g, pts, n, R, hold, yaw, dt) {
 var PATTERNS = [
   {
     id: 'drift', name: 'Drift Field', kind: 'chaotic', face: 'center', hold: 0.5,
+    calm: 1,
     desc: 'Today’s behaviour, rewritten as layered sines: every shape wanders its own slow box on its own clock. The resting state the other fourteen leave from and return to.',
     pos: function (i, n, t, s, R, o) {
       o.set(
@@ -246,6 +266,7 @@ var PATTERNS = [
   },
   {
     id: 'breath', name: 'Breath', kind: 'organic', face: 'center', hold: 0.35,
+    calm: 0.95,
     desc: 'Every shape rides its own radial out from the centre and back in unison. Floored at 62% of the envelope and paid back in scale, so the cluster reads as inhaling without deflating behind the type.',
     pos: function (i, n, t, s, R, o) {
       var e = 0.5 + 0.5 * Math.sin(t * 0.45);
@@ -260,6 +281,7 @@ var PATTERNS = [
   },
   {
     id: 'pulse', name: 'Pulse Wave', kind: 'organic', face: 'center', hold: 0.3,
+    calm: 0.6, rate: 0.8,
     desc: 'The same radial motion with each shape a beat behind the last, so expansion travels through the cluster as a wave. The stagger is what keeps the envelope full — something is always at the outside.',
     pos: function (i, n, t, s, R, o) {
       var e = 0.5 + 0.5 * Math.sin(t * 0.8 - (i / n) * TAU);
@@ -271,6 +293,7 @@ var PATTERNS = [
   },
   {
     id: 'halo', name: 'Halo Ring', kind: 'geometric', face: 'align', hold: 0.3,
+    calm: 0.9,
     desc: 'All shapes on one circle, evenly spaced, in a plane built square to the camera and precessing only far enough to show its thickness — never far enough to present an edge.',
     planar: true,
     pos: function (i, n, t, s, R, o, ctx) {
@@ -285,6 +308,7 @@ var PATTERNS = [
   },
   {
     id: 'helix', name: 'Double Helix', kind: 'geometric', face: 'tangent', hold: 0.4,
+    calm: 0.55, rate: 0.85,
     desc: 'Two strands counter-phased by half a turn, on a wide radius and a short rise so the braid fills the frame rather than drawing a tall thin column. The axis leans as it turns.',
     pos: function (i, n, t, s, R, o) {
       var strand = i % 2;
@@ -298,6 +322,7 @@ var PATTERNS = [
   },
   {
     id: 'lattice', name: 'Sphere Lattice', kind: 'geometric', face: 'center', hold: 0.15,
+    calm: 1,
     desc: 'A golden-spiral shell at fixed radius, tumbling on two axes. The most ordered state in the set, and the steadiest footprint — equal spacing, equal scale, every face turned inward.',
     pos: function (i, n, t, s, R, o) {
       o.copy(s.dir).multiplyScalar(R * 0.9);
@@ -308,6 +333,7 @@ var PATTERNS = [
   },
   {
     id: 'crystal', name: 'Crystal Lock', kind: 'geometric', face: 'align', hold: 0.15,
+    calm: 1,
     desc: 'Shapes snap to the twelve vertices of an icosahedron and hold, breathing a few percent. Shared rotation turns the whole cluster into one faceted solid revolving in place.',
     pos: function (i, n, t, s, R, o) {
       o.copy(ICO[i % 12]).multiplyScalar(R * 0.88 * (1 + 0.05 * Math.sin(t * 0.7 + i)));
@@ -318,6 +344,7 @@ var PATTERNS = [
   },
   {
     id: 'lissa', name: 'Lissajous', kind: 'geometric', face: 'tangent', hold: 0.55,
+    calm: 0.5, rate: 0.85,
     desc: 'Each shape traverses its own Lissajous figure on small integer ratios, so paths repeatedly fall into phase, align for a beat, and separate again.',
     pos: function (i, n, t, s, R, o) {
       var A = 1 + (i % 3), B = 2 + ((i + 1) % 3), C = 1 + ((i + 2) % 4);
@@ -331,6 +358,7 @@ var PATTERNS = [
   },
   {
     id: 'orbit', name: 'Orbit Swarm', kind: 'chaotic', face: 'tangent', hold: 0.6,
+    calm: 0.5,
     desc: 'Every shape on a private circular orbit with its own radius, rate and inclination. Ordered up close, incoherent as a whole — an orrery with no shared plane.',
     pos: function (i, n, t, s, R, o) {
       var th = t * (0.28 + s.r * 0.4) + s.a;
@@ -341,6 +369,7 @@ var PATTERNS = [
   },
   {
     id: 'vortex', name: 'Vortex', kind: 'organic', face: 'tangent', hold: 0.35,
+    calm: 0.2, rate: 0.7,
     desc: 'Angular rate climbs as shapes fall towards the waist, so they wind tight through the middle and unwind at the poles. Tornado motion with no wrap-around seam.',
     pos: function (i, n, t, s, R, o) {
       var y = R * 0.9 * Math.sin(t * 0.26 + (i / n) * TAU);
@@ -354,6 +383,7 @@ var PATTERNS = [
   },
   {
     id: 'thomas', name: 'Strange Attractor', kind: 'chaotic', face: 'tangent', hold: 0.8,
+    calm: 0.35,
     desc: 'Shapes are dropped into Thomas’ cyclically symmetric flow and simply advect. Deterministic, never repeating, bounded by construction — and the one pattern that leans hardest on the governor, since the flow decides its own spread.',
     stateful: true,
     pos: function (i, n, t, s, R, o) {
@@ -367,8 +397,11 @@ var PATTERNS = [
   },
   {
     id: 'burst', name: 'Collapse & Burst', kind: 'chaotic', face: 'spin', hold: 0.5,
+    // The most agitated thing the cluster does, and so the rarest and the
+    // shortest-held. This is what `punchy` used to say as a boolean; as a
+    // weight it also makes the pattern scarce, not just brief.
+    calm: 0.12, rate: 0.8,
     desc: 'A cubed ease draws the cluster in and throws it wide again. The collapse stops at 55% of the envelope and the shapes swell as they gather, so the implosion reads as a clench rather than a disappearance.',
-    punchy: true,
     pos: function (i, n, t, s, R, o) {
       var e = 0.5 + 0.5 * Math.sin(t * 0.5 + s.a * 0.1);
       var k = e * e * e;
@@ -385,6 +418,7 @@ var PATTERNS = [
   },
   {
     id: 'mirror', name: 'Mirror Pairs', kind: 'geometric', face: 'align', hold: 0.55,
+    calm: 0.7,
     desc: 'Shapes couple up and hold exact point symmetry across the origin, each pair orbiting its own plane at its own rate while the gap between partners breathes.',
     pos: function (i, n, t, s, R, o) {
       var pair = Math.floor(i / 2), sign = (i % 2) ? -1 : 1;
@@ -397,6 +431,7 @@ var PATTERNS = [
   },
   {
     id: 'grid', name: 'Grid Wave', kind: 'geometric', face: 'camera', hold: 0.25,
+    calm: 0.35, rate: 0.75,
     desc: 'The cluster flattens into a camera-facing grid and a sine sweeps across it in depth. The column count tracks the shape count so the grid stays roughly square, and it cancels the group’s spin so it never turns edge-on.',
     planar: true,
     pos: function (i, n, t, s, R, o, ctx) {
@@ -416,6 +451,7 @@ var PATTERNS = [
   },
   {
     id: 'comet', name: 'Comet Trail', kind: 'organic', face: 'tangent', hold: 0.7,
+    calm: 0.4, rate: 0.85,
     desc: 'One curve through the cluster volume, every shape reading it a fixed interval behind the one in front. Braided laterally off each shape’s own offset, so the single file still covers width instead of drawing a wire.',
     pos: function (i, n, t, s, R, o) {
       var u = t * 0.6 - i * 0.13;
@@ -436,8 +472,183 @@ var PATTERNS = [
 ];
 
 
+// ------------------------------------------------------------ conductor aid
+// The cluster sits behind the header type for as long as someone is reading
+// it, so what it is doing has to be mostly still -- but a hero that is evenly,
+// predictably still is just as dead as one that never stops. What this section
+// buys is a rhythm with runs in it: long stretches of calm, occasional
+// stretches of agitation, and no two visits to the same pattern lasting the
+// same length of time.
+//
+// Three things are randomised, and they are deliberately different kinds of
+// random:
+//
+//   mood     a slow, mean-reverting walk. This is the one that makes runs
+//            possible at all.
+//   hold     how long a pattern is kept, drawn log-uniformly from a band that
+//            widens with the pattern's calm.
+//   blend    how long the dissolve into it takes, short into an agitated
+//            pattern and long into a still one.
+
+function patternCalm(p) {
+  return p.calm === undefined ? 0.5 : p.calm;
+}
+
+// A pattern's agitation, which is the axis `mood` is measured on.
+function patternEnergy(p) {
+  return 1 - patternCalm(p);
+}
+
+// The pattern's own clock, in seconds, given the cluster's.
+function patternTime(p, t) {
+  return p.rate === undefined ? t : t * p.rate;
+}
+
+// ------------------------------------------------------------------- mood
+// Selection used to be memoryless: each change drew from a fixed distribution
+// weighted towards the calm patterns. That gives a correct calm-to-agitated
+// *ratio* and no runs whatsoever -- a still pattern was followed by a frantic
+// one exactly as often as by another still one, so the cluster read as evenly
+// mixed rather than as having moods. Stretches need the choice to remember
+// where it has been.
+//
+// `mood` is that memory: a scalar on the same 0..1 agitation axis as
+// patternEnergy, stepped once per pattern change as a mean-reverting random
+// walk. Selection then favours patterns sitting near it. Because the walk
+// moves a little each change and is pulled back a little each change, it
+// lingers: a few agitated picks in a row, then a long settle.
+//
+// MOOD_REST is where it is pulled back to, and it does most of the work of
+// keeping the cluster calm -- it is the old CALM_BIAS in a different coat.
+// MOOD_PULL sets how fast it reverts and MOOD_STEP how hard each change
+// kicks it; together they set how long a run lasts.
+var MOOD_REST = 0.24;
+var MOOD_PULL = 0.16;
+var MOOD_STEP = 0.15;
+
+// How choosy selection is about matching the mood, and the constant that
+// actually decides whether runs exist. The walk on its own is not enough:
+// with a wide window an agitated mood still picks calm patterns most of the
+// time, which washes the run straight out. Measured as the lift in
+// P(agitated | previous agitated) over the base rate, at otherwise identical
+// walk settings:
+//
+//   width 0.26   lift 1.35   agitated runs p95 2-3
+//   width 0.22   lift 1.61   agitated runs p95 3
+//   width 0.18   lift 1.93   agitated runs p95 4
+//   width 0.16   lift 2.16   agitated runs p95 4, long tail to 13
+//   width 0.14   lift 2.43   agitated runs p95 5
+//
+// 0.16 is as narrow as this goes before the cost shows up at the other end:
+// the window starts gating patterns out rather than merely weighting them,
+// a calm stretch begins circling the same three still patterns, and the
+// returns-to-the-pattern-before-last rate climbs past one change in eight.
+var MOOD_WIDTH = 0.16;
+
+function newMood() {
+  return MOOD_REST;
+}
+
+// Box-Muller. A gaussian step rather than a uniform one because the tails are
+// the point: most changes nudge the mood, and once in a while one throws it.
+function gauss() {
+  var u = 1 - Math.random();
+  var v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function stepMood(mood) {
+  var next = mood + (MOOD_REST - mood) * MOOD_PULL + gauss() * MOOD_STEP;
+  return Math.min(Math.max(next, 0), 1);
+}
+
+// --------------------------------------------------------------- selection
+// Picks the next pattern given the current mood, never repeating the one
+// running. Weight falls off as a gaussian in the distance between a pattern's
+// energy and the mood, so every pattern stays reachable from every mood --
+// there is no hard gate, just a pull.
+function pickPattern(exclude, mood) {
+  var i, w = [], total = 0;
+  var m = mood === undefined ? MOOD_REST : mood;
+
+  for (i = 0; i < PATTERNS.length; i++) {
+    if (i === exclude) { w[i] = 0; continue; }
+    var d = (patternEnergy(PATTERNS[i]) - m) / MOOD_WIDTH;
+    w[i] = Math.exp(-0.5 * d * d);
+    total += w[i];
+  }
+  if (total <= 0) return exclude;
+
+  var r = Math.random() * total;
+  for (i = 0; i < PATTERNS.length; i++) {
+    r -= w[i];
+    if (r <= 0) return i;
+  }
+  return PATTERNS.length - 1;
+}
+
+// ------------------------------------------------------------------ timing
+// Seconds a pattern is held, as a band rather than a number. Both ends scale
+// with calm, so a still pattern can run for half a minute and an agitated one
+// can be over in two seconds. The band is wide -- the top of each is four to
+// five times the bottom -- because a fixed duration per pattern is what made
+// the old conductor feel metronomic even once the balance was right.
+var HOLD_LO_BASE = 1.2, HOLD_LO_SPAN = 7;
+var HOLD_HI_BASE = 6, HOLD_HI_SPAN = 28;
+
+// Drawn log-uniformly, not uniformly. On a uniform draw the mean sits in the
+// middle of the band and most holds cluster there, which is the metronome
+// again with extra steps; log-uniform puts the mass at the short end and lets
+// the long holds be genuinely occasional, so a pattern that has just settled
+// in might be gone in three seconds or might still be there in thirty.
+function drawHold(index) {
+  var c = patternCalm(PATTERNS[index]);
+  var lo = HOLD_LO_BASE + HOLD_LO_SPAN * c;
+  var hi = HOLD_HI_BASE + HOLD_HI_SPAN * c;
+  return lo * Math.pow(hi / lo, Math.random());
+}
+
+// Seconds the dissolve into a pattern takes, off the arriving pattern's calm.
+// A fixed 4.5s crossfade was the reason a one-second stab was unreachable no
+// matter what the hold did: the transition was always longer than the thing it
+// was transitioning to. Snapping into the agitated patterns and easing into
+// the still ones also reads the way the motion itself does -- a burst arrives,
+// a resting state is subsided into.
+var BLEND_MIN = 0.9, BLEND_MAX = 5;
+// +-18%, so even two dissolves between the same pair are not the same length.
+var BLEND_JITTER = 0.18;
+
+function drawBlend(index) {
+  var c = patternCalm(PATTERNS[index]);
+  var base = BLEND_MIN + (BLEND_MAX - BLEND_MIN) * c;
+  return base * (1 + (Math.random() * 2 - 1) * BLEND_JITTER);
+}
+
+// How far the envelope opens through the middle of a dissolve, as a share.
+// Scaled by how long that dissolve is: the bloom exists to stop one solid
+// morphing into another from reading as a shrug, and over five seconds it is
+// a breath, but the same 0.25 crammed into a 1.1s cut into Collapse & Burst
+// is a bounce -- the cluster would visibly inflate and deflate inside a
+// second, which is a different and worse artefact than the one it fixes.
+var LOOSEN_MAX = 0.25;
+
+function drawLoosen(blend) {
+  return LOOSEN_MAX * Math.min(1, blend / BLEND_MAX);
+}
+
+
 export {
   PATTERNS,
+  pickPattern,
+  patternTime,
+  patternCalm,
+  patternEnergy,
+  newMood,
+  stepMood,
+  drawHold,
+  drawBlend,
+  drawLoosen,
+  BLEND_MAX,
   buildSeeds,
   thomasReset,
   thomasStep,
