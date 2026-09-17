@@ -12,7 +12,7 @@ import StarLarge from '../../../images/star-sprite-large.png';
 import StarSmall from '../../../images/star-sprite-small.png';
 import {
   getParticleConfig,
-  shouldEnableBloom,
+  getBloomResolutionScale,
   shouldEnableAntialias,
   detectPerformanceTier,
 } from '../../utils/PerformanceDetector';
@@ -492,7 +492,7 @@ function Scene({ colors }) {
 
   // Get performance-based configuration
   const particleConfig = getParticleConfig();
-  const enableBloom = shouldEnableBloom();
+  const bloomResolutionScale = getBloomResolutionScale();
 
   // Roll each field's star size once. Randomizing inline in the JSX would hand
   // every field a new size on any re-render, visibly resizing stars mid-scroll.
@@ -619,21 +619,20 @@ function Scene({ colors }) {
           ))}
       </group>
 
-      {enableBloom && (
-        <EffectComposer>
-          <Bloom
-            intensity={1}
-            // Raised with the output encode. The background used to be written
-            // unencoded and so sat well under the old threshold; now that it
-            // lands at the brightness it was picked at, 0.3 would bloom the
-            // whole field and haze the hero over. This keeps bloom on the
-            // stars and the cluster, which is what it was ever for.
-            luminanceThreshold={0.7}
-            luminanceSmoothing={0.9}
-            mipmapBlur
-          />
-        </EffectComposer>
-      )}
+      <EffectComposer>
+        <Bloom
+          intensity={1}
+          // Raised with the output encode. The background used to be written
+          // unencoded and so sat well under the old threshold; now that it
+          // lands at the brightness it was picked at, 0.3 would bloom the
+          // whole field and haze the hero over. This keeps bloom on the
+          // stars and the cluster, which is what it was ever for.
+          luminanceThreshold={0.7}
+          luminanceSmoothing={0.9}
+          mipmapBlur
+          resolutionScale={bloomResolutionScale}
+        />
+      </EffectComposer>
     </>
   );
 }

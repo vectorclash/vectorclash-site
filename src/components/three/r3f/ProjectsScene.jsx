@@ -7,7 +7,7 @@ import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
-import { shouldEnableAntialias, getGLPrecision, shouldEnableBloom, detectPerformanceTier } from '../../utils/PerformanceDetector';
+import { shouldEnableAntialias, getGLPrecision, detectPerformanceTier } from '../../utils/PerformanceDetector';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
 
 function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {

@@ -105,8 +105,26 @@ export function getParticleConfig(tier = detectPerformanceTier()) {
   }
 }
 
-export function shouldEnableBloom(tier = detectPerformanceTier()) {
-  return tier === 'high' || tier === 'medium';
+// Bloom used to be cut below the medium tier, which in practice meant it was
+// cut on every phone: Safari masks gl.RENDERER, so an iPhone scores as an
+// unknown GPU and then takes the blanket mobile penalty on top, landing on
+// 'low' however fast it actually is. The hero reads as a different animation
+// with the pass off -- the stars and the cluster are lit for it -- so what was
+// meant as a safety valve was really shipping two designs.
+//
+// It is also not the expensive thing here. mipmapBlur bloom is a fixed
+// downsample chain plus one composite, a handful of fullscreen passes at
+// steadily smaller sizes, and none of it scales with how much is in the scene;
+// the canvas is already capped at dpr 1.5, which bounds all of it. The scene's
+// real cost is the particle fields and the cluster's per-frame skin work, and
+// those are tiered elsewhere.
+//
+// So the pass is on everywhere and the tier decides what it costs instead:
+// below high, the chain is built from a half-size buffer. Against a blur that
+// is on its way to being blurred anyway, that is most of the saving for none of
+// the look.
+export function getBloomResolutionScale(tier = detectPerformanceTier()) {
+  return tier === 'high' ? 1 : 0.5;
 }
 
 export function shouldEnableAntialias(tier = detectPerformanceTier()) {
