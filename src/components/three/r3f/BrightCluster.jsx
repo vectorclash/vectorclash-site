@@ -244,7 +244,7 @@ function randomDirection() {
   return v.lengthSq() < 1e-6 ? v.set(0, 1, 0) : v.normalize();
 }
 
-function MerkabaCluster({ geometry }) {
+function MerkabaCluster({ geometry, fit }) {
   const groupRef = useRef();
   const meshes = useRef([]);
 
@@ -257,6 +257,13 @@ function MerkabaCluster({ geometry }) {
     () => (CLUSTER_SKIN === 'solids' ? null : createSkinData()),
     []
   );
+  // Quantized before it reaches the skin, because ClusterSkin rebuilds its
+  // material -- and so recompiles its shader -- whenever opacity changes, and
+  // fit moves with every canvas resize. A phone's address bar collapsing mid
+  // scroll is a resize. Steps of 0.05 are finer than the eye reads on a wire
+  // this faint and coarse enough that ordinary reflow does not cross one.
+  const fitStep = Math.round(fit * 20) / 20;
+
   const skin = useMemo(() => {
     const cfg = SKIN_SETTINGS[CLUSTER_SKIN];
     if (!cfg) return null;
@@ -265,8 +272,16 @@ function MerkabaCluster({ geometry }) {
       ...cfg,
       detail: cfg.detail[tier] || cfg.detail.medium,
       offset: cfg.offset * ENVELOPE,
+      // Opacity that low is a trace, and a trace only survives at desktop size.
+      // The fit above shrinks the whole cluster on a narrow frame, and shrinking
+      // a wireframe pulls its lines together and drops each one further under a
+      // pixel, so the same 0.05 that reads as an edge on a desktop disappears on
+      // a phone. Dividing by the fit gives it back exactly what the scale took:
+      // 1 on a desktop, and twice the opacity at the phone end of the range,
+      // with tablets in between rather than on one side of a breakpoint.
+      opacity: cfg.opacity / fitStep,
     };
-  }, []);
+  }, [fitStep]);
 
   const shapeMaterial = useMemo(
     () =>
@@ -691,7 +706,7 @@ export default function BrightCluster() {
     // The tween above drives rotation.y only, so the scale here is never
     // fought over.
     <group ref={groupRef} scale={fit}>
-      <MerkabaCluster geometry={geometry} />
+      <MerkabaCluster geometry={geometry} fit={fit} />
 
       {/* Bright shapes with lights */}
       {colors.map((color, i) => (
