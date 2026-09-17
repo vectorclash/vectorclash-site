@@ -42,7 +42,7 @@
 
 export const LEVELS = ['low', 'medium', 'high'];
 
-const STORE_KEY = 'vc:quality:v1';
+const STORE_KEY = 'vc:quality:v2';
 
 // Everything either scene reads. Keys the governor may change are marked
 // ADAPTIVE above; the rest are only ever read through latchedLevel().
@@ -53,7 +53,13 @@ const SETTINGS = {
     largeFields: 5,
     largeParticles: 8,
     bloomScale: 0.4,
-    dpr: 1,
+    // Resolution is the last knob turned, not the first. Every device used to
+    // render at 1.5 and nobody complained about the frame rate there, so the
+    // ladder keeps 1.5 for two of its three rungs and only gives ground at the
+    // bottom -- counts, bloom and grain are cut long before pixels are, because
+    // a phone that has dropped a few hundred stars still looks like the scene
+    // and a phone rendering at 1.0 looks broken.
+    dpr: 1.25,
     grain: 0,
     multisampling: 0,
     clusterDetail: 'low',
@@ -65,7 +71,7 @@ const SETTINGS = {
     largeFields: 9,
     largeParticles: 10,
     bloomScale: 0.6,
-    dpr: 1.25,
+    dpr: 1.5,
     grain: 0.05,
     multisampling: 0,
     clusterDetail: 'medium',

@@ -61,14 +61,14 @@ describe('estimateStartingLevel', () => {
 
   test('a stored level wins outright, so a return visit skips the guess', async () => {
     vi.resetModules();
-    window.localStorage.setItem('vc:quality:v1', 'high');
+    window.localStorage.setItem('vc:quality:v2', 'high');
     const mod = await import('./qualityLevel');
     expect(mod.estimateStartingLevel()).toBe('high');
   });
 
   test('a corrupt stored level falls back to measuring rather than throwing', async () => {
     vi.resetModules();
-    window.localStorage.setItem('vc:quality:v1', 'ludicrous');
+    window.localStorage.setItem('vc:quality:v2', 'ludicrous');
     vi.spyOn(navigator, 'hardwareConcurrency', 'get').mockReturnValue(4);
     const mod = await import('./qualityLevel');
     expect(['low', 'medium', 'high']).toContain(mod.estimateStartingLevel());
@@ -81,7 +81,7 @@ describe('stepLevel', () => {
   beforeEach(async () => {
     vi.resetModules();
     window.localStorage.clear();
-    window.localStorage.setItem('vc:quality:v1', 'medium');
+    window.localStorage.setItem('vc:quality:v2', 'medium');
     mod = await import('./qualityLevel');
   });
 
@@ -113,6 +113,6 @@ describe('stepLevel', () => {
 
   test('the settled level is persisted for the next visit', () => {
     mod.stepLevel(1);
-    expect(window.localStorage.getItem('vc:quality:v1')).toBe('high');
+    expect(window.localStorage.getItem('vc:quality:v2')).toBe('high');
   });
 });

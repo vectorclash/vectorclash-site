@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { useThree } from '@react-three/fiber';
+import { useStore } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
 import { stepLevel } from '../../utils/qualityLevel';
 import useQuality from '../../utils/useQuality';
@@ -12,7 +12,11 @@ import useQuality from '../../utils/useQuality';
 // under it.
 const bounds = (refreshrate) => {
   const target = Math.min(refreshrate || 60, 60);
-  return [target * 0.75, target * 0.95];
+  // 0.95 of 60 is 57, which a vsynced device only clears on a clean window --
+  // one stutter in four and a phone that is comfortably holding 60 never
+  // climbs, and never gets its resolution back. 54 is the honest bar for
+  // "coping".
+  return [target * 0.75, target * 0.9];
 };
 
 // The canvas resolution is the one knob that can move without anything
@@ -20,13 +24,31 @@ const bounds = (refreshrate) => {
 // waiting for the ladder. Capped at the display's real ratio -- asking for 1.5
 // on a 1x monitor is supersampling a gradient nobody can see the difference in.
 function DprDriver() {
-  const setDpr = useThree((state) => state.setDpr);
+  const store = useStore();
   const { settings } = useQuality();
 
   useEffect(() => {
     const ratio = typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1;
-    setDpr(Math.min(settings.dpr, ratio));
-  }, [setDpr, settings.dpr]);
+    const next = Math.min(settings.dpr, ratio);
+    const { viewport, size, setDpr, setSize } = store.getState();
+
+    if (viewport.dpr === next) return;
+
+    setDpr(next);
+
+    // And then republish the size unchanged, which looks pointless and is the
+    // whole point. setDpr only writes viewport.dpr; r3f resizes the canvas
+    // backbuffer off that, but the size object keeps its identity, and the
+    // EffectComposer sizes its render targets in an effect keyed on size
+    // alone. So a dpr change moved the backbuffer and left every composer
+    // target at the resolution it started at: the bloom chain, the normal
+    // pass and the grain all kept costing what they cost before, and their
+    // output was then blitted down into a smaller canvas. Turning the knob
+    // bought a softer picture and not one frame. A fresh size object re-runs
+    // that effect, which re-reads the drawing buffer and resizes the targets
+    // with it. The values are identical, so nothing else in the tree moves.
+    setSize(size.width, size.height, size.top, size.left);
+  }, [store, settings.dpr]);
 
   return null;
 }
