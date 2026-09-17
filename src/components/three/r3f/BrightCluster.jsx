@@ -19,7 +19,7 @@ import ClusterSkin, {
   MODEL_PLANE_OFFSET,
   MODEL_TIP,
 } from './ClusterSkin';
-import { detectPerformanceTier } from '../../utils/PerformanceDetector';
+import { latchedSettings } from '../../utils/qualityLevel';
 import {
   PATTERNS,
   pickPattern,
@@ -267,10 +267,14 @@ function MerkabaCluster({ geometry, fit }) {
   const skin = useMemo(() => {
     const cfg = SKIN_SETTINGS[CLUSTER_SKIN];
     if (!cfg) return null;
-    const tier = detectPerformanceTier();
+    // Latched, not adaptive. Detail is a polyhedron subdivision level, so a
+    // change rebuilds the geometry and re-uploads it -- and because the cluster
+    // is a wireframe, a rebuild also re-draws every edge in a different place.
+    // That is the one thing on screen that cannot fade between two states.
+    const { clusterDetail } = latchedSettings();
     return {
       ...cfg,
-      detail: cfg.detail[tier] || cfg.detail.medium,
+      detail: cfg.detail[clusterDetail] || cfg.detail.medium,
       offset: cfg.offset * ENVELOPE,
       // Opacity that low is a trace, and a trace only survives at desktop size.
       // The fit above shrinks the whole cluster on a narrow frame, and shrinking

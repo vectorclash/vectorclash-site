@@ -10,13 +10,11 @@ import ParticleField from './ParticleField';
 import GradientGenerator from '../../utils/GradientGenerator';
 import StarLarge from '../../../images/star-sprite-large.png';
 import StarSmall from '../../../images/star-sprite-small.png';
-import {
-  getParticleConfig,
-  getBloomResolutionScale,
-  shouldEnableAntialias,
-  detectPerformanceTier,
-} from '../../utils/PerformanceDetector';
+import { latchedSettings } from '../../utils/qualityLevel';
+import useQuality from '../../utils/useQuality';
+import useRetiringCount from '../../utils/useRetiringCount';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
+import QualityGovernor from './QualityGovernor';
 
 // Hoisted so these stay referentially stable across renders — ParticleField and
 // ShapeSwarm memoize their random positions against the containerSize object, so
@@ -367,7 +365,12 @@ function AnimatedGradientBackground({ colors }) {
   const material = useMemo(() => {
     // GLSL3 so the colour arrays can be indexed by a loop variable through a
     // function parameter, which ES 1.00 forbids.
-    const octaves = detectPerformanceTier() === 'low' ? 2 : 4;
+    //
+    // Latched rather than adaptive: the octave count is baked into the source
+    // as a loop bound, so changing it rebuilds the material and recompiles the
+    // shader. Doing that mid-scroll drops frames on exactly the device that
+    // needed the help.
+    const octaves = latchedSettings().octaves;
 
     // Seeded here rather than in an effect. Zeroed colour uniforms render pure
     // black, and any frame that lands between the first render and the effect
@@ -490,27 +493,52 @@ function Scene({ colors }) {
   const fogColor = useMemo(() => paletteAverage(colors), [colors]);
   const accentColor = useMemo(() => paletteAccent(fogColor), [fogColor]);
 
-  // Get performance-based configuration
-  const particleConfig = getParticleConfig();
-  const bloomResolutionScale = getBloomResolutionScale();
+  const { settings } = useQuality();
 
-  // Roll each field's star size once. Randomizing inline in the JSX would hand
-  // every field a new size on any re-render, visibly resizing stars mid-scroll.
-  const smallFields = useMemo(
-    () =>
-      Array.from({ length: particleConfig.smallFields }, () => ({
-        size: 0.8 + Math.random() * 1.5,
-      })),
-    [particleConfig.smallFields]
-  );
+  // Roll each field's size once, when the field is first created. Randomizing
+  // inline in the JSX would hand every field a new size on any re-render,
+  // visibly resizing stars mid-scroll -- and now that the count moves with the
+  // quality level, re-renders are no longer rare.
+  //
+  // The counts come back as a list that only ever grows: a field the governor
+  // has dropped stays mounted, flagged, until it has faded itself out. See
+  // useRetiringCount.
+  //
+  // Each field also fixes its own particle count at creation. Quality is
+  // expressed by how many fields are up, never by resizing a field that is
+  // already drawn: the position buffer is derived from the count, so changing
+  // it would re-roll three hundred stars into new places -- a teleport, not a
+  // fade, and no amount of easing hides it.
+  const [smallFields, releaseSmall] = useRetiringCount(settings.smallFields, () => ({
+    size: 0.8 + Math.random() * 1.5,
+    particles: settings.smallParticles,
+  }));
 
-  const largeFields = useMemo(
-    () =>
-      Array.from({ length: particleConfig.largeFields }, () => ({
-        size: 15 + Math.random() * 35,
-      })),
-    [particleConfig.largeFields]
-  );
+  const [largeFields, releaseLarge] = useRetiringCount(settings.largeFields, () => ({
+    size: 15 + Math.random() * 35,
+    particles: settings.largeParticles,
+  }));
+
+  // Bloom stays on at every level, and the level decides what it costs instead.
+  // The hero reads as a different animation with the pass off -- the stars and
+  // the cluster are lit for it -- so cutting it outright was really shipping two
+  // designs, and under the old detector the second one was what every phone got.
+  // It is not the expensive thing here either: mipmapBlur is a fixed downsample
+  // chain plus one composite, a handful of fullscreen passes at steadily smaller
+  // sizes, none of it scaling with what is in the scene.
+  //
+  // Written straight onto the effect rather than through the prop, because the
+  // prop is a constructor argument and changing it would rebuild the pass. The
+  // setter resizes the chain's render targets, so it is a step and never a
+  // tween -- resizing a buffer every frame for a second would cost more than
+  // the pass does. Against a blur on its way to being blurred, a step between
+  // scales is close to invisible anyway.
+  const bloomRef = useRef();
+
+  useEffect(() => {
+    const resolution = bloomRef.current?.resolution;
+    if (resolution) resolution.scale = settings.bloomScale;
+  }, [settings.bloomScale]);
 
   useEffect(() => {
     // Load star images
@@ -592,35 +620,50 @@ function Scene({ colors }) {
           <BrightCluster />
         </Suspense>
 
-        {/* Small particles - optimized for visibility in front of camera */}
+        {/* Small particles - optimized for visibility in front of camera.
+            Keyed by entry id rather than by index: a retiring field has to keep
+            the same element across the re-render that flags it, or React
+            unmounts it and the fade never runs. */}
         {starSmallImage &&
-          smallFields.map((field, i) => (
+          smallFields.map(({ id, retiring, item }) => (
             <ParticleField
-              key={`small-${i}`}
-              particleNum={particleConfig.smallParticles}
+              key={`small-${id}`}
+              particleNum={item.particles}
               image={starSmallImage}
-              size={field.size}
+              size={item.size}
               opacity={0.6}
               containerSize={SMALL_STAR_FIELD}
+              retiring={retiring}
+              onRetired={() => releaseSmall(id)}
             />
           ))}
 
         {/* Large particles - optimized for visibility */}
         {starLargeImage &&
-          largeFields.map((field, i) => (
+          largeFields.map(({ id, retiring, item }) => (
             <ParticleField
-              key={`large-${i}`}
-              particleNum={particleConfig.largeParticles}
+              key={`large-${id}`}
+              particleNum={item.particles}
               image={starLargeImage}
-              size={field.size}
+              size={item.size}
               opacity={0.8}
               containerSize={LARGE_STAR_FIELD}
+              retiring={retiring}
+              onRetired={() => releaseLarge(id)}
             />
           ))}
       </group>
 
-      <EffectComposer>
+      <QualityGovernor />
+
+      {/* multisampling is latched, not adaptive: the prop is in the composer's
+          construction dependencies, so changing it disposes the composer and
+          all of its render targets and builds a new one. Worth noting that the
+          old code never set it at all, which left it on the library default of
+          8 -- full-size 8x MSAA on a half-float target, on every phone. */}
+      <EffectComposer multisampling={latchedSettings().multisampling}>
         <Bloom
+          ref={bloomRef}
           intensity={1}
           // Raised with the output encode. The background used to be written
           // unencoded and so sat well under the old threshold; now that it
@@ -630,7 +673,10 @@ function Scene({ colors }) {
           luminanceThreshold={0.7}
           luminanceSmoothing={0.9}
           mipmapBlur
-          resolutionScale={bloomResolutionScale}
+          // Constant, because the effect is memoized on its props and a change
+          // here would rebuild it. The live value is written to the effect
+          // directly, in the effect above.
+          resolutionScale={latchedSettings().bloomScale}
         />
       </EffectComposer>
     </>
@@ -639,7 +685,6 @@ function Scene({ colors }) {
 
 export default function HeaderScene({ colors, fallback, ready, onReady }) {
   const fallbackColor = paletteAverage(colors);
-  const enableAntialias = shouldEnableAntialias();
   const [canvasRef, frameloop] = useRenderWhenVisible();
 
   return (
@@ -648,11 +693,17 @@ export default function HeaderScene({ colors, fallback, ready, onReady }) {
       frameloop={frameloop}
       // Uncapped, this follows devicePixelRatio -- 2 on a retina laptop, which
       // is four times the fragment work for a soft gradient that cannot show
-      // the difference.
-      dpr={[1, 1.5]}
+      // the difference. Only the starting value: QualityGovernor drives it from
+      // here on, which is why this is a number rather than the old [1, 1.5]
+      // range -- setDpr replaces the range outright the first time it runs, so
+      // leaving a range here only disguises where the value really comes from.
+      dpr={Math.min(latchedSettings().dpr, window.devicePixelRatio || 1)}
       camera={{ position: [0, 2, 130], fov: 60, near: 0.1, far: 20000 }}
       gl={{
-        antialias: enableAntialias,
+        // No antialias flag. Every frame this scene draws goes through the
+        // EffectComposer's own render target, so the backbuffer's MSAA setting
+        // is never consulted -- the knob the old detector spent a tier on did
+        // nothing. multisampling on the composer is the real control.
         alpha: false,
         physicallyCorrectLights: false,
         shadowMap: {

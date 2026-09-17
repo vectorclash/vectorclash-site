@@ -7,8 +7,62 @@ import gsap from 'gsap';
 import tinycolor from 'tinycolor2';
 import ProjectShape from './ProjectShape';
 import VideoShape from './VideoShape';
-import { shouldEnableAntialias, getGLPrecision, detectPerformanceTier } from '../../utils/PerformanceDetector';
+import { latchedSettings } from '../../utils/qualityLevel';
+import useQuality from '../../utils/useQuality';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
+import QualityGovernor from './QualityGovernor';
+
+// Grain is the one thing in this scene the quality level can take away, so it
+// goes the same way the star fields do: it fades rather than vanishing. The
+// opacity prop is pulled out of the effect's constructor arguments by the
+// library and applied as a live uniform, so tweening it here neither rebuilds
+// the pass nor recompiles anything.
+const GRAIN_FADE = 0.8;
+
+function FilmGrain({ opacity }) {
+  const ref = useRef();
+
+  useEffect(() => {
+    const blend = ref.current?.blendMode;
+    if (!blend) return undefined;
+
+    const tween = gsap.to(blend.opacity, {
+      value: opacity,
+      duration: GRAIN_FADE,
+      ease: 'quad.inOut',
+    });
+
+    return () => tween.kill();
+  }, [opacity]);
+
+  // Mounted at zero and tweened up, so the grain arrives rather than appearing.
+  return <Noise ref={ref} blendFunction={BlendFunction.SCREEN} opacity={0} />;
+}
+
+/**
+ * True while `on` is true, and for `ms` afterwards.
+ *
+ * The composer itself has to outlive the fade. Unmounting it the moment the
+ * grain is switched off would cut the fade short and take a whole render pass
+ * out from under the scene in the same frame, which is a visible flash --
+ * the composer draws through its own target, so losing it changes how the
+ * frame is composited, not just what is in it.
+ */
+function useLingering(on, ms) {
+  const [lingering, setLingering] = useState(on);
+
+  useEffect(() => {
+    if (on) {
+      setLingering(true);
+      return undefined;
+    }
+
+    const timer = setTimeout(() => setLingering(false), ms);
+    return () => clearTimeout(timer);
+  }, [on, ms]);
+
+  return on || lingering;
+}
 
 function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const projectGroupRef = useRef();
@@ -17,9 +71,9 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const camera = useThree((state) => state.camera);
   const gl = useThree((state) => state.gl);
 
-  // Get performance tier for conditional effects
-  const performanceTier = detectPerformanceTier();
-  const enablePostprocessing = performanceTier === 'high' || performanceTier === 'medium';
+  const { settings } = useQuality();
+  const grainOn = settings.grain > 0;
+  const composerMounted = useLingering(grainOn, GRAIN_FADE * 1000 + 100);
 
   useEffect(() => {
     const scrollTarget = { offsetY: 0 };
@@ -86,13 +140,11 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
         {videoURLs && videoURLs.length > 0 && <VideoShape urls={videoURLs} size={50} />}
       </group>
 
-      {enablePostprocessing && (
-        <EffectComposer>
-          {/* Film Grain/Noise */}
-          <Noise
-            blendFunction={BlendFunction.SCREEN} // Screen blend mode for better visibility
-            opacity={0.05} // Visible grain effect
-          />
+      <QualityGovernor />
+
+      {composerMounted && (
+        <EffectComposer multisampling={latchedSettings().multisampling}>
+          <FilmGrain opacity={grainOn ? settings.grain : 0} />
         </EffectComposer>
       )}
     </>
@@ -107,8 +159,6 @@ export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] })
   const [canvasRef, frameloop] = useRenderWhenVisible(Boolean(textureURL || videoURLs));
   const [fogColor, setFogColor] = useState('#fb0097');
   const [backgroundColor, setBackgroundColor] = useState('#fb0097');
-  const enableAntialias = shouldEnableAntialias();
-  const glPrecision = getGLPrecision();
 
   useEffect(() => {
     if (textureURL) {
@@ -124,11 +174,20 @@ export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] })
     <Canvas
       ref={canvasRef}
       frameloop={frameloop}
-      dpr={[1, 1.5]}
+      // Starting value only; QualityGovernor drives it from here.
+      dpr={Math.min(latchedSettings().dpr, window.devicePixelRatio || 1)}
       camera={{ position: [0, 2, 160], fov: 50, near: 0.1, far: 20000 }}
       gl={{
-        antialias: enableAntialias,
-        precision: glPrecision,
+        // Only consulted at the bottom level, where the composer is unmounted
+        // and the scene draws straight to the backbuffer. Everywhere else the
+        // composer's own multisampling is what counts.
+        antialias: latchedSettings().multisampling > 0,
+        // No precision override. It used to drop to mediump below the top tier,
+        // which is a blunt instrument -- it lowers the default precision for
+        // every fragment shader in the scene at once, and this hero already has
+        // a documented precision-sensitive dither in it. The saving was never
+        // measured and the failure mode is banding, so three's highp default
+        // stands.
         alpha: false, // Disable alpha for better performance
         physicallyCorrectLights: false, // Disable for better performance
         powerPreference: 'high-performance', // Request high-performance GPU
