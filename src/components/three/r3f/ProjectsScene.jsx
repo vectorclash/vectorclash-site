@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, Suspense } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { useFrame } from '@react-three/fiber';
 import { EffectComposer, Noise } from '@react-three/postprocessing';
@@ -128,12 +128,17 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
       <ambientLight intensity={1.5} color={0xfafafa} />
       <directionalLight intensity={1} color={0x00ccff} />
 
+      {/*
+        No Suspense boundary here on purpose. ProjectShape loads its textures
+        itself precisely so that it does not suspend: a boundary would take the
+        shape off screen for the length of a project's first load and put it
+        back afterwards, which is the two-part transition this scene used to
+        have.
+      */}
       <group ref={projectGroupRef}>
-        <Suspense fallback={null}>
-          {textureURL && imageURLs.length > 0 && (
-            <ProjectShape key="project-shape" size={300} textureURL={textureURL} imageURLs={imageURLs} />
-          )}
-        </Suspense>
+        {textureURL && imageURLs.length > 0 && (
+          <ProjectShape key="project-shape" size={300} textureURL={textureURL} imageURLs={imageURLs} />
+        )}
       </group>
 
       <group ref={videoGroupRef} position={[-20, -70, -20]}>
