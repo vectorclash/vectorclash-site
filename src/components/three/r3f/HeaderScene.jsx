@@ -600,10 +600,29 @@ ${FIELDS}      `;
 // the header is scrolled out of view and parked -- an episode cannot happen with
 // nobody watching, and cannot be half over by the time the hero comes back.
 //
-// Rare is the whole point. Four to nine minutes of calm means most visits never
-// see one, and the ones that do see it once. Any oftener and it stops being a
-// moment and becomes the background's normal behaviour.
-const CALM_SPELL = [240, 540];
+// The gap between episodes is drawn from an exponential rather than picked out
+// of a range. A gap uniform between four and nine minutes is unpredictable in
+// the sense that you cannot say which it will be, but every gap comes out
+// roughly the same size, and a thing that happens at roughly regular intervals
+// reads as a cycle however random the interval was. An exponential is
+// memoryless: the chance of an episode starting is the same in any given
+// second, whatever has just happened. So the gaps cluster -- two episodes come
+// close together, then nothing for a long while -- which is what now and then
+// actually looks like.
+//
+// CALM_MEAN is the exponential's own mean, not the gap's. The floor keeps two
+// episodes from running into each other -- the fall alone is twenty seconds, so
+// a floor much under this leaves no stretch of settled ramp between them at all
+// -- and the ceiling keeps the long tail from reading as the background having
+// stopped. Between them the gap averages a little under three minutes, with
+// most of them shorter than that and the occasional drought of six or seven.
+const CALM_MEAN = 120;
+const CALM_FLOOR = 45;
+const CALM_CEIL = 420;
+
+const calmSpell = () =>
+  Math.min(CALM_FLOOR + -Math.log(1 - Math.random()) * CALM_MEAN, CALM_CEIL);
+
 const CHAOS_HOLD = [12, 26];
 
 // It leaves more slowly than it arrives. Coming apart can afford to be the
@@ -627,7 +646,7 @@ const randIn = ([lo, hi]) => lo + Math.random() * (hi - lo);
 const CHAOS_SLOW_FRAME = 1 / 34;
 const CHAOS_SLOW_LIMIT = 90;
 
-const newChaos = () => ({ phase: 'calm', t: 0, span: randIn(CALM_SPELL), slow: 0, given: false });
+const newChaos = () => ({ phase: 'calm', t: 0, span: calmSpell(), slow: 0, given: false });
 
 /**
  * Advances the episode clock and answers how much chaos is on screen, 0 to 1.
@@ -648,7 +667,7 @@ function stepChaos(c, dt, raw) {
     c.t = 0;
 
     if (c.given || getLevel() !== 'high') {
-      c.span = randIn(CALM_SPELL);
+      c.span = calmSpell();
       return 0;
     }
 
@@ -662,7 +681,7 @@ function stepChaos(c, dt, raw) {
 
     c.phase = 'calm';
     c.t = 0;
-    c.span = randIn(CALM_SPELL);
+    c.span = calmSpell();
     return 0;
   }
 
