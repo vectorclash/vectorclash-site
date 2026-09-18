@@ -120,6 +120,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const closeTimelineRef = useRef(null);
   const openTimelineRef = useRef(null);
   const returningToGridRef = useRef(false);
+  // Set by prev/next on the way out and read back by the layout effect once the
+  // new project has been committed, which is what tells the effect to run the
+  // swap entrance instead of the cold open.
+  const swapRef = useRef(null);
+  const swapTimelineRef = useRef(null);
 
   const killOpenTimeline = () => {
     if (openTimelineRef.current) {
@@ -127,6 +132,27 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       openTimelineRef.current = null;
     }
   };
+
+  const killSwapTimeline = () => {
+    if (swapTimelineRef.current) {
+      swapTimelineRef.current.kill();
+      swapTimelineRef.current = null;
+    }
+    swapRef.current = null;
+  };
+
+  // The pieces a project swap carries across: everything that is actually a
+  // different project afterwards. The controls are deliberately left out --
+  // they are the frame around the content, and blinking them out and back is
+  // what made the panel look like it was closing and reopening.
+  const swapPieces = (detail) =>
+    [
+      detail.querySelector(".project-header h2"),
+      detail.querySelector(".project-header .tools"),
+      detail.querySelector(".project-description"),
+      detail.querySelector(".gallery-main"),
+      ...detail.querySelectorAll(".thumbnail"),
+    ].filter(Boolean);
 
   // The parent dims the section while a project is open. It is told the project
   // has closed as soon as the exit animation starts, so the backdrop cross-fades
@@ -183,6 +209,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         closeTimelineRef.current = null;
       }
       killOpenTimeline();
+      killSwapTimeline();
     };
   }, []);
 
@@ -202,20 +229,6 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         return;
       }
 
-      // Show loader
-      setIsProjectLoading(true);
-      setIsLoaderMounted(true);
-
-      // The panel does not unmount between prev/next, so an expansion or a
-      // loader fade interrupted by the swap would otherwise leave its inline
-      // height and opacity behind on the elements this pass reuses.
-      gsap.set(mountRef.current, { clearProps: "height,overflow" });
-      const staleLoader = mountRef.current.querySelector(".project-loader");
-      if (staleLoader) {
-        gsap.killTweensOf(staleLoader);
-        gsap.set(staleLoader, { clearProps: "opacity,top" });
-      }
-
       // Set up project data
       let newVideo = null;
       if (project.videos && project.videos.length > 0) {
@@ -231,10 +244,37 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       setCurrentVideo(newVideo);
       setActiveImageIndex(0);
 
-      // Update header color
       const headerElement = mountRef.current.querySelector(".project-header");
+      const newBorderColor = newColor.setAlpha(0.4).toRgbString();
+
+      // Arriving from prev/next: the panel is already open and pinned at the
+      // outgoing project's height, so there is nothing to load into and no
+      // loader to run. Hand off to the swap entrance before any of the cold
+      // open's setup, all of which would undo the pin.
+      const swap = swapRef.current;
+      if (swap) {
+        swapRef.current = null;
+        runSwapEntrance(swap, newBorderColor);
+        return;
+      }
+
+      // Show loader
+      setIsProjectLoading(true);
+      setIsLoaderMounted(true);
+
+      // The panel does not unmount between prev/next, so an expansion or a
+      // loader fade interrupted by the swap would otherwise leave its inline
+      // height and opacity behind on the elements this pass reuses.
+      gsap.set(mountRef.current, { clearProps: "height,overflow" });
+      const staleLoader = mountRef.current.querySelector(".project-loader");
+      if (staleLoader) {
+        gsap.killTweensOf(staleLoader);
+        gsap.set(staleLoader, { clearProps: "opacity,top" });
+      }
+
+      // Update header color
       if (headerElement) {
-        headerElement.style.borderBottomColor = newColor.setAlpha(0.4).toRgbString();
+        headerElement.style.borderBottomColor = newBorderColor;
       }
 
       // Hide Three.js container initially
@@ -533,25 +573,207 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     setActiveThumbnailID(null);
   };
 
-  const onProjectPrevClick = () => {
+  // Prev/next with the panel already open is a move between two projects, not
+  // a close followed by an open. Routing it through the cold-open path is what
+  // made it feel broken: the loader branch collapses the panel to its
+  // min-height with no animation at all, holds there for a second, then
+  // expands again. Here the panel keeps its box the whole way -- the outgoing
+  // content leaves in the direction of travel, the height tweens straight from
+  // one project's to the other's, and the new content arrives from the far
+  // side.
+  const SWAP_OUT_DURATION = 0.22;
+  const SWAP_IN_DURATION = 0.45;
+  // How far the content is allowed to slide, and the ceiling on how long the
+  // entrance will wait for the incoming hero image to decode.
+  const SWAP_SHIFT = 24;
+  const SWAP_DECODE_CAP = 350;
+
+  const startProjectSwap = (direction) => {
     if (isProjectTransitioning || isClosing) return;
 
+    const detail = mountRef.current;
+    if (!detail || activeProjectID === null) return;
+
+    const target =
+      (activeProjectID + direction + projects.length) % projects.length;
+
     setIsProjectTransitioning(true);
+    killOpenTimeline();
+    killSwapTimeline();
 
-    const prevProject = activeProjectID - 1 < 0 ? projects.length - 1 : activeProjectID - 1;
+    // Started here rather than on arrival so the decode overlaps the exit. By
+    // the time the new content fades in the JPEG is usually ready, and the
+    // gallery slot is not an empty box for a frame.
+    const preload = new Image();
+    preload.src = projects[target].images[0];
 
-    // Fade out current project content
-    const projectContent = mountRef.current.querySelector(".project-content");
-    gsap.to(projectContent, {
-      duration: 0.3,
-      opacity: 0,
-      ease: "power2.in",
+    const pieces = swapPieces(detail);
+    gsap.killTweensOf(pieces);
+
+    swapRef.current = { direction, preload };
+
+    // Pinning the height is what holds the panel still while its contents are
+    // replaced underneath: React swaps a two-paragraph description for a
+    // five-paragraph one the moment the id changes, and nothing should move
+    // until the entrance tweens it.
+    gsap.set(detail, { height: detail.offsetHeight, overflow: "hidden" });
+
+    const tl = gsap.timeline({
       onComplete: () => {
-        setActiveProjectID(prevProject);
-        setIsProjectTransitioning(false);
-      }
+        swapTimelineRef.current = null;
+        setActiveProjectID(target);
+      },
     });
+    swapTimelineRef.current = tl;
+
+    tl.to(
+      pieces,
+      {
+        opacity: 0,
+        x: -SWAP_SHIFT * direction,
+        duration: SWAP_OUT_DURATION,
+        ease: "power2.in",
+        stagger: { amount: 0.06, from: direction > 0 ? "start" : "end" },
+      },
+      0
+    );
+
+    if (threeContainerRef.current) {
+      gsap.killTweensOf(threeContainerRef.current);
+      tl.to(
+        threeContainerRef.current,
+        { alpha: 0, duration: SWAP_OUT_DURATION + 0.06, ease: "power2.in" },
+        0
+      );
+    }
   };
+
+  // Runs from the layout effect, with the new project already committed to the
+  // DOM at opacity 0 and the panel still pinned at the old height.
+  const runSwapEntrance = ({ direction, preload }, borderColor) => {
+    const detail = mountRef.current;
+    if (!detail) return;
+
+    // Both heights have to be read in this one synchronous pass: the pin as it
+    // stands, then the height the new project actually wants. Letting the box
+    // go and pinning it straight back costs a layout and no paint, because a
+    // layout effect runs before the browser gets the frame.
+    const fromHeight = detail.offsetHeight;
+    gsap.set(detail, { height: "auto" });
+    const toHeight = detail.offsetHeight;
+    gsap.set(detail, { height: fromHeight });
+
+    // Same reasoning as the cold open: the canvas is height:100% of a section
+    // that is about to change size for the length of the tween, so it would
+    // resize -- and reallocate the composer's render targets -- every frame of
+    // it. Pinned to the height the section is about to have, it resizes once,
+    // here, while it is still faded out.
+    const threeContainer = threeContainerRef.current;
+    const section = threeContainer?.parentElement;
+    if (section) {
+      gsap.set(threeContainer, {
+        height: section.offsetHeight + (toHeight - fromHeight),
+      });
+    }
+
+    const start = () => {
+      const detail = mountRef.current;
+      // A close, or another swap, may have landed while we waited on the
+      // decode.
+      if (!detail || swapRef.current) return;
+
+      projectLoadTimeoutRef.current = null;
+
+      const header = detail.querySelector(".project-header");
+      if (header && borderColor) {
+        gsap.to(header, { borderBottomColor: borderColor, duration: SWAP_IN_DURATION });
+      }
+
+      const projectContent = detail.querySelector(".project-content");
+      const pieces = swapPieces(detail);
+
+      killOpenTimeline();
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          openTimelineRef.current = null;
+          setIsProjectTransitioning(false);
+        },
+      });
+      openTimelineRef.current = tl;
+
+      tl.to(
+        detail,
+        {
+          height: toHeight,
+          duration: SWAP_IN_DURATION,
+          ease: "power2.inOut",
+          clearProps: "height,overflow",
+        },
+        0
+      );
+
+      if (projectContent) {
+        tl.set(projectContent, { opacity: 1 }, 0);
+      }
+
+      tl.fromTo(
+        pieces,
+        { opacity: 0, x: SWAP_SHIFT * direction },
+        {
+          opacity: 1,
+          x: 0,
+          duration: SWAP_IN_DURATION,
+          ease: "power2.out",
+          stagger: { amount: 0.12, from: direction > 0 ? "start" : "end" },
+          clearProps: "transform",
+        },
+        0.05
+      );
+
+      if (threeContainer) {
+        tl.to(
+          threeContainer,
+          {
+            alpha: 1,
+            duration: 0.5,
+            ease: "power2.out",
+            // Off here rather than with the height tween, so nothing touches
+            // the canvas size while it is fading back up.
+            clearProps: "height",
+          },
+          0.12
+        );
+      }
+    };
+
+    if (projectLoadTimeoutRef.current) {
+      clearTimeout(projectLoadTimeoutRef.current);
+      projectLoadTimeoutRef.current = null;
+    }
+
+    if (preload && !preload.complete) {
+      let started = false;
+      const go = () => {
+        if (started) return;
+        started = true;
+        if (projectLoadTimeoutRef.current) {
+          clearTimeout(projectLoadTimeoutRef.current);
+          projectLoadTimeoutRef.current = null;
+        }
+        start();
+      };
+      preload.addEventListener("load", go, { once: true });
+      preload.addEventListener("error", go, { once: true });
+      // A slow image does not get to hold the panel open indefinitely: past the
+      // cap the entrance runs anyway and the picture arrives when it arrives.
+      projectLoadTimeoutRef.current = setTimeout(go, SWAP_DECODE_CAP);
+    } else {
+      start();
+    }
+  };
+
+  const onProjectPrevClick = () => startProjectSwap(-1);
 
   const onProjectCloseClick = () => {
     if (isClosing) return;
@@ -562,6 +784,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     }
 
     killOpenTimeline();
+    killSwapTimeline();
 
     setIsClosing(true);
     // Closing part way through the load deliberately leaves the panel collapsed
@@ -604,6 +827,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     if (projectContent) {
       gsap.killTweensOf(projectContent);
     }
+    // A swap killed part way through leaves its slide offset on the content,
+    // and these are the same nodes the next project is rendered into.
+    gsap.set(pieces, { clearProps: "x" });
 
     const tl = gsap.timeline({ onComplete: finish });
     closeTimelineRef.current = tl;
@@ -633,25 +859,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     }
   };
 
-  const onProjectNextClick = () => {
-    if (isProjectTransitioning || isClosing) return;
-
-    setIsProjectTransitioning(true);
-
-    const nextProject = activeProjectID + 1 >= projects.length ? 0 : activeProjectID + 1;
-
-    // Fade out current project content
-    const projectContent = mountRef.current.querySelector(".project-content");
-    gsap.to(projectContent, {
-      duration: 0.3,
-      opacity: 0,
-      ease: "power2.in",
-      onComplete: () => {
-        setActiveProjectID(nextProject);
-        setIsProjectTransitioning(false);
-      }
-    });
-  };
+  const onProjectNextClick = () => startProjectSwap(1);
 
   const onImageClick = (index) => {
     const newTexture = projects[activeProjectID].images[index];
