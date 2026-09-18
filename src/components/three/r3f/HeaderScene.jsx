@@ -429,31 +429,60 @@ const FLOW_RATE = 0.36;
 // sometimes moving with purpose, and never doing either for long.
 const FLOW_SWING = 1.0;
 
-// The fastest the gradient's axis turns, in radians per second. A hundredth of
-// a radian is a full revolution in about ten minutes at the peak, and the
-// wander spends most of its time well under the peak and changes sign freely --
-// so the direction the colour flows in drifts, reverses and comes back rather
-// than sweeping steadily one way.
-const TURN_RATE = 0.011;
-
-// A smooth -1..1 wander. Three sines whose periods are close to coprime: they
-// do come back into step eventually, but only after a span measured in hours,
-// so nothing anyone sits through repeats. Being a sum of sines it is smooth in
-// value and in slope, which is what keeps a change of speed from arriving as a
-// kick -- interpolating between random targets is the obvious alternative and
-// it kinks at every target.
+// Where the gradient's axis points: a drift it cannot escape, plus a swing it
+// wanders through on the way.
 //
-// Phases are rolled per material, so two loads of the page are not in step.
-const WANDER_PERIODS = [41.3, 23.7, 13.1];
+// This was an integrated turn rate, and the rate was a wander -- which meant the
+// axis never went anywhere. A bounded zero-mean rate integrates to a bounded
+// angle: at the old rate and the flow's periods the excursion worked out to
+// 2.28 + 0.71 + 0.20 degrees, so the axis picked an orientation at random on
+// load and then held it, to within three degrees, for the rest of the session.
+// It rocked either side of a fixed heading, which is the one thing it was
+// written not to do.
+//
+// TURN_DRIFT is the term that has no bound on it: a full turn every ten and a
+// half minutes of net travel. TURN_SWING is wide enough, and TURN_PERIODS slow
+// enough, that the axis is not sweeping steadily -- the direction reverses about
+// once a minute, whenever the swing's slope beats the drift, and the axis covers
+// a median of 39 degrees in a minute while doing it.
+const TURN_DRIFT = 0.01;
+const TURN_SWING = 1.2;
 
-function makeWander() {
-  const phases = WANDER_PERIODS.map(() => Math.random() * TAU);
+// A smooth -1..1 wander: three sines whose periods are close to coprime, so
+// they come back into step only after a span measured in hours and nothing
+// anyone sits through repeats. Being a sum of sines it is smooth in value and
+// in slope, which is what keeps a change from arriving as a kick --
+// interpolating between random targets is the obvious alternative and it kinks
+// at every target.
+//
+// What a wander cannot do is go anywhere. It is zero-mean and bounded, and so
+// is its integral: integrate one as a rate and the result swings by rate times
+// amplitude times period over 2pi and no further, however long you wait. The
+// flow gets around that by being exponential in the wander rather than
+// proportional to it, which is never negative, so its integral only ever
+// climbs. The axis needs a term of its own -- see TURN_DRIFT.
+//
+// Phases are rolled per caller, so the flow and the turn are independent of
+// each other, and two loads of the page are not in step.
+const WANDER_WEIGHTS = [0.55, 0.3, 0.15];
 
-  return (time) =>
-    (Math.sin((TAU * time) / WANDER_PERIODS[0] + phases[0]) * 0.55 +
-      Math.sin((TAU * time) / WANDER_PERIODS[1] + phases[1]) * 0.30 +
-      Math.sin((TAU * time) / WANDER_PERIODS[2] + phases[2]) * 0.15);
+function makeWander(periods) {
+  const phases = periods.map(() => Math.random() * TAU);
+
+  return (time) => {
+    let sum = 0;
+
+    for (let i = 0; i < periods.length; i++) {
+      sum += Math.sin((TAU * time) / periods[i] + phases[i]) * WANDER_WEIGHTS[i];
+    }
+
+    return sum;
+  };
 }
+
+// The flow's wander turns over in tens of seconds; the axis wants minutes.
+const FLOW_PERIODS = [41.3, 23.7, 13.1];
+const TURN_PERIODS = [313, 197, 89];
 
 // The palettes strung end to end, sampled as one continuous gradient. The
 // viewport is a window one palette wide onto that strip, and it never stops
@@ -715,11 +744,11 @@ function stepChaos(c, dt, raw) {
 function AnimatedGradientBackground({ colors }) {
   const resRef = useRef(new THREE.Vector2());
   const timeRef = useRef(0);
-  // How far into the current palette the window sits, and where the gradient's
-  // axis is pointing. Both are integrated frame by frame rather than tweened,
-  // because both are driven by a rate that is itself moving.
+  // How far into the current palette the window sits, and the orientation the
+  // axis starts from -- the axis is solved from that, the drift and the swing,
+  // so this one is a constant rather than an accumulator.
   const offsetRef = useRef(0);
-  const angleRef = useRef(Math.random() * TAU);
+  const angleStartRef = useRef(Math.random() * TAU);
   const chaosRef = useRef(null);
   if (chaosRef.current === null) chaosRef.current = newChaos();
 
@@ -745,7 +774,7 @@ function AnimatedGradientBackground({ colors }) {
       uChaosStops: { value: new Float32Array(COLOR_SLOTS * 3) },
       uChaos: { value: 0 },
       uOffset: { value: 0 },
-      uAngle: { value: angleRef.current },
+      uAngle: { value: angleStartRef.current },
       // The header opens on the palette it was handed, and the rest of the
       // strip is rolled straight away -- so the flow has somewhere to go from
       // the first frame, rather than creeping through two copies of the opening
@@ -770,8 +799,8 @@ function AnimatedGradientBackground({ colors }) {
 
   // Rolled per material so the flow and the turn are independent of each other
   // and of the page's other animations.
-  const flowWander = useMemo(() => makeWander(), [material]);
-  const turnWander = useMemo(() => makeWander(), [material]);
+  const flowWander = useMemo(() => makeWander(FLOW_PERIODS), [material]);
+  const turnWander = useMemo(() => makeWander(TURN_PERIODS), [material]);
 
   useEffect(() => () => material.dispose(), [material]);
 
@@ -789,12 +818,14 @@ function AnimatedGradientBackground({ colors }) {
     const res = state.gl.getDrawingBufferSize(resRef.current);
     material.uniforms.uRes.value.set(res.x, res.y);
 
-    // Integrated rather than solved from the clock: both of these are driven by
-    // a rate that is itself moving, and the header stops rendering when it
-    // scrolls out of view -- so the flow picks up where it left off instead of
-    // jumping to wherever a clock would have carried it.
-    angleRef.current += turnWander(time) * TURN_RATE * dt;
-    material.uniforms.uAngle.value = angleRef.current;
+    // The axis is solved from the clock; the flow has to be integrated, because
+    // its rate is exponential in the wander and there is no closed form for
+    // where that has got to. Either way it is the field's own clock, which only
+    // advances on rendered frames -- so both pick up where they left off when
+    // the header scrolls back into view, rather than jumping to wherever a wall
+    // clock would have carried them.
+    material.uniforms.uAngle.value =
+      angleStartRef.current + TURN_DRIFT * time + TURN_SWING * turnWander(time);
 
     offsetRef.current += FLOW_RATE * Math.exp(flowWander(time) * FLOW_SWING) * dt;
 
