@@ -5,7 +5,10 @@ import "./HexagonLoader.scss";
 
 gsap.registerPlugin(DrawSVGPlugin);
 
-const randomHex = (spin) => tinycolor("#CCFF00").spin(spin).toHexString();
+// The brand hue, rotated by a given number of degrees. Callers spin it at
+// random for the glow and by a fixed step per ring for the stroke, so this
+// takes the angle rather than rolling one.
+const spun = (degrees) => tinycolor("#CCFF00").spin(degrees).toHexString();
 
 function HexagonLoader() {
   const mountRef = useRef(null);
@@ -21,9 +24,9 @@ function HexagonLoader() {
 
       const glow = mountRef.current.querySelectorAll(".hexagon-glow");
       gsap.set(glow, {
-        background: `linear-gradient( 42deg, ${randomHex(
+        background: `linear-gradient( 42deg, ${spun(
           Math.random() * 360
-        )}, ${randomHex(Math.random() * 360)}, ${randomHex(
+        )}, ${spun(Math.random() * 360)}, ${spun(
           Math.random() * 360
         )})`,
       });
@@ -57,7 +60,7 @@ function HexagonLoader() {
             duration: 1,
             drawSVG: drawsForward ? "100%" : "100% 0%",
             strokeWidth: 10,
-            stroke: randomHex(i * (drawsForward ? 25 : 40)),
+            stroke: spun(i * (drawsForward ? 25 : 40)),
             ease: "quad.inOut",
           }
         );
@@ -69,7 +72,7 @@ function HexagonLoader() {
             duration: 1,
             drawSVG: drawsForward ? "100% 100%" : "0% 0%",
             strokeWidth: 0,
-            stroke: randomHex(Math.random() * 360),
+            stroke: spun(Math.random() * 360),
             ease: "quad.inOut",
             delay: 1,
           }

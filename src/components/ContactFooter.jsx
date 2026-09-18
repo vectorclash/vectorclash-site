@@ -136,7 +136,7 @@ function ContactFooter() {
           <div className="copyright">{copyright}</div>
         </div>
       </article>
-      <AnimatedParticles particles="20" />
+      <AnimatedParticles count={20} />
     </footer>
   );
 }

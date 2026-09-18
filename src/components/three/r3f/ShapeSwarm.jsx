@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/all';
-import RandomCanvasLinearGradient from '../RandomCanvasLinearGradient';
+import CanvasLinearGradient from '../CanvasLinearGradient';
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -11,7 +11,7 @@ function SingleShape({ geometry, containerSize, positionRange = 250, speed = 10 
   const meshRef = useRef();
 
   const texture = useMemo(() => {
-    const gradient = new RandomCanvasLinearGradient(256, 256);
+    const gradient = new CanvasLinearGradient(256, 256);
     const tex = new THREE.Texture(gradient);
     tex.needsUpdate = true;
     tex.wrapS = THREE.RepeatWrapping;

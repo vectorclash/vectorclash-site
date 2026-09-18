@@ -3,7 +3,7 @@ import { gsap, MotionPathPlugin } from "gsap/all";
 import tinycolor from "tinycolor2";
 import "./AnimatedParticles.scss";
 
-function AnimatedParticles({ particles }) {
+function AnimatedParticles({ count }) {
   const mountRef = useRef(null);
 
   useEffect(() => {
@@ -64,30 +64,29 @@ function AnimatedParticles({ particles }) {
       });
     };
 
-    // Create and animate bubbles
-    for (let i = 0; i < particles; i++) {
-      const bubble = document.createElement("div");
-      bubble.className = "bubble";
-      mountRef.current.appendChild(bubble);
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement("div");
+      particle.className = "particle";
+      mountRef.current.appendChild(particle);
 
       const startX = randomX();
       const startY = randomY();
 
-      gsap.set(bubble, {
+      gsap.set(particle, {
         x: startX,
         y: startY,
         scale: 0.01 + Math.random() * 0.25,
         background: `linear-gradient(${Math.round(Math.random() * 360)}deg, ${tinycolor("#CCFF00").spin(Math.random() * 360).toHexString()}, ${tinycolor("#CCFF00").spin(Math.random() * 360).toHexString()})`,
       });
 
-      moveParticle(bubble);
+      moveParticle(particle);
     }
 
     return () => {
-      gsap.killTweensOf(".bubble");
+      gsap.killTweensOf(".particle");
       mountTl.kill();
     };
-  }, [particles]);
+  }, [count]);
 
   return <div className="animated-particles" ref={mountRef}></div>;
 }

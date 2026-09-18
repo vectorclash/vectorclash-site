@@ -1,6 +1,6 @@
 import tinycolor from "tinycolor2";
 
-export default class RandomCanvasLinearGradient {
+export default class CanvasLinearGradient {
   constructor(width, height) {
     let canvas = document.createElement("canvas");
     let context = canvas.getContext("2d");
