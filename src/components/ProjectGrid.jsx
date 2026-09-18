@@ -198,7 +198,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     if (isProjectActive && activeProjectID !== null) {
       const project = projects[activeProjectID];
 
-      if (!project || !project.field_images || project.field_images.length === 0) {
+      if (!project || !project.images || project.images.length === 0) {
         return;
       }
 
@@ -218,11 +218,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
       // Set up project data
       let newVideo = null;
-      if (project.field_videos && project.field_videos.length > 0) {
-        newVideo = project.field_videos.map(v => v.url);
+      if (project.videos && project.videos.length > 0) {
+        newVideo = project.videos;
       }
 
-      const newImageURLs = project.field_images.map((img) => img.url);
+      const newImageURLs = project.images;
       const newTexture = newImageURLs[0];
       const newColor = tinycolor("#CCFF00").spin(Math.random() * 360);
 
@@ -654,7 +654,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   };
 
   const onImageClick = (index) => {
-    const newTexture = projects[activeProjectID].field_images[index].url;
+    const newTexture = projects[activeProjectID].images[index];
     setActiveImageIndex(index);
     setCurrentTexture(newTexture);
   };
@@ -667,7 +667,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     e.stopPropagation();
     if (isTransitioning) return;
 
-    const images = projects[activeProjectID].field_images;
+    const images = projects[activeProjectID].images;
     const prevIndex = (activeImageIndex - 1 + images.length) % images.length;
 
     setPreviousImageIndex(activeImageIndex);
@@ -676,7 +676,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
     setTimeout(() => {
       setActiveImageIndex(prevIndex);
-      setCurrentTexture(images[prevIndex].url);
+      setCurrentTexture(images[prevIndex]);
 
       setTimeout(() => {
         setIsTransitioning(false);
@@ -688,7 +688,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     e.stopPropagation();
     if (isTransitioning) return;
 
-    const images = projects[activeProjectID].field_images;
+    const images = projects[activeProjectID].images;
     const nextIndex = (activeImageIndex + 1) % images.length;
 
     setPreviousImageIndex(activeImageIndex);
@@ -697,7 +697,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
     setTimeout(() => {
       setActiveImageIndex(nextIndex);
-      setCurrentTexture(images[nextIndex].url);
+      setCurrentTexture(images[nextIndex]);
 
       setTimeout(() => {
         setIsTransitioning(false);
@@ -714,12 +714,12 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     const project = projects[activeProjectID];
 
     // Safety check: ensure activeImageIndex is within bounds
-    if (!project || !project.field_images || project.field_images.length === 0) {
+    if (!project || !project.images || project.images.length === 0) {
       return null;
     }
 
-    const safeImageIndex = Math.min(activeImageIndex, project.field_images.length - 1);
-    const currentImage = project.field_images[safeImageIndex];
+    const safeImageIndex = Math.min(activeImageIndex, project.images.length - 1);
+    const currentImage = project.images[safeImageIndex];
 
     return (
       <div
@@ -733,10 +733,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         )}
         <div className="project-header">
           <div className="project-meta">
-            <h2>{project.title[0].value}</h2>
+            <h2>{project.title}</h2>
             <ul className="tools">
-              {project.field_tools.map((tool, i) => (
-                <li key={i}>{tool.value}</li>
+              {project.tools.map((tool, i) => (
+                <li key={i}>{tool}</li>
               ))}
             </ul>
           </div>
@@ -775,16 +775,16 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           <div className="project-description">
             <span
               dangerouslySetInnerHTML={{
-                __html: project.body[0].value,
+                __html: project.body,
               }}
             ></span>
           </div>
 
           <div className="project-gallery">
             <div className="gallery-main">
-              <img src={currentImage.url} alt={project.title[0].value} />
+              <img src={currentImage} alt={project.title} />
               <div className="gallery-counter">
-                {safeImageIndex + 1} / {project.field_images.length}
+                {safeImageIndex + 1} / {project.images.length}
               </div>
               <button
                 className="gallery-magnify"
@@ -802,18 +802,18 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             </div>
 
             <div className="gallery-thumbnails">
-              {project.field_images.map((image, i) => (
+              {project.images.map((image, i) => (
                 <div
                   className={`thumbnail ${i === safeImageIndex ? "active" : ""}`}
                   key={i}
                   onClick={() => onImageClick(i)}
                 >
-                  <img src={thumbURL(image.url)} alt="" loading="lazy" />
+                  <img src={thumbURL(image)} alt="" loading="lazy" />
                 </div>
               ))}
             </div>
 
-            {project.field_images.length > 1 && (
+            {project.images.length > 1 && (
               <div className="gallery-nav">
                 <button
                   className="gallery-nav-prev"
@@ -842,14 +842,14 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             <div className="lightbox-content">
               {isTransitioning && (
                 <img
-                  src={project.field_images[previousImageIndex].url}
-                  alt={project.title[0].value}
+                  src={project.images[previousImageIndex]}
+                  alt={project.title}
                   className={`lightbox-image-previous ${transitionDirection}`}
                 />
               )}
               <img
-                src={currentImage.url}
-                alt={project.title[0].value}
+                src={currentImage}
+                alt={project.title}
                 className={isTransitioning ? `lightbox-image-current transitioning ${transitionDirection}` : "lightbox-image-current"}
               />
               <button
@@ -859,7 +859,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
               >
                 <img src={close} alt="Close" />
               </button>
-              {project.field_images.length > 1 && (
+              {project.images.length > 1 && (
                 <>
                   <button
                     className="lightbox-prev"
@@ -878,7 +878,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
                 </>
               )}
               <div className="lightbox-counter">
-                {safeImageIndex + 1} / {project.field_images.length}
+                {safeImageIndex + 1} / {project.images.length}
               </div>
             </div>
           </div>
@@ -899,7 +899,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           className={activeThumbnailID === i ? 'active' : ''}
           role="button"
           tabIndex={0}
-          aria-label={`Open project: ${project.title[0].value}`}
+          aria-label={`Open project: ${project.title}`}
           onMouseEnter={(e) => onProjectOver(i, e)}
           // Keyboard focus recolours the tile the same way a pointer does,
           // otherwise tabbing through the grid moves an invisible cursor.
@@ -909,11 +909,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           onClick={() => onProjectClick(i)}
           onKeyDown={(e) => onProjectKeyDown(i, e)}
         >
-          <h4>{project.title[0].value}</h4>
+          <h4>{project.title}</h4>
           <div
             className="background"
             style={{
-              backgroundImage: "url(" + thumbURL(project.field_images[0].url) + ")",
+              backgroundImage: "url(" + thumbURL(project.images[0]) + ")",
             }}
           ></div>
         </li>

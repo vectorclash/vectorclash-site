@@ -1,166 +1,144 @@
 [
   {
-    "title": [{ "value": "Spinor" }],
-    "body": [
-      {
-        "value": "<p>Site preloaders exist to fill dead time, and most of them do nothing with it. Spinor set out to treat that interval as the first thing a visitor actually experiences: a three-dimensional introduction that resolves into the page, rather than a spinner that merely occupies the wait.</p><p>Built on three.js, the scene selects its visual elements procedurally at runtime, so each page load resolves into a subtly different composition—enough variation to stay interesting for a returning visitor without drifting off-brand. A preloader that is itself slow to start defeats its own purpose, so the scene had to reach its first frame quickly and stay cheap to run while the rest of the page loaded behind it. GSAP gave me the timing precision to orchestrate the sequences, and the whole thing ships as a self-contained module inside a WordPress site, with Sass and Webpack rounding out the build pipeline.</p>"
-      }
+    "title": "Spinor",
+    "body": "<p>Site preloaders exist to fill dead time, and most of them do nothing with it. Spinor set out to treat that interval as the first thing a visitor actually experiences: a three-dimensional introduction that resolves into the page, rather than a spinner that merely occupies the wait.</p><p>Built on three.js, the scene selects its visual elements procedurally at runtime, so each page load resolves into a subtly different composition—enough variation to stay interesting for a returning visitor without drifting off-brand. A preloader that is itself slow to start defeats its own purpose, so the scene had to reach its first frame quickly and stay cheap to run while the rest of the page loaded behind it. GSAP gave me the timing precision to orchestrate the sequences, and the whole thing ships as a self-contained module inside a WordPress site, with Sass and Webpack rounding out the build pipeline.</p>",
+    "tools": [
+      "three.js",
+      "GSAP",
+      "Sass",
+      "Webpack",
+      "WordPress"
     ],
-    "field_tools": [
-      { "value": "three.js" },
-      { "value": "GSAP" },
-      { "value": "Sass" },
-      { "value": "Webpack" },
-      { "value": "WordPress" }
+    "images": [
+      "/projects/spinor/images/spinor_img01.jpg",
+      "/projects/spinor/images/spinor_img02.jpg",
+      "/projects/spinor/images/spinor_img03.jpg",
+      "/projects/spinor/images/spinor_img04.jpg",
+      "/projects/spinor/images/spinor_img05.jpg"
     ],
-    "field_images": [
-      { "url": "/projects/spinor/images/spinor_img01.jpg" },
-      { "url": "/projects/spinor/images/spinor_img02.jpg" },
-      { "url": "/projects/spinor/images/spinor_img03.jpg" },
-      { "url": "/projects/spinor/images/spinor_img04.jpg" },
-      { "url": "/projects/spinor/images/spinor_img05.jpg" }
-    ],
-    "field_videos": [{ "url": "/projects/spinor/videos/spinor.mp4" }]
-  },
-  {
-    "title": [{ "value": "Winc" }],
-    "body": [
-      {
-        "value": "<p>Winc was a complete ecommerce platform built from the ground up on native web components—no framework, just the browser's own component model. It was my first time working that close to the platform, and the constraint turned out to be the interesting part: everything the project needed had to be assembled from primitives rather than pulled from an ecosystem.</p><p>Each component was a self-contained unit carrying its own encapsulated animations, driven by GSAP so that motion stayed with the element it belonged to instead of being coordinated from above. That decision shaped everything downstream. Composing a page meant assembling components that already knew how to animate themselves, which kept layouts flexible without a central timeline to keep in sync, and it meant animation behavior stayed consistent because each part brought its own. The library grew to cover the full shopping experience, and the payoff was that new page variations could be composed from existing pieces rather than built from scratch.</p>"
-      }
-    ],
-    "field_tools": [
-      { "value": "Web Components" },
-      { "value": "GSAP" }
-    ],
-    "field_images": [
-      { "url": "/projects/winc/images/winc_img01.jpg" },
-      { "url": "/projects/winc/images/winc_img02.jpg" },
-      { "url": "/projects/winc/images/winc_img03.jpg" },
-      { "url": "/projects/winc/images/winc_img04.jpg" },
-      { "url": "/projects/winc/images/winc_img05.jpg" },
-      { "url": "/projects/winc/images/winc_img06.jpg" },
-      { "url": "/projects/winc/images/winc_img07.jpg" }
-    ],
-    "field_videos": [{ "url": "/projects/winc/videos/winc.mp4" }]
-  },
-  {
-    "title": [{ "value": "Honey 10" }],
-    "body": [
-      {
-        "value": "<p>Honey Soundsystem's 10th anniversary called for a dancefloor projection—not a backdrop looping regardless of what was happening in the room, but a visual layer that belonged to the night and moved with the DJ sets as they unfolded.</p><p>Using three.js as the rendering foundation, I built a generative geometric system around a deliberate constraint: keep the forms simple enough to read from across a room at speed, and let the complexity come from how they move rather than from how they look. Because those motions are driven by formula rather than keyframes, every parameter in them is a number that something else can push—and what pushes them is the music. Audio data from the sound system feeds the animation parameters directly, so the projection surface stops being a screen showing something and becomes a visual reading of what the room is hearing.</p>"
-      }
-    ],
-    "field_tools": [
-      { "value": "Event Projection" },
-      { "value": "Sound Reactivity" },
-      { "value": "three.js" },
-      { "value": "GSAP" }
-    ],
-    "field_images": [
-      { "url": "/projects/honey/images/honey_img01.jpg" },
-      { "url": "/projects/honey/images/honey_img02.jpg" },
-      { "url": "/projects/honey/images/honey_img03.jpg" },
-      { "url": "/projects/honey/images/honey_img04.jpg" },
-      { "url": "/projects/honey/images/honey_img05.jpg" }
-    ],
-    "field_videos": [{ "url": "/projects/honey/videos/honey.mp4" }]
-  },
-  {
-    "title": [{ "value": "Chromaforge" }],
-    "pinned": true,
-    "body": [
-      {
-        "value": "<p>Chromaforge began as a question I wanted to answer for myself: how much of what makes a palette work is structural, and whether that structure could be generated rather than picked by hand. The experiment became a React application—a generative art studio running in the browser, where the algorithm proposes the color relationships and the artwork follows from them. Every decision in it is mine, design and engineering both, arrived at by iteration rather than by specification.</p><p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states. Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p><p><a href='https://chromaforge.app/' target='_blank' rel='noopener noreferrer'>View Project</a></p>"
-      }
-    ],
-    "field_tools": [
-      { "value": "React" },
-      { "value": "Vite" },
-      { "value": "GSAP" },
-      { "value": "tinycolor" },
-      { "value": "Supabase" }
-    ],
-    "field_images": [
-      { "url": "/projects/forge/images/forge_img01.jpg" },
-      { "url": "/projects/forge/images/forge_img02.jpg" },
-      { "url": "/projects/forge/images/forge_img03.jpg" },
-      { "url": "/projects/forge/images/forge_img04.jpg" },
-      { "url": "/projects/forge/images/forge_img05.jpg" },
-      { "url": "/projects/forge/images/forge_img06.jpg" },
-      { "url": "/projects/forge/images/forge_img07.jpg" },
-      { "url": "/projects/forge/images/forge_img08.jpg" }
-    ],
-    "field_videos": [
-      { "url": "/projects/forge/videos/FusedCryosphere-ebeb.mp4"},
-      { "url": "/projects/forge/videos/GeodesicVortex-49ea.mp4"}
+    "videos": [
+      "/projects/spinor/videos/spinor.mp4"
     ]
   },
   {
-    "title": [{ "value": "Gap Denim" }],
-    "body": [
-      {
-        "value": "<p>Gap has been woven into the fabric of American culture since 1969, and the brief was to chronicle that history as an interactive application—a permanent installation for the Gap museum at their San Francisco headquarters, where it sits between the company's past and the employees and visitors who move through the space every day. Work that is installed rather than deployed carries its own set of constraints: it runs unattended, it is touched by people who never chose to open it, and nobody is going to redeploy it when a browser updates.</p><p>I built it to work as much as an experience as an archive, moving visitors through decades of cultural moments, campaigns, and brand milestones by touch. GSAP gave me the precision and expressiveness to bring each chapter of the timeline to life, and Webpack kept the build lean enough to hold up under continuous unattended use. The aim throughout was for it to read as something a visitor moves through, rather than a corporate timeline being presented to them.</p>"
-      }
+    "title": "Winc",
+    "body": "<p>Winc was a complete ecommerce platform built from the ground up on native web components—no framework, just the browser's own component model. It was my first time working that close to the platform, and the constraint turned out to be the interesting part: everything the project needed had to be assembled from primitives rather than pulled from an ecosystem.</p><p>Each component was a self-contained unit carrying its own encapsulated animations, driven by GSAP so that motion stayed with the element it belonged to instead of being coordinated from above. That decision shaped everything downstream. Composing a page meant assembling components that already knew how to animate themselves, which kept layouts flexible without a central timeline to keep in sync, and it meant animation behavior stayed consistent because each part brought its own. The library grew to cover the full shopping experience, and the payoff was that new page variations could be composed from existing pieces rather than built from scratch.</p>",
+    "tools": [
+      "Web Components",
+      "GSAP"
     ],
-    "field_tools": [
-      { "value": "GSAP" },
-      { "value": "Webpack" }
+    "images": [
+      "/projects/winc/images/winc_img01.jpg",
+      "/projects/winc/images/winc_img02.jpg",
+      "/projects/winc/images/winc_img03.jpg",
+      "/projects/winc/images/winc_img04.jpg",
+      "/projects/winc/images/winc_img05.jpg",
+      "/projects/winc/images/winc_img06.jpg",
+      "/projects/winc/images/winc_img07.jpg"
     ],
-    "field_images": [
-      { "url": "/projects/gap/images/gap_img01.jpg" },
-      { "url": "/projects/gap/images/gap_img02.jpg" },
-      { "url": "/projects/gap/images/gap_img03.jpg" },
-      { "url": "/projects/gap/images/gap_img04.jpg" },
-      { "url": "/projects/gap/images/gap_img05.jpg" },
-      { "url": "/projects/gap/images/gap_img06.jpg" },
-      { "url": "/projects/gap/images/gap_img07.jpg" },
-      { "url": "/projects/gap/images/gap_img08.jpg" }
-    ],
-    "field_videos": []
+    "videos": [
+      "/projects/winc/videos/winc.mp4"
+    ]
   },
   {
-    "title": [{ "value": "Nylas" }],
-    "body": [
-      {
-        "value": "<p>Nylas needed to explain a complex platform to an audience that would not read an architecture diagram twice. The brief was an immersive SVG animation module living inside their WordPress site—an explainer carrying the shape of the product's feature set in a way that static copy and diagrams could not, while staying accurate enough to survive a technical readership. The difficulty in work like this is rarely the animation; it is deciding what to leave out without misrepresenting how the system actually behaves.</p><p>I architected the animation system as a self-contained module, designed to drop into the existing WordPress environment without disturbing the page infrastructure around it. GSAP served as the animation engine, sequencing layered SVG elements across multiple synchronized timelines. Each passage was choreographed to move the viewer's attention through one idea at a time—connections, data flows, and API interactions rendered as purposeful motion rather than as labeled boxes. The test of a piece like this is whether a developer and a decision-maker come away with the same understanding, which is a harder target than either one alone.</p>"
-      }
+    "title": "Honey 10",
+    "body": "<p>Honey Soundsystem's 10th anniversary called for a dancefloor projection—not a backdrop looping regardless of what was happening in the room, but a visual layer that belonged to the night and moved with the DJ sets as they unfolded.</p><p>Using three.js as the rendering foundation, I built a generative geometric system around a deliberate constraint: keep the forms simple enough to read from across a room at speed, and let the complexity come from how they move rather than from how they look. Because those motions are driven by formula rather than keyframes, every parameter in them is a number that something else can push—and what pushes them is the music. Audio data from the sound system feeds the animation parameters directly, so the projection surface stops being a screen showing something and becomes a visual reading of what the room is hearing.</p>",
+    "tools": [
+      "Event Projection",
+      "Sound Reactivity",
+      "three.js",
+      "GSAP"
     ],
-    "field_tools": [
-      { "value": "GSAP" },
-      { "value": "WordPress" }
+    "images": [
+      "/projects/honey/images/honey_img01.jpg",
+      "/projects/honey/images/honey_img02.jpg",
+      "/projects/honey/images/honey_img03.jpg",
+      "/projects/honey/images/honey_img04.jpg",
+      "/projects/honey/images/honey_img05.jpg"
     ],
-    "field_images": [
-      { "url": "/projects/nylas/images/nylas_img01.jpg" },
-      { "url": "/projects/nylas/images/nylas_img02.jpg" },
-      { "url": "/projects/nylas/images/nylas_img03.jpg" }
-    ],
-    "field_videos": []
+    "videos": [
+      "/projects/honey/videos/honey.mp4"
+    ]
   },
   {
-    "title": [{ "value": "AT&T" }],
-    "body": [
-      {
-        "value": "<p>AT&amp;T ran on volume—animated banner ads and social video produced continuously for a brand almost everyone in the country recognizes on sight. The discipline the work demanded was less about any single execution than about consistency: every animation had to land as polished and on-brand while fitting the technical specifications of whichever ad platform or social channel it was bound for. GSAP drove the interactive banners, where precise timing control mattered because layered text, imagery, and transitions all had to be choreographed inside tight filesize limits. After Effects handled the social video pipeline, where the motion needed to feel cinematic and still hold up on a phone.</p><p>The more interesting half of the engagement had little to do with the creative. Producing at that rate surfaces the same bottlenecks over and over, and most of them were mechanical: resizing, reformatting, and exporting the same creative across every spec a campaign required. I designed and built automation workflows to take that handoff over, and what had been a labor-intensive process of duplicating files and adjusting them by hand became a pipeline that ran itself. The value was less the time saved than what the time got spent on instead—the quality of the work rather than the mechanics of shipping it.</p>"
-      }
+    "title": "Chromaforge",
+    "pinned": true,
+    "body": "<p>Chromaforge began as a question I wanted to answer for myself: how much of what makes a palette work is structural, and whether that structure could be generated rather than picked by hand. The experiment became a React application—a generative art studio running in the browser, where the algorithm proposes the color relationships and the artwork follows from them. Every decision in it is mine, design and engineering both, arrived at by iteration rather than by specification.</p><p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states. Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p><p><a href='https://chromaforge.app/' target='_blank' rel='noopener noreferrer'>View Project</a></p>",
+    "tools": [
+      "React",
+      "Vite",
+      "GSAP",
+      "tinycolor",
+      "Supabase"
     ],
-    "field_tools": [
-      { "value": "GSAP" },
-      { "value": "Adobe Animate" },
-      { "value": "After Effects" }
+    "images": [
+      "/projects/forge/images/forge_img01.jpg",
+      "/projects/forge/images/forge_img02.jpg",
+      "/projects/forge/images/forge_img03.jpg",
+      "/projects/forge/images/forge_img04.jpg",
+      "/projects/forge/images/forge_img05.jpg",
+      "/projects/forge/images/forge_img06.jpg",
+      "/projects/forge/images/forge_img07.jpg",
+      "/projects/forge/images/forge_img08.jpg"
     ],
-    "field_images": [
-      { "url": "/projects/att/images/att_img01.jpg" },
-      { "url": "/projects/att/images/att_img02.jpg" },
-      { "url": "/projects/att/images/att_img03.jpg" },
-      { "url": "/projects/att/images/att_img04.jpg" },
-      { "url": "/projects/att/images/att_img05.jpg" },
-      { "url": "/projects/att/images/att_img06.jpg" },
-      { "url": "/projects/att/images/att_img07.jpg" }
+    "videos": [
+      "/projects/forge/videos/FusedCryosphere-ebeb.mp4",
+      "/projects/forge/videos/GeodesicVortex-49ea.mp4"
+    ]
+  },
+  {
+    "title": "Gap Denim",
+    "body": "<p>Gap has been woven into the fabric of American culture since 1969, and the brief was to chronicle that history as an interactive application—a permanent installation for the Gap museum at their San Francisco headquarters, where it sits between the company's past and the employees and visitors who move through the space every day. Work that is installed rather than deployed carries its own set of constraints: it runs unattended, it is touched by people who never chose to open it, and nobody is going to redeploy it when a browser updates.</p><p>I built it to work as much as an experience as an archive, moving visitors through decades of cultural moments, campaigns, and brand milestones by touch. GSAP gave me the precision and expressiveness to bring each chapter of the timeline to life, and Webpack kept the build lean enough to hold up under continuous unattended use. The aim throughout was for it to read as something a visitor moves through, rather than a corporate timeline being presented to them.</p>",
+    "tools": [
+      "GSAP",
+      "Webpack"
     ],
-    "field_videos": [
-      { "url": "/projects/att/videos/delivery.mp4" },
-      { "url": "/projects/att/videos/ladybugs.mp4" }
+    "images": [
+      "/projects/gap/images/gap_img01.jpg",
+      "/projects/gap/images/gap_img02.jpg",
+      "/projects/gap/images/gap_img03.jpg",
+      "/projects/gap/images/gap_img04.jpg",
+      "/projects/gap/images/gap_img05.jpg",
+      "/projects/gap/images/gap_img06.jpg",
+      "/projects/gap/images/gap_img07.jpg",
+      "/projects/gap/images/gap_img08.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "title": "Nylas",
+    "body": "<p>Nylas needed to explain a complex platform to an audience that would not read an architecture diagram twice. The brief was an immersive SVG animation module living inside their WordPress site—an explainer carrying the shape of the product's feature set in a way that static copy and diagrams could not, while staying accurate enough to survive a technical readership. The difficulty in work like this is rarely the animation; it is deciding what to leave out without misrepresenting how the system actually behaves.</p><p>I architected the animation system as a self-contained module, designed to drop into the existing WordPress environment without disturbing the page infrastructure around it. GSAP served as the animation engine, sequencing layered SVG elements across multiple synchronized timelines. Each passage was choreographed to move the viewer's attention through one idea at a time—connections, data flows, and API interactions rendered as purposeful motion rather than as labeled boxes. The test of a piece like this is whether a developer and a decision-maker come away with the same understanding, which is a harder target than either one alone.</p>",
+    "tools": [
+      "GSAP",
+      "WordPress"
+    ],
+    "images": [
+      "/projects/nylas/images/nylas_img01.jpg",
+      "/projects/nylas/images/nylas_img02.jpg",
+      "/projects/nylas/images/nylas_img03.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "title": "AT&T",
+    "body": "<p>AT&amp;T ran on volume—animated banner ads and social video produced continuously for a brand almost everyone in the country recognizes on sight. The discipline the work demanded was less about any single execution than about consistency: every animation had to land as polished and on-brand while fitting the technical specifications of whichever ad platform or social channel it was bound for. GSAP drove the interactive banners, where precise timing control mattered because layered text, imagery, and transitions all had to be choreographed inside tight filesize limits. After Effects handled the social video pipeline, where the motion needed to feel cinematic and still hold up on a phone.</p><p>The more interesting half of the engagement had little to do with the creative. Producing at that rate surfaces the same bottlenecks over and over, and most of them were mechanical: resizing, reformatting, and exporting the same creative across every spec a campaign required. I designed and built automation workflows to take that handoff over, and what had been a labor-intensive process of duplicating files and adjusting them by hand became a pipeline that ran itself. The value was less the time saved than what the time got spent on instead—the quality of the work rather than the mechanics of shipping it.</p>",
+    "tools": [
+      "GSAP",
+      "Adobe Animate",
+      "After Effects"
+    ],
+    "images": [
+      "/projects/att/images/att_img01.jpg",
+      "/projects/att/images/att_img02.jpg",
+      "/projects/att/images/att_img03.jpg",
+      "/projects/att/images/att_img04.jpg",
+      "/projects/att/images/att_img05.jpg",
+      "/projects/att/images/att_img06.jpg",
+      "/projects/att/images/att_img07.jpg"
+    ],
+    "videos": [
+      "/projects/att/videos/delivery.mp4",
+      "/projects/att/videos/ladybugs.mp4"
     ]
   }
 ]
