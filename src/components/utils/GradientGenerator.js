@@ -28,9 +28,9 @@ const MAX_STEP = 78;
 
 // The overall level a palette sits at, rolled once per palette and weighted
 // towards the dark end. Every palette used to key off the same mid lightness,
-// so each one was fine on its own and the header never stopped shouting. The
+// so each one was fine on its own and the hero never stopped shouting. The
 // weights are shares of one roll, not probabilities.
-// Once in a while the header should be allowed to shout. A flare ignores the
+// Once in a while the hero should be allowed to shout. A flare ignores the
 // keys and the step cap both: it takes one of the two widest hue relationships,
 // opens the step up far enough to actually travel them, holds full saturation
 // and sits at a bright level. Rare enough that it reads as an event rather than
@@ -42,7 +42,7 @@ const FLARE_LEVEL = [0.44, 0.58];
 const TONAL_KEYS = [
   { weight: 4, level: [0.12, 0.24] }, // deep -- the field reads as dark, colour in it
   { weight: 4, level: [0.24, 0.39] }, // low -- shadowed colour, still plainly colour
-  { weight: 2, level: [0.39, 0.52] }, // open -- as bright as the header now goes
+  { weight: 2, level: [0.39, 0.52] }, // open -- as bright as the hero now goes
 ];
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -87,7 +87,7 @@ export default class GradientGenerator {
     // either side, and where in the wave the first stop lands. Sampling a sine
     // rather than a straight ramp lets a palette fall dark through the middle
     // and come back up, instead of only ever climbing from one end to the other.
-    // Only the header asks to vary; everything else keeps the old mid level.
+    // Only the hero asks to vary; everything else keeps the old mid level.
     const level = this.flare
       ? FLARE_LEVEL[0] + Math.random() * (FLARE_LEVEL[1] - FLARE_LEVEL[0])
       : varied

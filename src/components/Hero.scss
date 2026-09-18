@@ -1,4 +1,4 @@
-.header {
+.hero {
   // Was a hardcoded red/navy gradient, which had nothing to do with the palette
   // this load actually generated -- it painted for a beat on every load and then
   // was covered by the real gradient fading in, reading as a flash of the wrong
@@ -101,7 +101,7 @@
       }
     }
 
-    .header-buttons {
+    .hero-buttons {
       opacity: 0;
     }
 

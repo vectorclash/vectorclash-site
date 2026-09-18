@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { gsap, ScrollTrigger } from "gsap/all";
 import ProjectGrid from "./ProjectGrid";
-import HeaderIcon from "./HeaderIcon";
+import HeadingIcon from "./HeadingIcon";
 import "./Projects.scss";
 import projectsData from "../data/projects.json";
 
@@ -48,7 +48,7 @@ function Projects() {
     <section className={`container projects ${isProjectActive ? 'project-open' : ''}`} ref={mountRef}>
       <div className="project-three-container" ref={threeContainerRef}></div>
       <div className="column">
-        <h3>Projects <HeaderIcon /></h3>
+        <h3>Projects <HeadingIcon /></h3>
         <ProjectGrid
           projects={projects}
           threeContainerRef={threeContainerRef}

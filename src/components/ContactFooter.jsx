@@ -7,7 +7,7 @@ import bsIcon from "../images/bs-icon.svg";
 import liIcon from "../images/li-icon.svg";
 import ghIcon from "../images/gh-icon.svg";
 import AnimatedParticles from "./AnimatedParticles";
-import HeaderIcon from "./HeaderIcon";
+import HeadingIcon from "./HeadingIcon";
 import profileData from "../data/profile.json";
 
 const socialIcons = {
@@ -110,7 +110,7 @@ function ContactFooter() {
     <footer className="contact-footer container" ref={mount}>
       <article className="column">
         <div className="footer-left">
-          <h3>Contact me <HeaderIcon /></h3>
+          <h3>Contact me <HeadingIcon /></h3>
           <p>
             <a className="phone-link" href={phone.href}>
               {phone.display}

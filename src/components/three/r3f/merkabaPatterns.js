@@ -7,7 +7,7 @@ import * as THREE from 'three';
  * and cross-dissolved. Ported from the motion lab unchanged: no React and no
  * GSAP in here, only three's vector maths.
  *
- * The cluster backs the header type, so a pattern may not trade away the
+ * The cluster backs the hero type, so a pattern may not trade away the
  * silhouette for its effect: each one is written to hold its projected
  * footprint inside a band, and declares a `hold` weight saying how hard the
  * footprint governor is allowed to correct it on top of that.
@@ -21,7 +21,7 @@ import * as THREE from 'three';
  *
  * `calm` is the conductor's weighting, not anything the pattern reads: it sets
  * both how often a pattern is picked and how long it is held once it is. The
- * cluster sits behind the header type for the whole time someone is reading
+ * cluster sits behind the hero type for the whole time someone is reading
  * it, so the resting states have to be what it is usually doing and the big
  * gestures have to be punctuation. Weighting selection alone was not enough --
  * a rare pattern held as long as a common one still puts the cluster in an
@@ -133,7 +133,7 @@ function gridCols(n) { return Math.max(2, Math.round(Math.sqrt(n * 1.3))); }
 
 
 // ------------------------------------------------------------- governor
-// The cluster backs the header type, so its silhouette is a budget, not an
+// The cluster backs the hero type, so its silhouette is a budget, not an
 // outcome. Correcting overall size alone is not enough: the patterns that
 // failed hardest were not small, they were *thin* -- a ring turned edge-on,
 // a trail drawn as a wire, a plane rotated away. Both need the same fix
@@ -473,7 +473,7 @@ var PATTERNS = [
 
 
 // ------------------------------------------------------------ conductor aid
-// The cluster sits behind the header type for as long as someone is reading
+// The cluster sits behind the hero type for as long as someone is reading
 // it, so what it is doing has to be mostly still -- but a hero that is evenly,
 // predictably still is just as dead as one that never stops. What this section
 // buys is a rhythm with runs in it: long stretches of calm, occasional

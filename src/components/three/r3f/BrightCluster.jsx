@@ -61,7 +61,7 @@ const SIZE_RATIO = 1.4;
 // The state for the current transition lives on the conductor ref below.
 
 // Everything in here is framed against the shorter axis of the canvas. On a
-// desktop header the camera's 60-degree vertical field is the tighter of the
+// desktop hero the camera's 60-degree vertical field is the tighter of the
 // two, and every size below was chosen against it; on a phone held upright the
 // frame is roughly half as wide as it is tall, the horizontal field becomes the
 // tight one, and a composition sized for the vertical runs off both edges.
@@ -155,7 +155,7 @@ const SPOT_RMAX = 150;
 const SPOT_INTENSITY = 3500;
 const SPOT_DISTANCE = 500;
 // The camera frames +-75 units vertically at the cluster's depth but +-133
-// horizontally on a desktop header, so an unconstrained shell spends most of
+// horizontally on a desktop hero, so an unconstrained shell spends most of
 // its time above or below the frame. Flattening it towards the equator takes the shapes from
 // on-screen 32% of the time to 46%, which is as far as this goes while still
 // clearing the cluster.
@@ -382,7 +382,7 @@ function MerkabaCluster({ geometry, fit }) {
     const group = groupRef.current;
     if (!group) return;
 
-    // The header pauses its frameloop when scrolled out of view, so the first
+    // The hero pauses its frameloop when scrolled out of view, so the first
     // delta back can be enormous.
     const delta = Math.min(rawDelta, 1 / 20);
     const c = conductor.current;
@@ -663,7 +663,7 @@ export default function BrightCluster() {
   // Select narrowly: the canvas pixel size is all this needs, and subscribing
   // to the whole store would re-render on every camera tween. Pixels rather
   // than r3f's `viewport`, because viewport is measured at the camera's
-  // distance from the origin and the header tweens the camera on scroll -- the
+  // distance from the origin and the hero tweens the camera on scroll -- the
   // ratio of the two is the same either way, but taking it from size means the
   // fit cannot breathe as the page moves.
   const size = useThree((state) => state.size);

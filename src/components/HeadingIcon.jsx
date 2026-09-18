@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import "./HeaderIcon.scss";
+import "./HeadingIcon.scss";
 
 // A tesseract: 16 vertices at every corner of {-1,1}^4, with an edge wherever
 // two corners differ in exactly one coordinate.
@@ -115,7 +115,7 @@ const subscribe = (lines) => {
   };
 };
 
-const HeaderIcon = () => {
+const HeadingIcon = () => {
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ const HeaderIcon = () => {
   }, []);
 
   return (
-    <span className="header-icon">
+    <span className="heading-icon">
       <svg
         ref={svgRef}
         viewBox="-50 -50 100 100"
@@ -140,4 +140,4 @@ const HeaderIcon = () => {
   );
 };
 
-export default HeaderIcon;
+export default HeadingIcon;

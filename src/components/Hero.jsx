@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
 import { gsap, SplitText, ScrollTrigger } from "gsap/all";
-import "./Header.scss";
+import "./Hero.scss";
 import PDFIcon from "./PDFIcon";
-import ThreeHeaderBackground from "./ThreeHeaderBackground";
+import HeroBackground from "./HeroBackground";
 import Logo from "./Logo";
 import profileData from "../data/profile.json";
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
-function Header() {
+function Hero() {
   const myRef = useRef(null);
 
   // Only a width change relocks the height. On mobile the address bar
@@ -17,7 +17,7 @@ function Header() {
   useEffect(() => {
     let lastWidth = window.innerWidth;
 
-    const lockHeaderHeight = () => {
+    const lockHeroHeight = () => {
       if (window.innerWidth <= 600 && myRef.current) {
         const h = window.innerHeight;
         myRef.current.style.height = `${h}px`;
@@ -25,12 +25,12 @@ function Header() {
       }
     };
 
-    lockHeaderHeight();
+    lockHeroHeight();
 
     const onResize = () => {
       if (window.innerWidth !== lastWidth) {
         lastWidth = window.innerWidth;
-        lockHeaderHeight();
+        lockHeroHeight();
       }
     };
 
@@ -130,7 +130,7 @@ function Header() {
       );
 
       tl.fromTo(
-        myRef.current.querySelector(".header-buttons"),
+        myRef.current.querySelector(".hero-buttons"),
         { alpha: 0, y: 30 },
         { duration: 0.5, y: 0, alpha: 1, ease: "quad.out" }
       );
@@ -146,7 +146,7 @@ function Header() {
   }, []);
 
   return (
-    <header className="header container" ref={myRef}>
+    <header className="hero container" ref={myRef}>
       <article className="column">
         <Logo />
         <h2>{profileData.greeting}</h2>
@@ -154,7 +154,7 @@ function Header() {
           <b>{profileData.name.full}</b>
         </h1>
         <p dangerouslySetInnerHTML={{ __html: profileData.intro }} />
-        <div className="header-buttons">
+        <div className="hero-buttons">
           <a
             href={profileData.resume.url}
             target="_blank"
@@ -164,9 +164,9 @@ function Header() {
           </a>
         </div>
       </article>
-      <ThreeHeaderBackground />
+      <HeroBackground />
     </header>
   );
 }
 
-export default Header;
+export default Hero;

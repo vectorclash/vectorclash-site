@@ -1,14 +1,14 @@
 import React, { lazy, Suspense, useMemo, useState } from "react";
-import "./ThreeHeaderBackground.scss";
+import "./HeroBackground.scss";
 import GradientGenerator from "./utils/GradientGenerator";
 
 // three, drei and postprocessing together are the bulk of the bundle. Loading
 // them statically meant the hero's markup, type and layout all waited on ~1.4MB
-// of WebGL that paints a background. Split out, the header renders immediately
+// of WebGL that paints a background. Split out, the hero renders immediately
 // on the flat fallback and the scene fades in over it when it arrives.
-const HeaderScene = lazy(() => import("./three/r3f/HeaderScene"));
+const HeroScene = lazy(() => import("./three/r3f/HeroScene"));
 
-export default function ThreeHeaderBackground() {
+export default function HeroBackground() {
   const colors = useMemo(() => {
     let colorAmount = 3;
     let randomChance = Math.random();
@@ -39,7 +39,7 @@ export default function ThreeHeaderBackground() {
   return (
     <div className="three-background" style={{ backgroundImage: fallback }}>
       <Suspense fallback={null}>
-        <HeaderScene
+        <HeroScene
           colors={colors}
           fallback={fallback}
           ready={sceneReady}

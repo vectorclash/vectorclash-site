@@ -26,7 +26,7 @@
          could not discover until that stylesheet had downloaded and parsed.
          Left render-blocking on purpose: deferring it (media="print" swap) only
          bought ~35ms of first paint, and it delays when the font files are
-         requested. The header splits its headline on document.fonts.ready,
+         requested. The hero splits its headline on document.fonts.ready,
          which already resolves early (before React has mounted any text), so
          the split leans on the timeline's 1s delay for the faces to arrive --
          no reason to make that window tighter than it is. -->

@@ -158,10 +158,10 @@ function paletteAccent(hex) {
   return `#${col.getHexString()}`;
 }
 
-// The header runs two fields, and both map the palette to *screen* space rather
+// The hero runs two fields, and both map the palette to *screen* space rather
 // than to the UVs of the backdrop plane: the original shader spread its stops
 // across a 5000-unit plane while the camera only ever framed ~1074 units of it,
-// so the header showed a thin slice of the ramp -- on a phone, a slice narrow
+// so the hero showed a thin slice of the ramp -- on a phone, a slice narrow
 // enough to land inside a single stop.
 //
 //   calm   a linear gradient across the viewport, turning slowly on its axis
@@ -386,7 +386,7 @@ function writeChaosStops(out, strip, offset) {
   }
 }
 
-// The strip as it starts: the palette the header was handed in cell 1, where
+// The strip as it starts: the palette the hero was handed in cell 1, where
 // the window opens, with fresh ones around it. Cell 3's own seam is left unset
 // because nothing can reach it -- it is overwritten on the shift that would
 // bring it into range.
@@ -486,7 +486,7 @@ const TURN_PERIODS = [313, 197, 89];
 
 // The palettes strung end to end, sampled as one continuous gradient. The
 // viewport is a window one palette wide onto that strip, and it never stops
-// moving: uOffset walks it forward for as long as the header is on screen, so
+// moving: uOffset walks it forward for as long as the hero is on screen, so
 // the colour is always leaving one side of the screen while more of it arrives
 // from the other. There is no change event and nothing crossfades -- a palette
 // is simply what the window happens to be framing at the time.
@@ -497,7 +497,7 @@ const TURN_PERIODS = [313, 197, 89];
 // that shift frame the same colours, so it is invisible, and the strip stays
 // three palettes long however long the page is left open.
 //
-// Within a palette the stops mix straight, which is the gradient the header has
+// Within a palette the stops mix straight, which is the gradient the hero has
 // always drawn. Only the seams blend polar, because those are the pairs that
 // can be anywhere on the wheel from each other, and a straight mix between
 // opposites passes through grey on the way.
@@ -560,7 +560,7 @@ function buildFragmentShader(octaves) {
         // rocking either side of a fixed heading.
         uniform float uAngle;
         uniform vec3  uStrip[${STRIP_STOPS}];
-        // How far into a chaos episode the header is: 0 calm, 1 full chaos.
+        // How far into a chaos episode the hero is: 0 calm, 1 full chaos.
         uniform float uChaos;
         // Both solved on the CPU once a frame. The source positions depend only
         // on time and aspect ratio, and the chaos field's eight colours depend
@@ -626,7 +626,7 @@ ${FIELDS}      `;
 
 // A chaos episode, in seconds of *rendered* time. Every clock in this field is
 // integrated from dt rather than read off a wall clock, so nothing accrues while
-// the header is scrolled out of view and parked -- an episode cannot happen with
+// the hero is scrolled out of view and parked -- an episode cannot happen with
 // nobody watching, and cannot be half over by the time the hero comes back.
 //
 // The gap between episodes is drawn from an exponential rather than picked out
@@ -775,7 +775,7 @@ function AnimatedGradientBackground({ colors }) {
       uChaos: { value: 0 },
       uOffset: { value: 0 },
       uAngle: { value: angleStartRef.current },
-      // The header opens on the palette it was handed, and the rest of the
+      // The hero opens on the palette it was handed, and the rest of the
       // strip is rolled straight away -- so the flow has somewhere to go from
       // the first frame, rather than creeping through two copies of the opening
       // gradient for the first minute.
@@ -807,7 +807,7 @@ function AnimatedGradientBackground({ colors }) {
   useFrame((state, delta) => {
     // r3f resets clock.elapsedTime to 0 whenever frameloop changes, so the
     // field keeps its own clock -- otherwise every source would snap back to
-    // its starting position each time the header scrolled into view.
+    // its starting position each time the hero scrolled into view.
     // Clamped to absorb the long first delta after a resume.
     const dt = Math.min(delta, 1 / 30);
 
@@ -822,7 +822,7 @@ function AnimatedGradientBackground({ colors }) {
     // its rate is exponential in the wander and there is no closed form for
     // where that has got to. Either way it is the field's own clock, which only
     // advances on rendered frames -- so both pick up where they left off when
-    // the header scrolls back into view, rather than jumping to wherever a wall
+    // the hero scrolls back into view, rather than jumping to wherever a wall
     // clock would have carried them.
     material.uniforms.uAngle.value =
       angleStartRef.current + TURN_DRIFT * time + TURN_SWING * turnWander(time);
@@ -847,7 +847,7 @@ function AnimatedGradientBackground({ colors }) {
     if (chaos <= 0) return;
 
     // Everything below here is the chaos field's, and none of it runs while the
-    // header is calm.
+    // hero is calm.
     //
     // The ladder is held for four seconds at a time, renewed every frame the
     // field is on screen. Four outlasts one of the governor's sampling windows,
@@ -1094,7 +1094,7 @@ function Scene({ colors }) {
   );
 }
 
-export default function HeaderScene({ colors, fallback, ready, onReady }) {
+export default function HeroScene({ colors, fallback, ready, onReady }) {
   const fallbackColor = paletteAverage(colors);
   const [canvasRef, frameloop] = useRenderWhenVisible();
 
@@ -1125,7 +1125,7 @@ export default function HeaderScene({ colors, fallback, ready, onReady }) {
       // Cross-fades up over the CSS gradient underneath, which carries the same
       // palette, so the handover reads as the field gaining depth rather than
       // as the background being replaced.
-      // The transition itself lives in ThreeHeaderBackground.scss, alongside
+      // The transition itself lives in HeroBackground.scss, alongside
       // the gradient's, so the two are timed from one place.
       style={{ background: fallback || fallbackColor, opacity: ready ? 1 : 0 }}
       onCreated={({ gl }) => gl.setClearColor(fallbackColor)}

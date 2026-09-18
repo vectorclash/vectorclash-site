@@ -4,13 +4,13 @@ import gsap from 'gsap';
 import CanvasRadialGradient from '../CanvasRadialGradient';
 
 // The gradient-masked sprite is built from CanvasRadialGradient, which rolls a
-// fresh hue every time it is constructed -- so the header's ~37 fields each
+// fresh hue every time it is constructed -- so the hero's ~37 fields each
 // arrived in their own tint. Building one per field meant 37 canvas composites
 // and 37 uploads at startup; caching one per image cut that to two, and painted
-// every star in the header one of two colours.
+// every star in the hero one of two colours.
 //
 // A small pool per image keeps both: the number of composites stays bounded,
-// and fields draw from the pool at random, so the header still comes up in a
+// and fields draw from the pool at random, so the hero still comes up in a
 // spread of tints rather than a pair of them.
 const SPRITE_VARIANTS = 10;
 
@@ -41,7 +41,7 @@ function spriteTexture(image) {
     spritePools.set(image, pool);
   }
 
-  // Filled lazily, so a header that only ever mounts a handful of fields only
+  // Filled lazily, so a hero that only ever mounts a handful of fields only
   // ever composites a handful of sprites.
   const variant = Math.floor(Math.random() * SPRITE_VARIANTS);
   if (!pool[variant]) pool[variant] = buildSprite(image);

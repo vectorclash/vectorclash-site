@@ -19,7 +19,7 @@
   overflow-y: hidden;
 
   // r3f puts the style prop on a wrapper div around the canvas, not on the
-  // canvas itself -- this is the element HeaderScene toggles opacity on once
+  // canvas itself -- this is the element HeroScene toggles opacity on once
   // the scene has drawn its first frame.
   > div {
     transition: opacity 900ms ease-out;

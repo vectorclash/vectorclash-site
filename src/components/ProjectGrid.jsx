@@ -2,7 +2,7 @@ import { useState, useEffect, useLayoutEffect, useRef, memo, lazy, Suspense } fr
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import gsap from "gsap/all";
-// Shares the async three/r3f chunk with HeaderScene, so by the time a project
+// Shares the async three/r3f chunk with HeroScene, so by the time a project
 // is opened this is almost always already resolved.
 const ProjectsScene = lazy(() => import("./three/r3f/ProjectsScene"));
 import GradientGenerator from "./utils/GradientGenerator";

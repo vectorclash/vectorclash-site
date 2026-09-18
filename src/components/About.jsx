@@ -3,7 +3,7 @@ import { gsap, SplitText, ScrollTrigger } from "gsap/all";
 import tinycolor from "tinycolor2";
 import "./About.scss";
 import me from "../images/me.png";
-import HeaderIcon from "./HeaderIcon";
+import HeadingIcon from "./HeadingIcon";
 import skillsData from "../data/skills.json";
 
 // The shimmer runs off a class rather than :hover so that rolling off
@@ -183,7 +183,7 @@ function About() {
     <section className="about container" ref={mount}>
       <div className="column">
         <article className="skills" style={{ "--pill-shimmer": shimmerGradient }}>
-          <h3>Skills <HeaderIcon /></h3>
+          <h3>Skills <HeadingIcon /></h3>
           {skillsData.map((skillGroup) => (
             <div
               key={skillGroup.category}
@@ -207,7 +207,7 @@ function About() {
           ))}
         </article>
           <article className="about-text">
-            <h3>What I do <HeaderIcon /></h3>
+            <h3>What I do <HeadingIcon /></h3>
             <div>
               <p>I am a design engineer working at the seam between interface design and the code that makes it move. Over the past decade I have built interactive and animated work for Microsoft, Walmart, Atlassian, Gap, AT&amp;T, HTC Vive, and Subway &mdash; a permanent touch installation in Gap's San Francisco headquarters at one end of that range, an audio-reactive projection system for a live dancefloor at the other. The common thread is motion that carries meaning rather than motion applied as decoration.</p>
               <p>Motion graphics runs alongside the interface work. For AT&amp;T I produced animated banners and social video at campaign volume &mdash; GSAP and Adobe Animate for the interactive units, After Effects for the video &mdash; and built the automation that took the resizing and exporting over. It is still part of what I do: Chromaforge, my own app, renders its own promotional video in the browser rather than in After Effects.</p>

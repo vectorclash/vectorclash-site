@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger } from "gsap/all";
 import "./LogoGrid.scss";
-import HeaderIcon from "./HeaderIcon";
+import HeadingIcon from "./HeadingIcon";
 
 import jamba from "../images/logos/jamba.svg";
 import walmart from "../images/logos/walmart.svg";
@@ -119,7 +119,7 @@ function LogoGrid() {
   return (
     <section className="logo-grid container" ref={mountRef}>
       <div className="column">
-        <h3>Brands <HeaderIcon /></h3>
+        <h3>Brands <HeadingIcon /></h3>
         <div className="logo-grid-container">
           {LOGOS.map((logo, i) => (
             <div className="logo-grid-item" key={i}>
