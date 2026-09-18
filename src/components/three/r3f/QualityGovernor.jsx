@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useStore } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
-import { stepLevel } from '../../utils/qualityLevel';
+import { stepLevel, qualityHeld } from '../../utils/qualityLevel';
 import useQuality from '../../utils/useQuality';
 
 // How good is good enough. drei's default bounds judge a device against its own
@@ -11,6 +11,13 @@ import useQuality from '../../utils/useQuality';
 // the ceiling worth aiming at, and a device is declining only once it is well
 // under it.
 const bounds = (refreshrate) => {
+  // Something expensive and temporary is on screen -- a hero chaos episode --
+  // so there is nothing here worth judging the device on. Bounds nothing can
+  // fall below and nothing can rise above mean neither branch is taken: no
+  // callback, no step, and no flipflop spent. drei clears its samples either
+  // way, so the polluted window is thrown out rather than carried forward.
+  if (qualityHeld()) return [0, Infinity];
+
   const target = Math.min(refreshrate || 60, 60);
   // 0.95 of 60 is 57, which a vsynced device only clears on a clean window --
   // one stutter in four and a phone that is comfortably holding 60 never

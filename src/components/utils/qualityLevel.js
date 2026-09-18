@@ -233,6 +233,39 @@ function setLevel(next) {
   listeners.forEach((listener) => listener());
 }
 
+// The governor judges a device by how fast it is drawing, which assumes the
+// scene it is drawing costs about the same from one window to the next. The
+// hero's chaos episodes break that assumption: for twenty seconds or so the
+// background is a far more expensive shader, and the frame rate drops for a
+// reason that has nothing to do with the device. Left alone the governor would
+// read that as a decline, take stars away, and not give them back until it saw
+// an incline -- and since an episode is a decline followed by an incline, two
+// of them would spend drei's flipflop budget and latch the monitor off for the
+// rest of the session.
+//
+// So an episode holds the ladder still. This is deliberately not a way to
+// ignore the callbacks: the hold is applied inside the governor's bounds(), so
+// no verdict is reached at all, no callback fires, and the flipflop count never
+// moves. See QualityGovernor.
+let heldUntil = 0;
+
+const now = () => (typeof performance === 'undefined' ? Date.now() : performance.now());
+
+/**
+ * Hold the ladder where it is for the next few seconds. Called repeatedly for
+ * as long as the expensive thing is on screen, with a horizon long enough to
+ * outlast one of the governor's sampling windows -- so the window that straddles
+ * the end of an episode is discarded too, rather than being judged on samples
+ * half of which are from the expensive scene.
+ */
+export function holdQuality(seconds) {
+  heldUntil = Math.max(heldUntil, now() + seconds * 1000);
+}
+
+export function qualityHeld() {
+  return now() < heldUntil;
+}
+
 /**
  * Move one step along the ladder. The governor calls this; nothing else should.
  * Steps are single because each one is visible, and a fade looks like a

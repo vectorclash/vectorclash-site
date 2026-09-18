@@ -10,7 +10,7 @@ import ParticleField from './ParticleField';
 import GradientGenerator from '../../utils/GradientGenerator';
 import StarLarge from '../../../images/star-sprite-large.png';
 import StarSmall from '../../../images/star-sprite-small.png';
-import { latchedSettings } from '../../utils/qualityLevel';
+import { latchedSettings, getLevel, holdQuality } from '../../utils/qualityLevel';
 import useQuality from '../../utils/useQuality';
 import useRetiringCount from '../../utils/useRetiringCount';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
@@ -158,27 +158,31 @@ function paletteAccent(hex) {
   return `#${col.getHexString()}`;
 }
 
-// Which background field the header runs. Both map the palette to *screen*
-// space rather than to the UVs of the backdrop plane: the original shader
-// spread its stops across a 5000-unit plane while the camera only ever framed
-// ~1074 units of it, so the header showed a thin slice of the ramp -- on a
-// phone, a slice narrow enough to land inside a single stop.
+// The header runs two fields, and both map the palette to *screen* space rather
+// than to the UVs of the backdrop plane: the original shader spread its stops
+// across a 5000-unit plane while the camera only ever framed ~1074 units of it,
+// so the header showed a thin slice of the ramp -- on a phone, a slice narrow
+// enough to land inside a single stop.
 //
-//   'ramp'  a linear gradient across the viewport, turning slowly on its axis
-//           while it slides along itself. Quiet, and by far the cheaper.
-//   'mesh'  eight colour sources on slow independent orbits, blended by
-//           inverse-square weight and shaded with a little noise. Much busier.
+//   calm   a linear gradient across the viewport, turning slowly on its axis
+//          while it slides along itself. Quiet, and by far the cheaper.
+//   chaos  the same eight colours as loose sources on slow independent orbits,
+//          blended by inverse-square weight and shaded with a little noise.
 //
-// Neither has a change event. A strip of palettes runs end to end and the field
-// consumes it continuously -- the colour is always in motion, at a rate that
-// wanders smoothly between a creep and something brisker. The ramp is a
-// gradient laid across the screen, so it slides along that strip and the
-// palettes arrive from off screen. The mesh has no direction to slide along --
-// its sources are scattered -- so there each slot rotates around the hue wheel
-// to its counterpart in place, holding its chroma. See blend().
-const HERO_FIELD = 'ramp';
-
-// Only the mesh field needs noise; the ramp is built without it.
+// Neither has a change event. A strip of palettes runs end to end and both
+// fields consume it continuously, at the same rate -- the calm field slides
+// along the strip, and the chaos field, having no direction to slide along,
+// rotates each of its sources round the hue wheel to its counterpart in place.
+// So the two always hold the same palette and differ only in how it is arranged,
+// which is what lets one be mixed into the other without inventing any colour
+// that is not already on screen.
+//
+// Both are compiled into one program and uChaos picks between them. Two
+// materials would mean a shader recompile at every transition, which stalls --
+// the same reason the noise octave count is latched. The branch is on a
+// uniform, so every fragment in the draw takes the same side of it and the
+// chaos field costs nothing at all while uChaos is zero.
+// Only the chaos field needs noise, but it is always compiled in -- see above.
 const NOISE_HELPERS = (octaves) => `
         float hash21(vec2 p) {
           p = fract(p * vec2(123.34, 345.45));
@@ -205,9 +209,8 @@ const NOISE_HELPERS = (octaves) => `
         }
 `;
 
-const FIELD_BODIES = {
-  ramp: `
-        void main() {
+const FIELDS = `
+        vec3 calmField() {
           vec2 p = gl_FragCoord.xy / uRes - 0.5;
 
           // Dividing by |cos| + |sin| normalises the diagonal back to 0-1,
@@ -217,12 +220,10 @@ const FIELD_BODIES = {
           float ca = cos(uAngle), sa = sin(uAngle);
           float d = (p.x * ca + p.y * sa) / (abs(ca) + abs(sa)) + 0.5;
 
-          fragColor = vec4(present(palSlide(d)), 1.0);
+          return palSlide(d);
         }
-`,
 
-  mesh: `
-        void main() {
+        vec3 chaosField() {
           vec2 uv = gl_FragCoord.xy / uRes;
           float aspect = uRes.x / uRes.y;
           vec2 p = vec2(uv.x * aspect, uv.y);
@@ -233,7 +234,7 @@ const FIELD_BODIES = {
             vec2 sp = uSources[i];
             float d2 = dot(p - sp, p - sp);
             float w = 1.0 / pow(d2 + 0.010, 1.30);
-            acc += stop(i) * w;
+            acc += uChaosStops[i] * w;
             wsum += w;
           }
           vec3 col = acc / wsum;
@@ -244,10 +245,30 @@ const FIELD_BODIES = {
           float n = fbm(p * 1.15 + vec2(uTime * 0.02, uTime * -0.015));
           col.x *= 0.93 + 0.14 * n;
 
+          return col;
+        }
+
+        void main() {
+          // uChaos is a uniform, so the whole draw takes one side of this and
+          // there is no divergence to pay for. The middle case is the only one
+          // that evaluates both fields, and it is only reached while a
+          // transition is actually running.
+          vec3 col;
+
+          if (uChaos <= 0.0) {
+            col = calmField();
+          } else if (uChaos >= 1.0) {
+            col = chaosField();
+          } else {
+            // Mixed in OKLab, and both fields are drawing the same palette at
+            // the same instant -- so nothing on screen during the crossing is a
+            // colour that was not already there. Only the arrangement moves.
+            col = mix(calmField(), chaosField(), uChaos);
+          }
+
           fragColor = vec4(present(col), 1.0);
         }
-`,
-};
+`;
 
 // How wide the seam between two palettes is, measured in stop widths -- one
 // stop width being a seventh of the viewport. The strip is read as a single
@@ -288,40 +309,80 @@ const newPalette = () =>
 // borrows the other end's hue instead.
 const NEUTRAL = 0.004;
 
-// Fills in the stops spanning the seam that follows a cell. This is the one
-// pair on the strip that can be anywhere on the hue wheel from each other -- a
-// palette's own stops are close together by construction -- so the seam travels
-// round the wheel, the short way, holding its chroma, rather than straight
-// across the middle where it would pass through grey.
+// Travels one OKLab colour to another round the hue wheel rather than straight
+// across it.
 //
-// It runs on the CPU, once per palette, because the result is just more stops:
-// the shader reads them the same way it reads every other stop and no longer
-// needs to know a seam exists.
-function writeSeam(strip, cell) {
-  const a = (cell * CELL + SPAN) * 3;
-  const b = (cell + 1) * CELL_FLOATS;
-
-  const ca = Math.hypot(strip[a + 1], strip[a + 2]);
-  const cb = Math.hypot(strip[b + 1], strip[b + 2]);
-  let ha = Math.atan2(strip[a + 2], strip[a + 1]);
-  let hb = Math.atan2(strip[b + 2], strip[b + 1]);
+// Mixing two saturated colours straight takes the result through a duller
+// middle to get where it is going: a line between two distant hues passes near
+// the neutral axis, so the pair loses chroma halfway however soft the blend is
+// -- the grey-brown band. Read in polar OKLab a colour has a hue angle and a
+// chroma, and it can rotate to its new hue, the short way, holding its chroma
+// the whole way. The colour turns rather than being replaced, and it never
+// passes through grey to do it.
+//
+// This used to live in the shader. Both of its callers work in quantities that
+// are the same for every pixel on the screen, so neither ever needed it there.
+function polarBlend(out, o, src, a, b, t) {
+  const ca = Math.hypot(src[a + 1], src[a + 2]);
+  const cb = Math.hypot(src[b + 1], src[b + 2]);
+  let ha = Math.atan2(src[a + 2], src[a + 1]);
+  let hb = Math.atan2(src[b + 2], src[b + 1]);
 
   if (ca < NEUTRAL) ha = hb;
   if (cb < NEUTRAL) hb = ha;
 
-  // Wrapped into -PI..PI, so the seam always takes the shorter arc rather than
+  // Wrapped into -PI..PI, so a colour always takes the shorter arc rather than
   // unwinding the long way round the wheel.
-  const dh = ((hb - ha + Math.PI) % TAU + TAU) % TAU - Math.PI;
+  const dh = (((hb - ha + Math.PI) % TAU) + TAU) % TAU - Math.PI;
+  const chroma = ca + (cb - ca) * t;
+  const hue = ha + dh * t;
+
+  out[o] = src[a] + (src[b] - src[a]) * t;
+  out[o + 1] = chroma * Math.cos(hue);
+  out[o + 2] = chroma * Math.sin(hue);
+}
+
+// Fills in the stops spanning the seam that follows a cell. This is the one
+// pair on the strip that can be anywhere on the hue wheel from each other -- a
+// palette's own stops are close together by construction -- so the seam is the
+// one place that has to travel round the wheel.
+//
+// It runs once per palette, because the result is just more stops: the shader
+// reads them the same way it reads every other stop and no longer needs to know
+// a seam exists.
+function writeSeam(strip, cell) {
+  const a = (cell * CELL + SPAN) * 3;
+  const b = (cell + 1) * CELL_FLOATS;
 
   for (let k = 1; k <= SEAM_STOPS; k++) {
-    const t = k / JOIN;
-    const chroma = ca + (cb - ca) * t;
-    const hue = ha + dh * t;
-    const o = (cell * CELL + SPAN + k) * 3;
+    polarBlend(strip, (cell * CELL + SPAN + k) * 3, strip, a, b, k / JOIN);
+  }
+}
 
-    strip[o] = strip[a] + (strip[b] - strip[a]) * t;
-    strip[o + 1] = chroma * Math.cos(hue);
-    strip[o + 2] = chroma * Math.sin(hue);
+// How far apart the chaos field's slots go as they turn over: enough that the
+// turnover is not a single event, not so much that the field carries two
+// unrelated palettes at once.
+const CHAOS_STAGGER = 0.3;
+
+// The chaos field's eight colours. It has no axis to slide along, so it
+// consumes the strip in place: every slot rotates from the palette the strip is
+// on to the one after it, each slot trailing the one before it a little, so the
+// field turns over stop by stop rather than in one piece. One turnover per cell
+// of travel, which is the rate the calm field gets through palettes at -- and it
+// completes just before the strip shifts, so the shift lands on a field already
+// showing the palette it is about to promote, and is invisible for the same
+// reason it is on the calm field.
+//
+// Eight colours, once a frame, for the whole screen.
+function writeChaosStops(out, strip, offset) {
+  const phase = offset / CELL;
+
+  for (let i = 0; i < COLOR_SLOTS; i++) {
+    const lead = (i / (COLOR_SLOTS - 1)) * CHAOS_STAGGER;
+    const t = Math.min(Math.max(phase * (1 + CHAOS_STAGGER) - lead, 0), 1);
+
+    // Cells 1 and 2: the one the window is on and the one after it.
+    polarBlend(out, i * 3, strip, (CELL + i) * 3, (2 * CELL + i) * 3, t);
   }
 }
 
@@ -394,28 +455,6 @@ function makeWander() {
       Math.sin((TAU * time) / WANDER_PERIODS[2] + phases[2]) * 0.15);
 }
 
-// The mesh has no axis to travel along, so it consumes the same strip in
-// place: every slot rotates from the palette the strip is on to the one after
-// it, each slot trailing the one before it a little so the field turns over
-// stop by stop rather than in one piece. One turnover per CELL of travel, which
-// is the rate the ramp gets through palettes at, and it completes just before
-// the strip shifts -- so the shift lands on a field already showing the palette
-// it is about to promote, and is invisible for the same reason it is on the
-// ramp. STAGGER is how far apart the slots go: enough that the turnover is not
-// a single event, not so much that the field carries two unrelated palettes at
-// once.
-const MESH_PALETTE = `
-        const float STAGGER = 0.30;
-
-        vec3 stop(int i) {
-          float phase = uOffset / float(${CELL});
-          float lead = float(i) / float(${COLOR_SLOTS} - 1) * STAGGER;
-          float t = clamp(phase * (1.0 + STAGGER) - lead, 0.0, 1.0);
-          // Cells 1 and 2: the one the window is on and the one after it.
-          return blend(uStrip[${CELL} + i], uStrip[${2 * CELL} + i], t);
-        }
-`;
-
 // The palettes strung end to end, sampled as one continuous gradient. The
 // viewport is a window one palette wide onto that strip, and it never stops
 // moving: uOffset walks it forward for as long as the header is on screen, so
@@ -480,41 +519,7 @@ const RAMP_PALETTE = `
         }
 `;
 
-// Only the mesh field blends two colours in the shader; on the ramp the seam
-// between palettes is resolved into ordinary stops on the CPU. See writeSeam.
-const BLEND_HELPER = `
-        // Mixing two saturated colours straight takes the result through a
-        // duller middle to get where it is going: a line between two distant
-        // hues passes near the neutral axis, so the pair loses chroma halfway
-        // however soft the blend is -- the grey-brown band. Read in polar
-        // OKLab instead, a stop has a hue angle and a chroma, and it can
-        // rotate around the wheel to its new hue -- the short way -- holding
-        // its chroma the whole way. The colour turns rather than being
-        // replaced, and it never passes through grey to do it.
-        vec3 blend(vec3 a, vec3 b, float t) {
-          float ha = atan(a.z, a.y), hb = atan(b.z, b.y);
-          float ca = length(a.yz), cb = length(b.yz);
-
-          // A near-neutral stop has no hue of its own to travel from -- atan on
-          // a zero vector answers 0, the red axis -- so it would swing through
-          // reds on its way to a chromatic partner. It borrows the other end's
-          // hue instead, and simply gains or loses chroma where it stands.
-          if (ca < 0.004) ha = hb;
-          if (cb < 0.004) hb = ha;
-
-          // Wrapped into -PI..PI, so a stop always takes the shorter arc rather
-          // than unwinding the long way round the wheel.
-          float dh = mod(hb - ha + PI, TAU) - PI;
-          float h = ha + dh * t;
-          float c = mix(ca, cb, t);
-
-          return vec3(mix(a.x, b.x, t), c * cos(h), c * sin(h));
-        }
-`;
-
 function buildFragmentShader(octaves) {
-  const isMesh = HERO_FIELD === 'mesh';
-
   return `
         uniform float uTime;
         uniform vec2  uRes;
@@ -526,16 +531,22 @@ function buildFragmentShader(octaves) {
         // rocking either side of a fixed heading.
         uniform float uAngle;
         uniform vec3  uStrip[${STRIP_STOPS}];
-${isMesh ? `        // Solved on the CPU once a frame -- see SOURCE_ORBITS.
-        uniform vec2  uSources[${COLOR_SLOTS}];` : ''}
+        // How far into a chaos episode the header is: 0 calm, 1 full chaos.
+        uniform float uChaos;
+        // Both solved on the CPU once a frame. The source positions depend only
+        // on time and aspect ratio, and the chaos field's eight colours depend
+        // only on uOffset -- neither varies from one pixel to the next, so
+        // neither belongs in a fragment shader. The colours used to be worked
+        // out per pixel: eight polar blends, each with two atan, a cos and a
+        // sin, recomputed a few million times a frame to arrive at the same
+        // eight answers. See SOURCE_ORBITS and writeChaosStops.
+        uniform vec2  uSources[${COLOR_SLOTS}];
+        uniform vec3  uChaosStops[${COLOR_SLOTS}];
 
         // GLSL3 leaves the fragment output to the material, so declare it.
         layout(location = 0) out vec4 fragColor;
 
-        const float PI  = 3.14159265359;
-        const float TAU = 6.28318530718;
-${isMesh ? NOISE_HELPERS(octaves) : ''}
-${isMesh ? BLEND_HELPER : ''}${isMesh ? MESH_PALETTE : RAMP_PALETTE}
+${NOISE_HELPERS(octaves)}${RAMP_PALETTE}
 
         // Interleaved gradient noise. The obvious hash(gl_FragCoord) dither
         // takes coordinates in the thousands, where a fract-based hash loses
@@ -581,10 +592,107 @@ ${isMesh ? BLEND_HELPER : ''}${isMesh ? MESH_PALETTE : RAMP_PALETTE}
           // and the spline has taken those away.
           return srgb + (dither(gl_FragCoord.xy) - 0.5) * 0.006;
         }
-${FIELD_BODIES[HERO_FIELD]}      `;
+${FIELDS}      `;
 }
 
-// Animated gradient background. The field is chosen by HERO_FIELD above.
+// A chaos episode, in seconds of *rendered* time. Every clock in this field is
+// integrated from dt rather than read off a wall clock, so nothing accrues while
+// the header is scrolled out of view and parked -- an episode cannot happen with
+// nobody watching, and cannot be half over by the time the hero comes back.
+//
+// Rare is the whole point. Four to nine minutes of calm means most visits never
+// see one, and the ones that do see it once. Any oftener and it stops being a
+// moment and becomes the background's normal behaviour.
+const CALM_SPELL = [240, 540];
+const CHAOS_HOLD = [12, 26];
+
+// It leaves more slowly than it arrives. Coming apart can afford to be the
+// quicker half -- that is the part with the interest in it -- but settling back
+// wants to be slow enough that there is no moment you could point at and call
+// the end of it.
+const CHAOS_RISE = 14;
+const CHAOS_FALL = 20;
+
+// Smootherstep rather than smoothstep: zero curvature at both ends as well as
+// zero slope, so neither the departure from calm nor the return to it has an
+// edge the eye can find. The same reasoning as the ramp's spline.
+const smootherstep = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+
+const randIn = ([lo, hi]) => lo + Math.random() * (hi - lo);
+
+// A frame this long, this many times in a row, means the device cannot carry
+// the chaos field -- about three seconds of genuinely bad frames. Measured on
+// the raw delta, not the clamped one, and the count resets on any good frame, so
+// a single stall on resume or a garbage collection does not trip it.
+const CHAOS_SLOW_FRAME = 1 / 34;
+const CHAOS_SLOW_LIMIT = 90;
+
+const newChaos = () => ({ phase: 'calm', t: 0, span: randIn(CALM_SPELL), slow: 0, given: false });
+
+/**
+ * Advances the episode clock and answers how much chaos is on screen, 0 to 1.
+ *
+ * The device gets a veto in both directions. An episode only starts on hardware
+ * that measured its way to the top of the quality ladder, and if one turns out
+ * to be too expensive anyway it is cut short and no more are scheduled for the
+ * rest of the session. That matters because the ladder is held still while an
+ * episode runs -- the governor cannot be allowed to read an episode as a slow
+ * device -- so this is the only thing watching, and something has to be.
+ */
+function stepChaos(c, dt, raw) {
+  c.t += dt;
+
+  if (c.phase === 'calm') {
+    if (c.t < c.span) return 0;
+
+    c.t = 0;
+
+    if (c.given || getLevel() !== 'high') {
+      c.span = randIn(CALM_SPELL);
+      return 0;
+    }
+
+    c.phase = 'rise';
+    c.slow = 0;
+    return 0;
+  }
+
+  if (c.phase === 'fall') {
+    if (c.t < CHAOS_FALL) return 1 - smootherstep(c.t / CHAOS_FALL);
+
+    c.phase = 'calm';
+    c.t = 0;
+    c.span = randIn(CALM_SPELL);
+    return 0;
+  }
+
+  // Rising or holding: the only two phases where giving up is still useful.
+  c.slow = raw > CHAOS_SLOW_FRAME ? c.slow + 1 : 0;
+
+  if (c.slow >= CHAOS_SLOW_LIMIT) {
+    c.given = true;
+    c.phase = 'fall';
+    c.t = 0;
+    return 1;
+  }
+
+  if (c.phase === 'rise') {
+    if (c.t < CHAOS_RISE) return smootherstep(c.t / CHAOS_RISE);
+
+    c.phase = 'hold';
+    c.t = 0;
+    c.span = randIn(CHAOS_HOLD);
+    return 1;
+  }
+
+  if (c.t < c.span) return 1;
+
+  c.phase = 'fall';
+  c.t = 0;
+  return 1;
+}
+
+// Animated gradient background. Calm nearly all of the time; see stepChaos.
 function AnimatedGradientBackground({ colors }) {
   const resRef = useRef(new THREE.Vector2());
   const timeRef = useRef(0);
@@ -593,6 +701,8 @@ function AnimatedGradientBackground({ colors }) {
   // because both are driven by a rate that is itself moving.
   const offsetRef = useRef(0);
   const angleRef = useRef(Math.random() * TAU);
+  const chaosRef = useRef(null);
+  if (chaosRef.current === null) chaosRef.current = newChaos();
 
   const material = useMemo(() => {
     // GLSL3 so the colour arrays can be indexed by a loop variable through a
@@ -612,9 +722,9 @@ function AnimatedGradientBackground({ colors }) {
     const uniforms = {
       uTime: { value: 0 },
       uRes: { value: new THREE.Vector2(1, 1) },
-      ...(HERO_FIELD === 'mesh'
-        ? { uSources: { value: new Float32Array(COLOR_SLOTS * 2) } }
-        : {}),
+      uSources: { value: new Float32Array(COLOR_SLOTS * 2) },
+      uChaosStops: { value: new Float32Array(COLOR_SLOTS * 3) },
+      uChaos: { value: 0 },
       uOffset: { value: 0 },
       uAngle: { value: angleRef.current },
       // The header opens on the palette it was handed, and the rest of the
@@ -681,16 +791,31 @@ function AnimatedGradientBackground({ colors }) {
 
     material.uniforms.uOffset.value = offsetRef.current;
 
-    if (HERO_FIELD === 'mesh') {
-      const aspect = res.x / res.y;
-      const sources = material.uniforms.uSources.value;
+    const chaos = stepChaos(chaosRef.current, dt, delta);
+    material.uniforms.uChaos.value = chaos;
 
-      for (let i = 0; i < COLOR_SLOTS; i++) {
-        const orbit = SOURCE_ORBITS[i];
-        sources[i * 2] = (orbit.x + 0.19 * Math.sin(time * orbit.rateX + orbit.phaseX)) * aspect;
-        sources[i * 2 + 1] = orbit.y + 0.19 * Math.cos(time * orbit.rateY + orbit.phaseY);
-      }
+    if (chaos <= 0) return;
+
+    // Everything below here is the chaos field's, and none of it runs while the
+    // header is calm.
+    //
+    // The ladder is held for four seconds at a time, renewed every frame the
+    // field is on screen. Four outlasts one of the governor's sampling windows,
+    // so the window that straddles the end of an episode is thrown out along
+    // with the ones inside it -- otherwise the device would be judged on an
+    // average half of which was drawn by a shader that is no longer running.
+    holdQuality(4);
+
+    const aspect = res.x / res.y;
+    const sources = material.uniforms.uSources.value;
+
+    for (let i = 0; i < COLOR_SLOTS; i++) {
+      const orbit = SOURCE_ORBITS[i];
+      sources[i * 2] = (orbit.x + 0.19 * Math.sin(time * orbit.rateX + orbit.phaseX)) * aspect;
+      sources[i * 2 + 1] = orbit.y + 0.19 * Math.cos(time * orbit.rateY + orbit.phaseY);
     }
+
+    writeChaosStops(material.uniforms.uChaosStops.value, material.uniforms.uStrip.value, offsetRef.current);
   });
 
   return (
