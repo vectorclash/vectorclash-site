@@ -169,9 +169,13 @@ function paletteAccent(hex) {
 //   'mesh'  eight colour sources on slow independent orbits, blended by
 //           inverse-square weight and shaded with a little noise. Much busier.
 //
-// Either way two palettes stay resident and uMix drives the same change: every
-// 5-15s each slot rotates around the hue wheel to its counterpart over 7s,
-// holding its chroma rather than fading through it. See blend().
+// Either way two palettes stay resident and uMix drives the change every 5-15s,
+// but each field turns over the way that suits it. The ramp is a gradient laid
+// across the screen, so it slides: the two palettes are strung together into one
+// long strip and the viewport travels along it, the new palette arriving from
+// off screen as the old one leaves. The mesh has no direction to slide along --
+// its sources are scattered -- so there each slot rotates around the hue wheel
+// to its counterpart in place, holding its chroma. See blend().
 const HERO_FIELD = 'ramp';
 
 // Only the mesh field needs noise; the ramp is built without it.
@@ -214,7 +218,7 @@ const FIELD_BODIES = {
           float d = (p.x * cos(a) + p.y * sin(a)) / (abs(cos(a)) + abs(sin(a))) + 0.5;
           d += sin(uTime * 0.13) * 0.07;
 
-          fragColor = vec4(present(palRamp(d)), 1.0);
+          fragColor = vec4(present(palSlide(d)), 1.0);
         }
 `,
 
@@ -246,6 +250,81 @@ const FIELD_BODIES = {
 `,
 };
 
+// The mesh has no axis to travel along, so its palettes change in place: every
+// slot rotates from its old hue to its new one, each slot trailing the one
+// before it a little so the field turns over stop by stop rather than in one
+// piece. STAGGER is how far apart they go: enough that the change is not a
+// single event, not so much that the field carries two unrelated palettes at
+// once.
+const MESH_PALETTE = `
+        const float STAGGER = 0.30;
+
+        vec3 stop(int i) {
+          float lead = float(i) / float(${COLOR_SLOTS} - 1) * STAGGER;
+          float t = clamp(uMix * (1.0 + STAGGER) - lead, 0.0, 1.0);
+          return blend(uColorsA[i], uColorsB[i], t);
+        }
+`;
+
+// How wide the seam between the two palettes is, measured in stop widths -- one
+// stop width being a seventh of the viewport. The strip is read as a single
+// gradient, so the old palette's last stop and the new one's first are joined
+// by an ordinary segment; widening that segment is what keeps the arriving
+// palette from having a front. Too narrow and the handover reads as an edge
+// crossing the screen, which is the thing a crossfade was already doing.
+const JOIN = 2.6;
+
+// The two palettes strung end to end, sampled as one continuous gradient. The
+// viewport is a window one palette wide onto that strip, and uMix slides it
+// from the first palette to the second -- so a change is the old colours
+// leaving one side of the screen while the new ones arrive from the other,
+// rather than every pixel being asked to become a different colour at once. No
+// pixel crossfades; the ramp simply moves past.
+//
+// Within a palette the stops still mix straight, which is the gradient the
+// header has always drawn. Only the seam blends polar, because that is the one
+// pair that can be anywhere on the wheel from each other, and a straight mix
+// between opposites passes through grey on the way.
+const RAMP_PALETTE = `
+        const float SPAN = float(${COLOR_SLOTS} - 1);
+        const float JOIN = ${JOIN.toFixed(2)};
+
+        // The pair of stops either side of a position inside one palette.
+        // Both ends are clamped rather than
+        // trusted: x is the sum of three animated terms, so it lands a rounding
+        // error either side of an exact stop often enough to matter, and an
+        // index of -1 reads off the end of a uniform array.
+        ivec2 pair(float y) {
+          int i = clamp(int(floor(y)), 0, ${COLOR_SLOTS} - 1);
+          return ivec2(i, min(i + 1, ${COLOR_SLOTS} - 1));
+        }
+
+        vec3 strip(float x) {
+          if (x <= SPAN) {
+            ivec2 e = pair(x);
+            return mix(uColorsA[e.x], uColorsA[e.y], smoothstep(0.0, 1.0, fract(x)));
+          }
+
+          if (x >= SPAN + JOIN) {
+            float y = clamp(x - SPAN - JOIN, 0.0, SPAN);
+            ivec2 e = pair(y);
+            return mix(uColorsB[e.x], uColorsB[e.y], smoothstep(0.0, 1.0, fract(y)));
+          }
+
+          return blend(
+            uColorsA[${COLOR_SLOTS} - 1],
+            uColorsB[0],
+            smoothstep(0.0, 1.0, (x - SPAN) / JOIN)
+          );
+        }
+
+        // uMix 0 frames the first palette exactly, 1 the second exactly, and
+        // everything between is the strip part way past.
+        vec3 palSlide(float t) {
+          return strip(clamp(t, 0.0, 1.0) * SPAN + uMix * (SPAN + JOIN));
+        }
+`;
+
 function buildFragmentShader(octaves) {
   const isMesh = HERO_FIELD === 'mesh';
 
@@ -261,19 +340,14 @@ ${isMesh ? `        // Solved on the CPU once a frame -- see SOURCE_ORBITS.
         // GLSL3 leaves the fragment output to the material, so declare it.
         layout(location = 0) out vec4 fragColor;
 
-        // How far apart the slots turn over. Enough that the palette changes
-        // stop by stop rather than all at once; not so much that the ramp is
-        // carrying two unrelated palettes at either end.
-        const float STAGGER = 0.30;
-
         const float PI  = 3.14159265359;
         const float TAU = 6.28318530718;
 ${isMesh ? NOISE_HELPERS(octaves) : ''}
-        // Crossfading two saturated palettes takes every stop through a duller
-        // middle to get where it is going: straight-line interpolation between
-        // two hues passes near the neutral axis, so the hero visibly loses
-        // chroma halfway through a change however soft the blend is. Read in
-        // polar OKLab instead, a stop has a hue angle and a chroma, and it can
+        // Mixing two saturated colours straight takes the result through a
+        // duller middle to get where it is going: a line between two distant
+        // hues passes near the neutral axis, so the pair loses chroma halfway
+        // however soft the blend is -- the grey-brown band. Read in polar
+        // OKLab instead, a stop has a hue angle and a chroma, and it can
         // rotate around the wheel to its new hue -- the short way -- holding
         // its chroma the whole way. The colour turns rather than being
         // replaced, and it never passes through grey to do it.
@@ -297,22 +371,7 @@ ${isMesh ? NOISE_HELPERS(octaves) : ''}
           return vec3(mix(a.x, b.x, t), c * cos(h), c * sin(h));
         }
 
-        // Both palettes are resident; each slot rotates from one to the other,
-        // trailing the slot before it a little so the palette turns over stop
-        // by stop instead of in one piece.
-        vec3 stop(int i) {
-          float lead = float(i) / float(${COLOR_SLOTS} - 1) * STAGGER;
-          float t = clamp(uMix * (1.0 + STAGGER) - lead, 0.0, 1.0);
-          return blend(uColorsA[i], uColorsB[i], t);
-        }
-
-        // Walk the stops as a gradient, eased between each pair.
-        vec3 palRamp(float t) {
-          float x = clamp(t, 0.0, 1.0) * float(${COLOR_SLOTS} - 1);
-          int i = int(floor(x));
-          int j = min(i + 1, ${COLOR_SLOTS} - 1);
-          return mix(stop(i), stop(j), smoothstep(0.0, 1.0, fract(x)));
-        }
+${isMesh ? MESH_PALETTE : RAMP_PALETTE}
 
         // Interleaved gradient noise. The obvious hash(gl_FragCoord) dither
         // takes coordinates in the thousands, where a fract-based hash loses
@@ -405,22 +464,32 @@ function AnimatedGradientBackground({ colors }) {
 
   useEffect(() => {
     const scheduleNextChange = () => {
+      // Measured from the end of the last slide rather than the start of it: a
+      // second change beginning while the strip was still part way past would
+      // rewrite the palette that was half on screen.
       const delay = (5 + Math.random() * 10) * 1000;
       timeoutRef.current = setTimeout(() => {
-        // Fill whichever set is currently faded out, then dissolve towards it.
-        const toB = material.uniforms.uMix.value < 0.5;
-        const target = toB ? 'uColorsB' : 'uColorsA';
-        material.uniforms[target].value.set(
+        // B is always the palette arriving. uMix only ever travels 0 -> 1, so
+        // the strip only ever slides one way; once it has arrived, B is copied
+        // down into A and the window jumps back to the start. Both ends of that
+        // jump frame the same palette, so it is invisible, and the next change
+        // starts from a strip that is clean again.
+        const { uColorsA, uColorsB, uMix } = material.uniforms;
+
+        uColorsB.value.set(
           oklabSlots(new GradientGenerator(randomColorCount(), false, true).colors)
         );
 
-        gsap.to(material.uniforms.uMix, {
-          value: toB ? 1 : 0,
+        gsap.to(uMix, {
+          value: 1,
           duration: 7,
           ease: 'sine.inOut',
+          onComplete: () => {
+            uColorsA.value.set(uColorsB.value);
+            uMix.value = 0;
+            scheduleNextChange();
+          },
         });
-
-        scheduleNextChange();
       }, delay);
     };
 
