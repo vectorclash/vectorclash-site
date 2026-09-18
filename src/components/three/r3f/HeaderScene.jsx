@@ -164,16 +164,16 @@ function paletteAccent(hex) {
 // ~1074 units of it, so the header showed a thin slice of the ramp -- on a
 // phone, a slice narrow enough to land inside a single stop.
 //
-//   'ramp'  a 42-degree linear gradient across the viewport, drifting in both
-//           angle and offset. Quiet, and by far the cheaper of the two.
+//   'ramp'  a linear gradient across the viewport, turning slowly on its axis
+//           while it slides along itself. Quiet, and by far the cheaper.
 //   'mesh'  eight colour sources on slow independent orbits, blended by
 //           inverse-square weight and shaded with a little noise. Much busier.
 //
-// Either way two palettes stay resident and uMix drives the change every 5-15s,
-// but each field turns over the way that suits it. The ramp is a gradient laid
-// across the screen, so it slides: the two palettes are strung together into one
-// long strip and the viewport travels along it, the new palette arriving from
-// off screen as the old one leaves. The mesh has no direction to slide along --
+// Neither has a change event. A strip of palettes runs end to end and the field
+// consumes it continuously -- the colour is always in motion, at a rate that
+// wanders smoothly between a creep and something brisker. The ramp is a
+// gradient laid across the screen, so it slides along that strip and the
+// palettes arrive from off screen. The mesh has no direction to slide along --
 // its sources are scattered -- so there each slot rotates around the hue wheel
 // to its counterpart in place, holding its chroma. See blend().
 const HERO_FIELD = 'ramp';
@@ -210,13 +210,12 @@ const FIELD_BODIES = {
         void main() {
           vec2 p = gl_FragCoord.xy / uRes - 0.5;
 
-          // The angle drifts either side of 42 degrees while the ramp slides
-          // along itself, so the gradient is never twice in the same place.
-          // Dividing by |cos| + |sin| normalises the diagonal back to 0-1, which
-          // is what keeps every stop on screen at any angle or aspect ratio.
-          float a = 0.733 + sin(uTime * 0.045) * 0.22;
-          float d = (p.x * cos(a) + p.y * sin(a)) / (abs(cos(a)) + abs(sin(a))) + 0.5;
-          d += sin(uTime * 0.13) * 0.07;
+          // Dividing by |cos| + |sin| normalises the diagonal back to 0-1,
+          // which is what keeps every stop on screen at any angle or aspect
+          // ratio. The axis itself turns -- see uAngle -- so the direction the
+          // colour flows in is never fixed for long.
+          float ca = cos(uAngle), sa = sin(uAngle);
+          float d = (p.x * ca + p.y * sa) / (abs(ca) + abs(sa)) + 0.5;
 
           fragColor = vec4(present(palSlide(d)), 1.0);
         }
@@ -250,99 +249,240 @@ const FIELD_BODIES = {
 `,
 };
 
-// The mesh has no axis to travel along, so its palettes change in place: every
-// slot rotates from its old hue to its new one, each slot trailing the one
-// before it a little so the field turns over stop by stop rather than in one
-// piece. STAGGER is how far apart they go: enough that the change is not a
-// single event, not so much that the field carries two unrelated palettes at
+// How wide the seam between two palettes is, measured in stop widths -- one
+// stop width being a seventh of the viewport. The strip is read as a single
+// gradient, so one palette's last stop and the next one's first are joined by
+// an ordinary segment; widening that segment is what keeps an arriving palette
+// from having a front. Too narrow and the handover reads as an edge crossing
+// the screen. At four -- over half the viewport, and more than half a palette's
+// own width -- each palette gets the screen to itself before the next one is
+// anywhere near it, and the spacing between palettes is close enough to the
+// spacing within them that the flow keeps one rhythm.
+const JOIN = 4;
+
+// One palette plus the seam that follows it: the strip's repeat length.
+const SPAN = COLOR_SLOTS - 1;
+const CELL = SPAN + JOIN;
+
+// The seam used to be one wide segment with its own interpolation, which made
+// the strip a sequence of unevenly spaced stops -- and an interpolant can only
+// be smooth across a knot if it knows where the next knot is. The seam is now
+// spanned by ordinary stops at the same unit spacing as everything else, so the
+// whole strip is one evenly knotted sequence and a single curve runs the length
+// of it. That is what JOIN being a whole number buys.
+const SEAM_STOPS = JOIN - 1;
+
+// The window opens on cell 1 and travels one cell before the strip shifts, so
+// it covers cells 1 and 2. Cell 0 is the history the curve's trailing tap
+// reaches back into, and cell 3 is the lookahead that lets cell 2's seam be
+// written before it is ever on screen.
+const STRIP_CELLS = 4;
+const STRIP_STOPS = STRIP_CELLS * CELL;
+const CELL_FLOATS = CELL * 3;
+
+const newPalette = () =>
+  oklabSlots(new GradientGenerator(randomColorCount(), false, true).colors);
+
+// A stop with no hue of its own reads as the red axis out of atan2, so it would
+// swing through reds on its way to a chromatic partner. Below this chroma it
+// borrows the other end's hue instead.
+const NEUTRAL = 0.004;
+
+// Fills in the stops spanning the seam that follows a cell. This is the one
+// pair on the strip that can be anywhere on the hue wheel from each other -- a
+// palette's own stops are close together by construction -- so the seam travels
+// round the wheel, the short way, holding its chroma, rather than straight
+// across the middle where it would pass through grey.
+//
+// It runs on the CPU, once per palette, because the result is just more stops:
+// the shader reads them the same way it reads every other stop and no longer
+// needs to know a seam exists.
+function writeSeam(strip, cell) {
+  const a = (cell * CELL + SPAN) * 3;
+  const b = (cell + 1) * CELL_FLOATS;
+
+  const ca = Math.hypot(strip[a + 1], strip[a + 2]);
+  const cb = Math.hypot(strip[b + 1], strip[b + 2]);
+  let ha = Math.atan2(strip[a + 2], strip[a + 1]);
+  let hb = Math.atan2(strip[b + 2], strip[b + 1]);
+
+  if (ca < NEUTRAL) ha = hb;
+  if (cb < NEUTRAL) hb = ha;
+
+  // Wrapped into -PI..PI, so the seam always takes the shorter arc rather than
+  // unwinding the long way round the wheel.
+  const dh = ((hb - ha + Math.PI) % TAU + TAU) % TAU - Math.PI;
+
+  for (let k = 1; k <= SEAM_STOPS; k++) {
+    const t = k / JOIN;
+    const chroma = ca + (cb - ca) * t;
+    const hue = ha + dh * t;
+    const o = (cell * CELL + SPAN + k) * 3;
+
+    strip[o] = strip[a] + (strip[b] - strip[a]) * t;
+    strip[o + 1] = chroma * Math.cos(hue);
+    strip[o + 2] = chroma * Math.sin(hue);
+  }
+}
+
+// The strip as it starts: the palette the header was handed in cell 1, where
+// the window opens, with fresh ones around it. Cell 3's own seam is left unset
+// because nothing can reach it -- it is overwritten on the shift that would
+// bring it into range.
+function seedStrip(slots) {
+  const strip = new Float32Array(STRIP_STOPS * 3);
+
+  strip.set(newPalette(), 0);
+  strip.set(slots, CELL_FLOATS);
+  for (let cell = 2; cell < STRIP_CELLS; cell++) strip.set(newPalette(), cell * CELL_FLOATS);
+  for (let cell = 0; cell < STRIP_CELLS - 1; cell++) writeSeam(strip, cell);
+
+  return strip;
+}
+
+// Drops the oldest cell off the front and rolls a fresh palette onto the back,
+// which puts the window back where it started in front of a strip that has
+// moved instead. The new cell's palette has to land before the seam that leads
+// into it can be drawn.
+function advanceStrip(strip) {
+  strip.copyWithin(0, CELL_FLOATS);
+  strip.set(newPalette(), (STRIP_CELLS - 1) * CELL_FLOATS);
+  writeSeam(strip, STRIP_CELLS - 2);
+}
+
+// How fast the window travels along the strip, in stop widths per second, with
+// the wander sitting at nothing. At this pace a palette crosses the screen in
+// something under twenty seconds and the next one is fully in frame inside
+// thirty. That is the "generally very slow" the field is after: slow enough
+// that a still frame looks still, quick enough that a glance back a minute
+// later finds a gradient that has moved on.
+// Nominal rather than average: exp() of a symmetric wander averages above one,
+// so the flow runs about a tenth quicker over time than this number reads.
+const FLOW_RATE = 0.36;
+
+// How far the wander pushes that rate either side of nominal, as a factor.
+// Exponential rather than additive: it cannot drive the flow backwards or stop
+// it dead, and a slowing feels like the mirror of a quickening rather than a
+// smaller version of it. At 1.0 the flow ranges from about a third of nominal
+// to about three times it, so the palettes are sometimes barely creeping and
+// sometimes moving with purpose, and never doing either for long.
+const FLOW_SWING = 1.0;
+
+// The fastest the gradient's axis turns, in radians per second. A hundredth of
+// a radian is a full revolution in about ten minutes at the peak, and the
+// wander spends most of its time well under the peak and changes sign freely --
+// so the direction the colour flows in drifts, reverses and comes back rather
+// than sweeping steadily one way.
+const TURN_RATE = 0.011;
+
+// A smooth -1..1 wander. Three sines whose periods are close to coprime: they
+// do come back into step eventually, but only after a span measured in hours,
+// so nothing anyone sits through repeats. Being a sum of sines it is smooth in
+// value and in slope, which is what keeps a change of speed from arriving as a
+// kick -- interpolating between random targets is the obvious alternative and
+// it kinks at every target.
+//
+// Phases are rolled per material, so two loads of the page are not in step.
+const WANDER_PERIODS = [41.3, 23.7, 13.1];
+
+function makeWander() {
+  const phases = WANDER_PERIODS.map(() => Math.random() * TAU);
+
+  return (time) =>
+    (Math.sin((TAU * time) / WANDER_PERIODS[0] + phases[0]) * 0.55 +
+      Math.sin((TAU * time) / WANDER_PERIODS[1] + phases[1]) * 0.30 +
+      Math.sin((TAU * time) / WANDER_PERIODS[2] + phases[2]) * 0.15);
+}
+
+// The mesh has no axis to travel along, so it consumes the same strip in
+// place: every slot rotates from the palette the strip is on to the one after
+// it, each slot trailing the one before it a little so the field turns over
+// stop by stop rather than in one piece. One turnover per CELL of travel, which
+// is the rate the ramp gets through palettes at, and it completes just before
+// the strip shifts -- so the shift lands on a field already showing the palette
+// it is about to promote, and is invisible for the same reason it is on the
+// ramp. STAGGER is how far apart the slots go: enough that the turnover is not
+// a single event, not so much that the field carries two unrelated palettes at
 // once.
 const MESH_PALETTE = `
         const float STAGGER = 0.30;
 
         vec3 stop(int i) {
+          float phase = uOffset / float(${CELL});
           float lead = float(i) / float(${COLOR_SLOTS} - 1) * STAGGER;
-          float t = clamp(uMix * (1.0 + STAGGER) - lead, 0.0, 1.0);
-          return blend(uColorsA[i], uColorsB[i], t);
+          float t = clamp(phase * (1.0 + STAGGER) - lead, 0.0, 1.0);
+          // Cells 1 and 2: the one the window is on and the one after it.
+          return blend(uStrip[${CELL} + i], uStrip[${2 * CELL} + i], t);
         }
 `;
 
-// How wide the seam between the two palettes is, measured in stop widths -- one
-// stop width being a seventh of the viewport. The strip is read as a single
-// gradient, so the old palette's last stop and the new one's first are joined
-// by an ordinary segment; widening that segment is what keeps the arriving
-// palette from having a front. Too narrow and the handover reads as an edge
-// crossing the screen, which is the thing a crossfade was already doing.
-const JOIN = 2.6;
-
-// The two palettes strung end to end, sampled as one continuous gradient. The
-// viewport is a window one palette wide onto that strip, and uMix slides it
-// from the first palette to the second -- so a change is the old colours
-// leaving one side of the screen while the new ones arrive from the other,
-// rather than every pixel being asked to become a different colour at once. No
-// pixel crossfades; the ramp simply moves past.
+// The palettes strung end to end, sampled as one continuous gradient. The
+// viewport is a window one palette wide onto that strip, and it never stops
+// moving: uOffset walks it forward for as long as the header is on screen, so
+// the colour is always leaving one side of the screen while more of it arrives
+// from the other. There is no change event and nothing crossfades -- a palette
+// is simply what the window happens to be framing at the time.
 //
-// Within a palette the stops still mix straight, which is the gradient the
-// header has always drawn. Only the seam blends polar, because that is the one
-// pair that can be anywhere on the wheel from each other, and a straight mix
-// between opposites passes through grey on the way.
+// uOffset only ever covers one CELL. Once it has, the strip is shifted down by
+// a palette and a fresh one is rolled onto the end, which puts the window back
+// where it started in front of a strip that has moved instead. Both sides of
+// that shift frame the same colours, so it is invisible, and the strip stays
+// three palettes long however long the page is left open.
+//
+// Within a palette the stops mix straight, which is the gradient the header has
+// always drawn. Only the seams blend polar, because those are the pairs that
+// can be anywhere on the wheel from each other, and a straight mix between
+// opposites passes through grey on the way.
 const RAMP_PALETTE = `
-        const float SPAN = float(${COLOR_SLOTS} - 1);
-        const float JOIN = ${JOIN.toFixed(2)};
+        const float SPAN = float(${SPAN});
+        const float CELL = float(${CELL});
 
-        // The pair of stops either side of a position inside one palette.
-        // Both ends are clamped rather than
-        // trusted: x is the sum of three animated terms, so it lands a rounding
-        // error either side of an exact stop often enough to matter, and an
-        // index of -1 reads off the end of a uniform array.
-        ivec2 pair(float y) {
-          int i = clamp(int(floor(y)), 0, ${COLOR_SLOTS} - 1);
-          return ivec2(i, min(i + 1, ${COLOR_SLOTS} - 1));
+        // A uniform cubic B-spline through the strip's stops.
+        //
+        // Every stop used to be joined to the next by a smoothstep, which stops
+        // the colour dead at each stop and then runs it through the middle of
+        // the segment at one and a half times the average rate. The stops are a
+        // linear resample of the palette, so the ramp they describe is straight
+        // -- and smoothstep was corrugating that straight line into seven
+        // pulses across the screen, one per segment, each with a flat either
+        // side of it. That is the line between the stops, and the fuzz is the
+        // dither sitting on the flats where nothing else is moving.
+        //
+        // A B-spline reproduces a straight line exactly, so a plain ramp comes
+        // out plain. It is also smooth in curvature, not just in slope, which
+        // is what the eye needs to stop finding an edge: a curvature step is
+        // what a Mach band is made of. The only place the curve leaves the
+        // stops is where the palette genuinely turns a corner, and rounding
+        // that corner off is the whole point.
+        vec3 stripAt(float x) {
+          // Clamped so the four taps stay on the array whatever x does. The
+          // window never comes near either end; this is for the rounding error.
+          float xc = clamp(x, 1.0, float(${STRIP_STOPS - 3}));
+          float i = floor(xc);
+          float f = xc - i;
+          int b = int(i) - 1;
+
+          float f2 = f * f;
+          float f3 = f2 * f;
+
+          return (
+              uStrip[b]     * (1.0 - 3.0 * f + 3.0 * f2 -       f3)
+            + uStrip[b + 1] * (4.0           - 6.0 * f2 + 3.0 * f3)
+            + uStrip[b + 2] * (1.0 + 3.0 * f + 3.0 * f2 - 3.0 * f3)
+            + uStrip[b + 3] *                                   f3
+          ) / 6.0;
         }
 
-        vec3 strip(float x) {
-          if (x <= SPAN) {
-            ivec2 e = pair(x);
-            return mix(uColorsA[e.x], uColorsA[e.y], smoothstep(0.0, 1.0, fract(x)));
-          }
-
-          if (x >= SPAN + JOIN) {
-            float y = clamp(x - SPAN - JOIN, 0.0, SPAN);
-            ivec2 e = pair(y);
-            return mix(uColorsB[e.x], uColorsB[e.y], smoothstep(0.0, 1.0, fract(y)));
-          }
-
-          return blend(
-            uColorsA[${COLOR_SLOTS} - 1],
-            uColorsB[0],
-            smoothstep(0.0, 1.0, (x - SPAN) / JOIN)
-          );
-        }
-
-        // uMix 0 frames the first palette exactly, 1 the second exactly, and
-        // everything between is the strip part way past.
+        // The window opens one cell into the strip, so the spline's trailing
+        // tap always has real colour behind it.
         vec3 palSlide(float t) {
-          return strip(clamp(t, 0.0, 1.0) * SPAN + uMix * (SPAN + JOIN));
+          return stripAt(CELL + uOffset + clamp(t, 0.0, 1.0) * SPAN);
         }
 `;
 
-function buildFragmentShader(octaves) {
-  const isMesh = HERO_FIELD === 'mesh';
-
-  return `
-        uniform float uTime;
-        uniform vec2  uRes;
-        uniform float uMix;
-        uniform vec3  uColorsA[${COLOR_SLOTS}];
-        uniform vec3  uColorsB[${COLOR_SLOTS}];
-${isMesh ? `        // Solved on the CPU once a frame -- see SOURCE_ORBITS.
-        uniform vec2  uSources[${COLOR_SLOTS}];` : ''}
-
-        // GLSL3 leaves the fragment output to the material, so declare it.
-        layout(location = 0) out vec4 fragColor;
-
-        const float PI  = 3.14159265359;
-        const float TAU = 6.28318530718;
-${isMesh ? NOISE_HELPERS(octaves) : ''}
+// Only the mesh field blends two colours in the shader; on the ramp the seam
+// between palettes is resolved into ordinary stops on the CPU. See writeSeam.
+const BLEND_HELPER = `
         // Mixing two saturated colours straight takes the result through a
         // duller middle to get where it is going: a line between two distant
         // hues passes near the neutral axis, so the pair loses chroma halfway
@@ -370,8 +510,32 @@ ${isMesh ? NOISE_HELPERS(octaves) : ''}
 
           return vec3(mix(a.x, b.x, t), c * cos(h), c * sin(h));
         }
+`;
 
-${isMesh ? MESH_PALETTE : RAMP_PALETTE}
+function buildFragmentShader(octaves) {
+  const isMesh = HERO_FIELD === 'mesh';
+
+  return `
+        uniform float uTime;
+        uniform vec2  uRes;
+        // How far the window has travelled into the current palette, in stop
+        // widths. It covers one CELL and then the strip shifts underneath it.
+        uniform float uOffset;
+        // The gradient's axis, in radians. Driven on the CPU so it can
+        // integrate a wandering turn rate and actually go round, rather than
+        // rocking either side of a fixed heading.
+        uniform float uAngle;
+        uniform vec3  uStrip[${STRIP_STOPS}];
+${isMesh ? `        // Solved on the CPU once a frame -- see SOURCE_ORBITS.
+        uniform vec2  uSources[${COLOR_SLOTS}];` : ''}
+
+        // GLSL3 leaves the fragment output to the material, so declare it.
+        layout(location = 0) out vec4 fragColor;
+
+        const float PI  = 3.14159265359;
+        const float TAU = 6.28318530718;
+${isMesh ? NOISE_HELPERS(octaves) : ''}
+${isMesh ? BLEND_HELPER : ''}${isMesh ? MESH_PALETTE : RAMP_PALETTE}
 
         // Interleaved gradient noise. The obvious hash(gl_FragCoord) dither
         // takes coordinates in the thousands, where a fract-based hash loses
@@ -410,16 +574,25 @@ ${isMesh ? MESH_PALETTE : RAMP_PALETTE}
           );
 
           // A grain of dither, which keeps the wide soft blend off banding.
-          return srgb + (dither(gl_FragCoord.xy) - 0.5) * 0.015;
+          // Sized at about one and a half steps of an 8-bit channel: enough to
+          // break up a quantisation edge, which is all it is for. It was at
+          // nearly four, which is visible as grain in its own right -- that was
+          // covering for the flats the old interpolation left at every stop,
+          // and the spline has taken those away.
+          return srgb + (dither(gl_FragCoord.xy) - 0.5) * 0.006;
         }
 ${FIELD_BODIES[HERO_FIELD]}      `;
 }
 
 // Animated gradient background. The field is chosen by HERO_FIELD above.
 function AnimatedGradientBackground({ colors }) {
-  const timeoutRef = useRef(null);
   const resRef = useRef(new THREE.Vector2());
   const timeRef = useRef(0);
+  // How far into the current palette the window sits, and where the gradient's
+  // axis is pointing. Both are integrated frame by frame rather than tweened,
+  // because both are driven by a rate that is itself moving.
+  const offsetRef = useRef(0);
+  const angleRef = useRef(Math.random() * TAU);
 
   const material = useMemo(() => {
     // GLSL3 so the colour arrays can be indexed by a loop variable through a
@@ -439,12 +612,16 @@ function AnimatedGradientBackground({ colors }) {
     const uniforms = {
       uTime: { value: 0 },
       uRes: { value: new THREE.Vector2(1, 1) },
-      uMix: { value: 0 },
       ...(HERO_FIELD === 'mesh'
         ? { uSources: { value: new Float32Array(COLOR_SLOTS * 2) } }
         : {}),
-      uColorsA: { value: slots.slice() },
-      uColorsB: { value: slots.slice() },
+      uOffset: { value: 0 },
+      uAngle: { value: angleRef.current },
+      // The header opens on the palette it was handed, and the rest of the
+      // strip is rolled straight away -- so the flow has somewhere to go from
+      // the first frame, rather than creeping through two copies of the opening
+      // gradient for the first minute.
+      uStrip: { value: seedStrip(slots) },
     };
 
     return new THREE.ShaderMaterial({
@@ -462,57 +639,47 @@ function AnimatedGradientBackground({ colors }) {
     });
   }, [colors]);
 
-  useEffect(() => {
-    const scheduleNextChange = () => {
-      // Measured from the end of the last slide rather than the start of it: a
-      // second change beginning while the strip was still part way past would
-      // rewrite the palette that was half on screen.
-      const delay = (5 + Math.random() * 10) * 1000;
-      timeoutRef.current = setTimeout(() => {
-        // B is always the palette arriving. uMix only ever travels 0 -> 1, so
-        // the strip only ever slides one way; once it has arrived, B is copied
-        // down into A and the window jumps back to the start. Both ends of that
-        // jump frame the same palette, so it is invisible, and the next change
-        // starts from a strip that is clean again.
-        const { uColorsA, uColorsB, uMix } = material.uniforms;
+  // Rolled per material so the flow and the turn are independent of each other
+  // and of the page's other animations.
+  const flowWander = useMemo(() => makeWander(), [material]);
+  const turnWander = useMemo(() => makeWander(), [material]);
 
-        uColorsB.value.set(
-          oklabSlots(new GradientGenerator(randomColorCount(), false, true).colors)
-        );
-
-        gsap.to(uMix, {
-          value: 1,
-          duration: 7,
-          ease: 'sine.inOut',
-          onComplete: () => {
-            uColorsA.value.set(uColorsB.value);
-            uMix.value = 0;
-            scheduleNextChange();
-          },
-        });
-      }, delay);
-    };
-
-    scheduleNextChange();
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      gsap.killTweensOf(material.uniforms.uMix);
-      material.dispose();
-    };
-  }, [material]);
+  useEffect(() => () => material.dispose(), [material]);
 
   useFrame((state, delta) => {
     // r3f resets clock.elapsedTime to 0 whenever frameloop changes, so the
     // field keeps its own clock -- otherwise every source would snap back to
-    // its starting position each time the header scrolled into view. The clamp
-    // absorbs the long first delta after a resume.
-    timeRef.current += Math.min(delta, 1 / 30);
+    // its starting position each time the header scrolled into view.
+    // Clamped to absorb the long first delta after a resume.
+    const dt = Math.min(delta, 1 / 30);
+
+    timeRef.current += dt;
     const time = timeRef.current;
     material.uniforms.uTime.value = time;
 
     const res = state.gl.getDrawingBufferSize(resRef.current);
     material.uniforms.uRes.value.set(res.x, res.y);
+
+    // Integrated rather than solved from the clock: both of these are driven by
+    // a rate that is itself moving, and the header stops rendering when it
+    // scrolls out of view -- so the flow picks up where it left off instead of
+    // jumping to wherever a clock would have carried it.
+    angleRef.current += turnWander(time) * TURN_RATE * dt;
+    material.uniforms.uAngle.value = angleRef.current;
+
+    offsetRef.current += FLOW_RATE * Math.exp(flowWander(time) * FLOW_SWING) * dt;
+
+    // The window has crossed into the next palette, so the strip comes to it:
+    // everything shifts down one and a fresh palette is rolled onto the end,
+    // two palettes clear of the screen. A while rather than an if -- a single
+    // frame cannot outrun a whole CELL at these rates, but the loop costs
+    // nothing and is the honest way to write a wrap.
+    while (offsetRef.current >= CELL) {
+      offsetRef.current -= CELL;
+      advanceStrip(material.uniforms.uStrip.value);
+    }
+
+    material.uniforms.uOffset.value = offsetRef.current;
 
     if (HERO_FIELD === 'mesh') {
       const aspect = res.x / res.y;
