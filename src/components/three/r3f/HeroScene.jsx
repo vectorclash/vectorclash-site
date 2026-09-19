@@ -209,7 +209,7 @@ const NOISE_HELPERS = (octaves) => `
         }
 `;
 
-const FIELDS = `
+const FIELD_FUNCS = `
         vec3 calmField() {
           vec2 p = gl_FragCoord.xy / uRes - 0.5;
 
@@ -248,27 +248,8 @@ const FIELDS = `
           return col;
         }
 
-        void main() {
-          // uChaos is a uniform, so the whole draw takes one side of this and
-          // there is no divergence to pay for. The middle case is the only one
-          // that evaluates both fields, and it is only reached while a
-          // transition is actually running.
-          vec3 col;
-
-          if (uChaos <= 0.0) {
-            col = calmField();
-          } else if (uChaos >= 1.0) {
-            col = chaosField();
-          } else {
-            // Mixed in OKLab, and both fields are drawing the same palette at
-            // the same instant -- so nothing on screen during the crossing is a
-            // colour that was not already there. Only the arrangement moves.
-            col = mix(calmField(), chaosField(), uChaos);
-          }
-
-          fragColor = vec4(present(col), 1.0);
-        }
 `;
+
 
 // How wide the seam between two palettes is, measured in stop widths -- one
 // stop width being a seventh of the viewport. The strip is read as a single
@@ -548,7 +529,24 @@ const RAMP_PALETTE = `
         }
 `;
 
-function buildFragmentShader(octaves) {
+// The field is drawn in two passes, and the split is where the cost is.
+//
+// Everything expensive about it is arithmetic that varies slowly across the
+// screen: a spline through the palette strip, eight sources blended by inverse
+// distance, a few octaves of noise. None of that carries any high spatial
+// frequency, so it is drawn once into a small offscreen target and read back
+// bilinearly. Interpolating in OKLab is what makes that nearly free -- the
+// space is perceptually uniform and linear, so a ramp between two samples comes
+// back as the ramp that was there, not as an approximation of it.
+//
+// The dither is the one part that genuinely wants a pixel of its own, being the
+// only thing here with any detail finer than the blend, and it stays in the
+// full-resolution pass along with the encode. Which is also why the split is
+// safe: the grain that would have shown a soft upsample is the grain that never
+// went through one.
+const FIELD_SCALE = 0.25;
+
+function buildFieldShader(octaves) {
   return `
         uniform float uTime;
         uniform vec2  uRes;
@@ -575,7 +573,36 @@ function buildFragmentShader(octaves) {
         // GLSL3 leaves the fragment output to the material, so declare it.
         layout(location = 0) out vec4 fragColor;
 
-${NOISE_HELPERS(octaves)}${RAMP_PALETTE}
+${NOISE_HELPERS(octaves)}${RAMP_PALETTE}${FIELD_FUNCS}
+        // Writes OKLab, not colour. The target is half-float because a and b
+        // are signed and an 8-bit target would clamp every negative one to
+        // zero -- which is most of the palette's blues and greens.
+        void main() {
+          vec3 col;
+
+          if (uChaos <= 0.0) {
+            col = calmField();
+          } else if (uChaos >= 1.0) {
+            col = chaosField();
+          } else {
+            // Mixed in OKLab, and both fields are drawing the same palette at
+            // the same instant -- so nothing on screen during the crossing is a
+            // colour that was not already there. Only the arrangement moves.
+            col = mix(calmField(), chaosField(), uChaos);
+          }
+
+          fragColor = vec4(col, 1.0);
+        }
+      `;
+}
+
+// The full-resolution half: one texture read, the encode, and the dither.
+const PRESENT_SHADER = `
+        uniform sampler2D uField;
+        uniform vec2 uRes;
+
+        // GLSL3 leaves the fragment output to the material, so declare it.
+        layout(location = 0) out vec4 fragColor;
 
         // Interleaved gradient noise. The obvious hash(gl_FragCoord) dither
         // takes coordinates in the thousands, where a fract-based hash loses
@@ -621,8 +648,15 @@ ${NOISE_HELPERS(octaves)}${RAMP_PALETTE}
           // and the spline has taken those away.
           return srgb + (dither(gl_FragCoord.xy) - 0.5) * 0.006;
         }
-${FIELDS}      `;
-}
+
+        void main() {
+          // The field target covers the viewport exactly, and this plane is
+          // larger than the frame, so the lookup is in screen space rather
+          // than in the plane's own uv.
+          vec3 lab = texture(uField, gl_FragCoord.xy / uRes).rgb;
+          fragColor = vec4(present(lab), 1.0);
+        }
+      `;
 
 // A chaos episode, in seconds of *rendered* time. Every clock in this field is
 // integrated from dt rather than read off a wall clock, so nothing accrues while
@@ -798,7 +832,8 @@ function AnimatedGradientBackground({ colors }) {
   const chaosRef = useRef(null);
   if (chaosRef.current === null) chaosRef.current = newChaos();
 
-  const material = useMemo(() => {
+  // The offscreen pass: the field itself, at FIELD_SCALE of the drawing buffer.
+  const field = useMemo(() => {
     // GLSL3 so the colour arrays can be indexed by a loop variable through a
     // function parameter, which ES 1.00 forbids.
     //
@@ -828,20 +863,65 @@ function AnimatedGradientBackground({ colors }) {
       uStrip: { value: seedStrip(slots) },
     };
 
-    return new THREE.ShaderMaterial({
+    const mat = new THREE.ShaderMaterial({
       uniforms,
       glslVersion: THREE.GLSL3,
+      // Clip space straight off the attribute: this quad is never seen by a
+      // camera, it only has to cover the target.
       vertexShader: `
+        void main() {
+          gl_Position = vec4(position.xy, 0.0, 1.0);
+        }
+      `,
+      fragmentShader: buildFieldShader(octaves),
+      depthTest: false,
+      depthWrite: false,
+      fog: false,
+    });
+
+    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+    quad.frustumCulled = false;
+
+    const scene = new THREE.Scene();
+    scene.add(quad);
+
+    const target = new THREE.WebGLRenderTarget(1, 1, {
+      // Half-float because the shader writes OKLab, whose a and b are signed.
+      // An 8-bit target would clamp every negative one to zero.
+      type: THREE.HalfFloatType,
+      // The whole point: the upsample has to interpolate, not nearest-sample.
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      depthBuffer: false,
+      stencilBuffer: false,
+      generateMipmaps: false,
+    });
+    // Not colour, so nothing should be converted on the way back in.
+    target.texture.colorSpace = THREE.NoColorSpace;
+
+    return { mat, scene, quad, target, camera: new THREE.Camera() };
+  }, [colors]);
+
+  const material = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        uniforms: {
+          uField: { value: field.target.texture },
+          uRes: { value: new THREE.Vector2(1, 1) },
+        },
+        glslVersion: THREE.GLSL3,
+        vertexShader: `
         void main() {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
-      fragmentShader: buildFragmentShader(octaves),
-      side: THREE.DoubleSide,
-      depthWrite: false,
-      fog: false,
-    });
-  }, [colors]);
+        fragmentShader: PRESENT_SHADER,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        fog: false,
+      }),
+    [field]
+  );
 
   // Rolled per material so the flow and the turn are independent of each other
   // and of the page's other animations.
@@ -849,6 +929,14 @@ function AnimatedGradientBackground({ colors }) {
   const turnWander = useMemo(() => makeWander(TURN_PERIODS), [material]);
 
   useEffect(() => () => material.dispose(), [material]);
+  useEffect(
+    () => () => {
+      field.mat.dispose();
+      field.quad.geometry.dispose();
+      field.target.dispose();
+    },
+    [field]
+  );
 
   useFrame((state, delta) => {
     // r3f resets clock.elapsedTime to 0 whenever frameloop changes, so the
@@ -859,10 +947,22 @@ function AnimatedGradientBackground({ colors }) {
 
     timeRef.current += dt;
     const time = timeRef.current;
-    material.uniforms.uTime.value = time;
+    field.mat.uniforms.uTime.value = time;
 
     const res = state.gl.getDrawingBufferSize(resRef.current);
     material.uniforms.uRes.value.set(res.x, res.y);
+
+    // The field itself is drawn at a fraction of that. Both fields are built
+    // from smooth, low-frequency parts -- a ramp, eight weighted sources, a
+    // little noise -- so what a bilinear upsample loses is very little, and
+    // the dither that would have shown the loss is applied full size in the
+    // pass that reads this back.
+    const fw = Math.max(1, Math.round(res.x * FIELD_SCALE));
+    const fh = Math.max(1, Math.round(res.y * FIELD_SCALE));
+    if (field.target.width !== fw || field.target.height !== fh) {
+      field.target.setSize(fw, fh);
+    }
+    field.mat.uniforms.uRes.value.set(fw, fh);
 
     // The axis is solved from the clock; the flow has to be integrated, because
     // its rate is exponential in the wander and there is no closed form for
@@ -870,7 +970,7 @@ function AnimatedGradientBackground({ colors }) {
     // advances on rendered frames -- so both pick up where they left off when
     // the hero scrolls back into view, rather than jumping to wherever a wall
     // clock would have carried them.
-    material.uniforms.uAngle.value =
+    field.mat.uniforms.uAngle.value =
       angleStartRef.current + TURN_DRIFT * time + TURN_SWING * turnWander(time);
 
     offsetRef.current += FLOW_RATE * Math.exp(flowWander(time) * FLOW_SWING) * dt;
@@ -882,37 +982,45 @@ function AnimatedGradientBackground({ colors }) {
     // nothing and is the honest way to write a wrap.
     while (offsetRef.current >= CELL) {
       offsetRef.current -= CELL;
-      advanceStrip(material.uniforms.uStrip.value);
+      advanceStrip(field.mat.uniforms.uStrip.value);
     }
 
-    material.uniforms.uOffset.value = offsetRef.current;
+    field.mat.uniforms.uOffset.value = offsetRef.current;
 
     const chaos = stepChaos(chaosRef.current, dt, delta);
-    material.uniforms.uChaos.value = chaos;
+    field.mat.uniforms.uChaos.value = chaos;
 
-    if (chaos <= 0) return;
-
-    // Everything below here is the chaos field's, and none of it runs while the
+    // Everything in here is the chaos field's, and none of it runs while the
     // hero is calm.
-    //
-    // The ladder is held for four seconds at a time, renewed every frame the
-    // field is on screen. Four outlasts one of the governor's sampling windows,
-    // so the window that straddles the end of an episode is thrown out along
-    // with the ones inside it -- otherwise the device would be judged on an
-    // average half of which was drawn by a shader that is no longer running.
-    holdQuality(4);
+    if (chaos > 0) {
+      // The ladder is held for four seconds at a time, renewed every frame the
+      // field is on screen. Four outlasts one of the governor's sampling
+      // windows, so the window that straddles the end of an episode is thrown
+      // out along with the ones inside it -- otherwise the device would be
+      // judged on an average half of which was drawn by a shader that is no
+      // longer running.
+      holdQuality(4);
 
-    const aspect = res.x / res.y;
-    const sources = material.uniforms.uSources.value;
+      const aspect = res.x / res.y;
+      const sources = field.mat.uniforms.uSources.value;
 
-    for (let i = 0; i < COLOR_SLOTS; i++) {
-      const orbit = SOURCE_ORBITS[i];
-      sources[i * 2] = (orbit.x + 0.19 * Math.sin(time * orbit.rateX + orbit.phaseX)) * aspect;
-      sources[i * 2 + 1] = orbit.y + 0.19 * Math.cos(time * orbit.rateY + orbit.phaseY);
+      for (let i = 0; i < COLOR_SLOTS; i++) {
+        const orbit = SOURCE_ORBITS[i];
+        sources[i * 2] = (orbit.x + 0.19 * Math.sin(time * orbit.rateX + orbit.phaseX)) * aspect;
+        sources[i * 2 + 1] = orbit.y + 0.19 * Math.cos(time * orbit.rateY + orbit.phaseY);
+      }
+
+      writeChaosStops(field.mat.uniforms.uChaosStops.value, field.mat.uniforms.uStrip.value, offsetRef.current);
     }
 
-    writeChaosStops(material.uniforms.uChaosStops.value, material.uniforms.uStrip.value, offsetRef.current);
-  });
+    // Draw the field into its own target before anything that samples it. A
+    // negative priority orders this ahead of the other frame callbacks without
+    // taking the automatic render away from r3f, which the composer still owns.
+    const prevTarget = state.gl.getRenderTarget();
+    state.gl.setRenderTarget(field.target);
+    state.gl.render(field.scene, field.camera);
+    state.gl.setRenderTarget(prevTarget);
+  }, -1);
 
   return (
     <mesh position={[0, 0, -800]} renderOrder={-1}>
