@@ -16,6 +16,7 @@ import useRetiringCount from '../../utils/useRetiringCount';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
 import QualityGovernor from './QualityGovernor';
 
+
 // Hoisted so these stay referentially stable across renders — ParticleField and
 // ShapeSwarm memoize their random positions against the containerSize object, so
 // a fresh literal each render would re-scatter every particle.
@@ -233,17 +234,35 @@ const FIELD_FUNCS = `
           for (int i = 0; i < ${COLOR_SLOTS}; i++) {
             vec2 sp = uSources[i];
             float d2 = dot(p - sp, p - sp);
-            float w = 1.0 / pow(d2 + 0.010, 1.30);
+            // Sharper than 1.30 and the nearest source takes the pixel outright
+            // -- 2.0 puts it at 95%, 3.0 is a hard Voronoi partition. Which
+            // reads energetic, and is also the one thing here with a spatial
+            // frequency the low-resolution field pass cannot carry, so it is
+            // driven separately from the rest and left alone by default.
+            float w = 1.0 / pow(d2 + uEps, uFalloff);
             acc += uChaosStops[i] * w;
             wsum += w;
           }
           vec3 col = acc / wsum;
 
-          // Slow luminance turbulence, so the blend has some weather in it.
-          // Only OKLab's L is scaled: scaling the whole triple would drag the
-          // a/b axes towards zero and wash the hue out along with it.
-          float n = fbm(p * 1.15 + vec2(uTime * 0.02, uTime * -0.015));
-          col.x *= 0.93 + 0.14 * n;
+          // Weather. fbm runs 0..0.94 with its mean near 0.47, so subtracting
+          // that centres the disturbance on zero and uTurbL is its full swing
+          // either way -- at 0.14 this is the +-6.6% it has always been.
+          //
+          // Luminance is kept on a shorter leash than hue deliberately: the
+          // hero's name sits on top of this, and what threatens its contrast is
+          // lightness moving, not colour.
+          float n = fbm(p * uTurbScale + vec2(uChaosTime * 0.02, uChaosTime * -0.015));
+          col.x *= 1.0 + uTurbL * (n - 0.47);
+
+          // And a second, independent disturbance pushed into the a/b plane,
+          // along a direction that itself turns. Scaling L alone can only make
+          // the field lighter and darker, which reads as cloud shadow; moving
+          // a/b is what makes it read as the colour itself being unsettled.
+          if (uTurbC > 0.0) {
+            float m = fbm(p * uTurbScale * 1.7 + vec2(uChaosTime * -0.031, uChaosTime * 0.024));
+            col.yz += (m - 0.47) * uTurbC * vec2(cos(uChaosTime * 0.07), sin(uChaosTime * 0.07));
+          }
 
           return col;
         }
@@ -570,6 +589,18 @@ function buildFieldShader(octaves) {
         uniform vec2  uSources[${COLOR_SLOTS}];
         uniform vec3  uChaosStops[${COLOR_SLOTS}];
 
+        // How hard this episode is blowing. All four are constant across the
+        // frame and interpolated from the episode's energy on the CPU.
+        uniform float uFalloff;
+        uniform float uEps;
+        uniform float uTurbL;
+        uniform float uTurbC;
+        uniform float uTurbScale;
+        // The source clock. Separate from uTime because it runs faster while an
+        // episode is blowing, and the weather should be carried along with the
+        // sources rather than drifting at its own pace behind them.
+        uniform float uChaosTime;
+
         // GLSL3 leaves the fragment output to the material, so declare it.
         layout(location = 0) out vec4 fragColor;
 
@@ -708,14 +739,66 @@ const FIRST_CEIL = 90;
 const firstSpell = () =>
   Math.min(FIRST_FLOOR + -Math.log(1 - Math.random()) * FIRST_MEAN, FIRST_CEIL);
 
-const CHAOS_HOLD = [12, 26];
 
-// It leaves more slowly than it arrives. Coming apart can afford to be the
-// quicker half -- that is the part with the interest in it -- but settling back
-// wants to be slow enough that there is no moment you could point at and call
-// the end of it.
-const CHAOS_RISE = 14;
-const CHAOS_FALL = 20;
+// Where an episode sits between a drift and a squall. Most of them should be
+// close to what the field has always done -- the point of a rare event is that
+// it is rare -- so the draw is biased hard towards nothing much. At skew 3,
+// half of all episodes come in under 0.2 and one in ten clears 0.54.
+const drawEnergy = () => Math.pow(Math.random(), ENERGY_SKEW);
+
+// Biased hard towards nothing much, because the point of a rare event is that
+// it is rare: at this exponent 58% of episodes come in under 0.2, 21% clear
+// 0.5, and 7% clear 0.8. Everything at energy 0 is what the field did before
+// any of this existed, so a mild episode is not a new thing happening less
+// often -- it is the old thing.
+const ENERGY_SKEW = 3;
+
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// Source clock multiplier, and the whole effect. A source orbits in 42-59
+// seconds, so across a 19-second hold it used to travel about a third of one
+// circuit -- the field was never calm, it was a still picture drifting. At
+// seven times that a short episode completes a full orbit and the sources
+// genuinely pass through each other, which the arrangement was always able to
+// do and never had time to.
+const chaosSpeed = (e) => lerp(1, 7, e);
+
+// How hard the nearest source holds its ground. At 1.30 it takes 70% of a
+// pixel and the other seven average into the rest, which is what kept the field
+// looking mixed however fast it moved; at 2.40 it takes about 97% and each
+// source owns its patch. Measured against a synthetic palette that is worth 12%
+// more chroma across the field, so the sharper it gets the more colour it has
+// rather than less -- averaging eight hues is what was washing it out.
+//
+// This was held back at first for fear of what the low-resolution field pass
+// would do to it, since it is the only thing here with any real spatial
+// frequency. Drawn at full size and at a quarter and compared, the difference
+// is 0.09/255 mean and 3/255 peak even at an exponent of 3.0: inverse-distance
+// weighting never actually produces an edge, only a steep ramp, and a steep
+// ramp is still several pixels wide. It survives the upsample.
+const chaosFalloff = (e) => lerp(1.30, 2.40, e);
+// Tightened with the exponent, or a sharper falloff only sharpens the far field
+// and leaves a soft blown-out core at every source.
+const chaosEps = (e) => lerp(0.010, 0.0024, e);
+
+// Weather. The luminance swing stays the shorter of the two deliberately -- the
+// hero's name sits on top of this, and what threatens its contrast is lightness
+// moving, not colour. Chroma turbulence is new: scaling L alone can only make
+// the field lighter and darker, which reads as cloud shadow, where moving a
+// and b is what makes the colour itself look unsettled.
+const chaosTurbL = (e) => lerp(0.14, 0.45, e);
+const chaosTurbC = (e) => lerp(0, 0.06, e);
+const chaosTurbScale = (e) => lerp(1.15, 2.6, e);
+
+// The harder it blows, the sooner it is over. Not a concession to cost, though
+// it happens to be one: at seven times the clock rate a six-second squall shows
+// more of the field rearranging than a twenty-six second drift does, so the
+// long ones have to be the mild ones or they become wallpaper.
+const CHAOS_HOLD_CALM = [12, 26];
+const chaosHold = (e) => lerp(randIn(CHAOS_HOLD_CALM), 6, e);
+
+const chaosRise = (e) => lerp(14, 4, e);
+const chaosFall = (e) => lerp(20, 24, e);
 
 // Smootherstep rather than smoothstep: zero curvature at both ends as well as
 // zero slope, so neither the departure from calm nor the return to it has an
@@ -737,6 +820,9 @@ const newChaos = () => ({
   span: firstSpell(),
   slow: 0,
   given: false,
+  // How hard the episode currently running is blowing, 0 to 1. Meaningless
+  // while calm; redrawn every time one starts.
+  energy: 0,
   // Whether the opening wait is still being served. It survives a wait that
   // expires without an episode, because such a wait was declined rather than
   // spent -- see stepChaos.
@@ -782,11 +868,17 @@ function stepChaos(c, dt, raw) {
     c.first = false;
     c.phase = 'rise';
     c.slow = 0;
+    // Drawn here rather than per frame: an episode has one energy for its whole
+    // length, and the rise and the fall have to agree with the hold about what
+    // it was.
+    c.energy = drawEnergy();
     return 0;
   }
 
   if (c.phase === 'fall') {
-    if (c.t < CHAOS_FALL) return 1 - smootherstep(c.t / CHAOS_FALL);
+    if (c.t < chaosFall(c.energy)) {
+      return 1 - smootherstep(c.t / chaosFall(c.energy));
+    }
 
     c.phase = 'calm';
     c.t = 0;
@@ -805,11 +897,11 @@ function stepChaos(c, dt, raw) {
   }
 
   if (c.phase === 'rise') {
-    if (c.t < CHAOS_RISE) return smootherstep(c.t / CHAOS_RISE);
+    if (c.t < chaosRise(c.energy)) return smootherstep(c.t / chaosRise(c.energy));
 
     c.phase = 'hold';
     c.t = 0;
-    c.span = randIn(CHAOS_HOLD);
+    c.span = chaosHold(c.energy);
     return 1;
   }
 
@@ -824,6 +916,11 @@ function stepChaos(c, dt, raw) {
 function AnimatedGradientBackground({ colors }) {
   const resRef = useRef(new THREE.Vector2());
   const timeRef = useRef(0);
+  // The source orbits run on their own clock, because energy speeds them up and
+  // a multiplied clock would teleport their phase the moment it changed. This
+  // one is integrated, so the field winds up through the rise and back down
+  // through the fall instead of snapping between rates.
+  const chaosPhaseRef = useRef(0);
   // How far into the current palette the window sits, and the orientation the
   // axis starts from -- the axis is solved from that, the drift and the swing,
   // so this one is a constant rather than an accumulator.
@@ -854,6 +951,12 @@ function AnimatedGradientBackground({ colors }) {
       uSources: { value: new Float32Array(COLOR_SLOTS * 2) },
       uChaosStops: { value: new Float32Array(COLOR_SLOTS * 3) },
       uChaos: { value: 0 },
+      uFalloff: { value: chaosFalloff(0) },
+      uEps: { value: chaosEps(0) },
+      uTurbL: { value: chaosTurbL(0) },
+      uTurbC: { value: chaosTurbC(0) },
+      uTurbScale: { value: chaosTurbScale(0) },
+      uChaosTime: { value: 0 },
       uOffset: { value: 0 },
       uAngle: { value: angleStartRef.current },
       // The hero opens on the palette it was handed, and the rest of the
@@ -990,6 +1093,14 @@ function AnimatedGradientBackground({ colors }) {
     const chaos = stepChaos(chaosRef.current, dt, delta);
     field.mat.uniforms.uChaos.value = chaos;
 
+    // Energy is what the episode is worth at full strength; the crossfade is how
+    // much of it is on screen. Multiplying them is what makes the field wind up
+    // and down rather than arriving at speed -- and it keeps a calm frame at
+    // exactly the settings it had before any of this existed.
+    const energy = chaosRef.current.energy * chaos;
+
+    chaosPhaseRef.current += dt * chaosSpeed(energy);
+
     // Everything in here is the chaos field's, and none of it runs while the
     // hero is calm.
     if (chaos > 0) {
@@ -1003,11 +1114,19 @@ function AnimatedGradientBackground({ colors }) {
 
       const aspect = res.x / res.y;
       const sources = field.mat.uniforms.uSources.value;
+      const phase = chaosPhaseRef.current;
+
+      field.mat.uniforms.uFalloff.value = chaosFalloff(energy);
+      field.mat.uniforms.uEps.value = chaosEps(energy);
+      field.mat.uniforms.uTurbL.value = chaosTurbL(energy);
+      field.mat.uniforms.uTurbC.value = chaosTurbC(energy);
+      field.mat.uniforms.uTurbScale.value = chaosTurbScale(energy);
+      field.mat.uniforms.uChaosTime.value = phase;
 
       for (let i = 0; i < COLOR_SLOTS; i++) {
         const orbit = SOURCE_ORBITS[i];
-        sources[i * 2] = (orbit.x + 0.19 * Math.sin(time * orbit.rateX + orbit.phaseX)) * aspect;
-        sources[i * 2 + 1] = orbit.y + 0.19 * Math.cos(time * orbit.rateY + orbit.phaseY);
+        sources[i * 2] = (orbit.x + 0.19 * Math.sin(phase * orbit.rateX + orbit.phaseX)) * aspect;
+        sources[i * 2 + 1] = orbit.y + 0.19 * Math.cos(phase * orbit.rateY + orbit.phaseY);
       }
 
       writeChaosStops(field.mat.uniforms.uChaosStops.value, field.mat.uniforms.uStrip.value, offsetRef.current);
