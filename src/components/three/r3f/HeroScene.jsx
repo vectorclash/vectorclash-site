@@ -652,6 +652,28 @@ const CALM_CEIL = 420;
 const calmSpell = () =>
   Math.min(CALM_FLOOR + -Math.log(1 - Math.random()) * CALM_MEAN, CALM_CEIL);
 
+// The opening wait does a different job from the gaps that follow it, and was
+// being asked to do it with the gaps' numbers. A gap sets a rhythm for someone
+// who has settled in; this one is the only thing standing between an ordinary
+// visit and ever seeing an episode at all. At the gap's floor that made it
+// impossible rather than unlikely -- the clock only advances on rendered
+// frames, so forty-five seconds means forty-five seconds of looking at the
+// hero, and anyone who scrolls on before then could not see one however long
+// they stayed on the site. Past that first wait an episode is running about a
+// quarter of the time, so the effect was never too rare. The wait for the first
+// one was too long.
+//
+// Drawn shorter and capped much closer, then, so half a minute of attention has
+// a real chance of catching one. The floor still clears the hero's own entrance
+// -- the cluster is six seconds arriving, and an episode landing on top of that
+// would be two things at once in the moment there is most to look at.
+const FIRST_MEAN = 25;
+const FIRST_FLOOR = 20;
+const FIRST_CEIL = 90;
+
+const firstSpell = () =>
+  Math.min(FIRST_FLOOR + -Math.log(1 - Math.random()) * FIRST_MEAN, FIRST_CEIL);
+
 const CHAOS_HOLD = [12, 26];
 
 // It leaves more slowly than it arrives. Coming apart can afford to be the
@@ -675,7 +697,17 @@ const randIn = ([lo, hi]) => lo + Math.random() * (hi - lo);
 const CHAOS_SLOW_FRAME = 1 / 34;
 const CHAOS_SLOW_LIMIT = 90;
 
-const newChaos = () => ({ phase: 'calm', t: 0, span: calmSpell(), slow: 0, given: false });
+const newChaos = () => ({
+  phase: 'calm',
+  t: 0,
+  span: firstSpell(),
+  slow: 0,
+  given: false,
+  // Whether the opening wait is still being served. It survives a wait that
+  // expires without an episode, because such a wait was declined rather than
+  // spent -- see stepChaos.
+  first: true,
+});
 
 /**
  * Advances the episode clock and answers how much chaos is on screen, 0 to 1.
@@ -695,11 +727,25 @@ function stepChaos(c, dt, raw) {
 
     c.t = 0;
 
-    if (c.given || getLevel() !== 'high') {
+    // Given up on: nothing will start again this session, so the span only has
+    // to be something to count down.
+    if (c.given) {
       c.span = calmSpell();
       return 0;
     }
 
+    // Not at the top of the ladder yet. That is a not-yet rather than a no --
+    // the governor takes three seconds to reach its first verdict and climbs a
+    // rung at a time, so a device that will get there may simply not have got
+    // there. Falling back to a full gap here would spend the short opening wait
+    // on a check that was never going to pass and put the first episode back
+    // where it was, which is the whole thing this is meant to fix.
+    if (getLevel() !== 'high') {
+      c.span = c.first ? firstSpell() : calmSpell();
+      return 0;
+    }
+
+    c.first = false;
     c.phase = 'rise';
     c.slow = 0;
     return 0;
