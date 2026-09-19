@@ -1390,11 +1390,22 @@ export default function HeroScene({ colors, fallback, ready, onReady }) {
         // nothing. multisampling on the composer is the real control.
         alpha: false,
         physicallyCorrectLights: false,
-        shadowMap: {
-          enabled: true,
-          type: THREE.PCFSoftShadowMap,
-        },
       }}
+      // Shadows have to be turned on here rather than through the gl prop,
+      // which is where this used to live and where it did nothing at all. r3f
+      // applies gl.shadowMap by *replacing* the renderer's WebGLShadowMap with
+      // the plain object handed to it, and three calls the instance it captured
+      // in its own constructor closure rather than the one on the renderer -- so
+      // the flag was set on an object nothing ever reads, the real shadow map
+      // kept its default of off, and every castShadow in this scene had been
+      // inert since the port to r3f. Nothing threw and nothing warned; the
+      // shadows just quietly stopped.
+      //
+      // "percentage" is PCFShadowMap. The soft variant this scene used to ask
+      // for is deprecated as of three 0.185 -- WebGLShadowMap.render downgrades
+      // it to exactly this on the first frame and warns -- so naming it
+      // directly is the same picture without the detour.
+      shadows="percentage"
       // Cross-fades up over the CSS gradient underneath, which carries the same
       // palette, so the handover reads as the field gaining depth rather than
       // as the background being replaced.
