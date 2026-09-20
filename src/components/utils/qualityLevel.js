@@ -27,13 +27,22 @@
  *
  * Settings split into two kinds, and the split is the whole design:
  *
- *   ADAPTIVE   dpr, bloom resolution, star field counts, film grain. These can
- *              change mid-session, so the governor drives them. Anything that
- *              *disappears* is faded out first -- see useRetiringCount.
- *   LATCHED    multisampling, cluster detail, gradient octaves. Changing these
- *              recompiles a shader, rebuilds geometry or disposes the whole
- *              EffectComposer, all of which drop frames. They are read once,
- *              from the starting level, and never again in that session.
+ *   ADAPTIVE   dpr, bloom resolution, star field counts, film grain, shadow
+ *              map size and shadow radius. These can change mid-session, so the
+ *              governor drives them. Anything that *disappears* is faded out
+ *              first -- see useRetiringCount.
+ *   LATCHED    multisampling, cluster detail, gradient octaves, shadow filter.
+ *              Changing these recompiles a shader, rebuilds geometry or
+ *              disposes the whole EffectComposer, all of which drop frames.
+ *              They are read once, from the starting level, and never again in
+ *              that session.
+ *
+ * The shadow settings are split across both halves, which is worth spelling out
+ * because three decides it for us. `shadowMapType` is a program parameter --
+ * WebGLPrograms puts it in the cache key -- so changing the filter recompiles
+ * every material in the scene, and it has to be latched. The map size is only a
+ * render target, and the radius is a plain uniform, so both can move whenever
+ * the governor likes.
  *
  * The settled level is written to localStorage, so the latched settings on a
  * return visit start from what the device actually proved it could do rather
@@ -64,6 +73,27 @@ const SETTINGS = {
     multisampling: 0,
     clusterDetail: 'low',
     octaves: 2,
+    // Not off, and not smaller. What the cluster loses without shadows is the
+    // merkabas occluding each other, and at SIZE_RATIO 1.4 they interpenetrate
+    // -- that occlusion is what makes twelve shapes read as one crystal rather
+    // than as twelve separately lit shells. The dark side of a shape is N.L
+    // shading and survives either way, so turning shadows off would cost the
+    // silhouette and save comparatively little.
+    //
+    // The saving is taken on the filter instead. PCF in three 0.185 is a
+    // 5-sample Vogel disk through hardware 4-tap comparison -- around twenty
+    // filtered taps, per receiving fragment, per light. Basic is one. That is
+    // where the cost of a shadow is in this scene, because the casters are
+    // twelve low-poly solids and the receivers cover most of the frame.
+    //
+    // The map stays at 512: with the frustum now fitted to the cluster (see
+    // BrightCluster) those texels all land on the crystal, and the depth pass
+    // over twelve small meshes is setup-bound rather than fill-bound, so
+    // halving it would buy almost nothing and make basic's aliasing worse.
+    shadowType: 'basic',
+    // Unused under basic filtering, which takes a single unfiltered sample.
+    shadowRadius: 0,
+    shadowMapSize: 512,
   },
   medium: {
     smallFields: 18,
@@ -76,6 +106,9 @@ const SETTINGS = {
     multisampling: 0,
     clusterDetail: 'medium',
     octaves: 4,
+    shadowType: 'percentage',
+    shadowRadius: 2,
+    shadowMapSize: 512,
   },
   high: {
     smallFields: 25,
@@ -92,6 +125,13 @@ const SETTINGS = {
     multisampling: 2,
     clusterDetail: 'high',
     octaves: 4,
+    shadowType: 'percentage',
+    // The radius is in texels, so it doubles with the map: a penumbra the same
+    // width in the scene as medium's, resolved at twice the detail. Left at 2
+    // it would have made high's shadows *harder* than medium's, which is not
+    // what a higher tier should mean.
+    shadowRadius: 4,
+    shadowMapSize: 1024,
   },
 };
 

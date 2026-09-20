@@ -4,7 +4,6 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { MotionPathPlugin } from 'gsap/all';
-import tinycolor from 'tinycolor2';
 import merkaba from '../../../assets/models/basic-merkaba.glb';
 // The white-RGB variant, brought over from chromaforge. The sprite the star
 // fields use is a black stencil -- its opaque pixels are RGB (0,0,0) and only
@@ -20,6 +19,8 @@ import ClusterSkin, {
   MODEL_TIP,
 } from './ClusterSkin';
 import { latchedSettings } from '../../utils/qualityLevel';
+import useQuality from '../../utils/useQuality';
+import { oklabToLinearInto } from '../../utils/oklab';
 import {
   PATTERNS,
   pickPattern,
@@ -119,7 +120,7 @@ const SKIN_SETTINGS = {
     opacity: 1,
   },
   cage: {
-    detail: { low: 10, medium: 12, high: 12 },
+    detail: { low: 6, medium: 8, high: 8 },
     wireframe: true,
     // Light, because the solids underneath are 0x333333 and a dark wire on a
     // dark crystal is just noise.
@@ -186,6 +187,175 @@ const HALO_CORE_FRACTION = 0.17;
 const HALO_CORE_OVERSHOOT = 1.25;
 const HALO_SCALE = (2 / HALO_CORE_FRACTION) * HALO_CORE_OVERSHOOT;
 
+// How many lit shapes orbit the cluster. Four of them, each on its own long
+// motion path, meant the cluster was lit from four sides at once and read
+// evenly bright from every angle -- which is the one thing a crystal should not
+// do. Two leave most of the surface in shadow at any moment, so the facets that
+// are lit are the composition rather than the whole object being visible.
+const BRIGHT_COUNT = 2;
+
+// The lights no longer carry a palette of their own. They are keyed off
+// whatever the background is showing at that instant: each one takes one of the
+// field's eight stops, turns it to the far side of the hue wheel and lights the
+// cluster with that. So the cluster is always the complement of what is behind
+// it, and it keeps being the complement as the field flows through palette
+// after palette -- there is nothing here to fall out of step, because the hue
+// is solved from the live palette every frame rather than chosen once.
+//
+// Which two stops. Neither end of the window, where the palette is joining the
+// one before or after it and the colour is partly the neighbour's; and a good
+// distance apart, so the two lights are answering to genuinely different parts
+// of the background rather than to two samples of the same wash.
+const BRIGHT_SLOTS = [2, 5];
+
+// A stop this close to the neutral axis has no hue to complement -- atan2 on
+// noise -- so it borrows the other light's, and a palette that is grey all the
+// way through falls back to a fixed pair. Against grey, any two hues contrast.
+const NEUTRAL_CHROMA = 0.004;
+const FALLBACK_HUES = [0, (Math.PI * 2) / 3];
+
+// The two stops a palette hands over can sit close together on the wheel --
+// GradientGenerator builds palettes out of near neighbours as readily as out of
+// opposites -- and two complements of two near-identical stops are two copies
+// of the same light. Below this they are pushed apart, symmetrically, so
+// neither drifts far from the stop it came from.
+const MIN_SEPARATION = (Math.PI / 180) * 60;
+
+// What the complement is rendered at, rather than what the background stop
+// happened to be. These are emissive bodies, so the floor is there because the
+// complement of a deep navy at the navy's own lightness is a brown that never
+// reads as a light at all; lightness still tracks the stop it came from, lifted
+// off it.
+//
+// The ceiling is the more interesting one, and it is low. Brightness here comes
+// from emissiveIntensity, which multiplies the colour by three before the
+// composer ever sees it -- so an OKLab lightness near 1 buys no extra glow and
+// costs the hue: the blue half of the wheel simply runs out of sRGB up there
+// and the shape arrives white. Held in this band the light stays the colour it
+// was asked for and the bloom pass makes it bright.
+const LIGHT_LIFT = 0.25;
+const LIGHT_L_MIN = 0.72;
+const LIGHT_L_MAX = 0.82;
+// OKLab chroma. Past roughly this the brighter hues leave sRGB and come back
+// with a negative channel, which clamps to a different hue than the one asked
+// for -- so the fit below walks it down rather than clamping the result.
+const LIGHT_CHROMA = 0.15;
+const GAMUT_STEP = 0.85;
+const GAMUT_TRIES = 8;
+
+// Scratch for the colour solve. Module level and shared between the shapes:
+// each of them runs this to completion inside its own frame callback, and
+// nothing here outlives the call.
+const HUES = new Float64Array(BRIGHT_COUNT);
+const LEVELS = new Float64Array(BRIGHT_COUNT);
+const CHROMAS = new Float64Array(BRIGHT_COUNT);
+const RGB = new Float64Array(3);
+
+// Wrapped into -PI..PI, so two hues are always compared the short way round.
+function hueDelta(a, b) {
+  return ((((b - a + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
+}
+
+// Reads both stops out of the live palette and leaves the two complements in
+// HUES. Solved as a pair rather than one at a time because the separation below
+// is a property of the pair.
+function solveHues(palette) {
+  for (let i = 0; i < BRIGHT_COUNT; i++) {
+    const o = BRIGHT_SLOTS[i] * 3;
+    const a = palette[o + 1];
+    const b = palette[o + 2];
+
+    LEVELS[i] = palette[o];
+    CHROMAS[i] = Math.hypot(a, b);
+    HUES[i] = Math.atan2(b, a) + Math.PI;
+  }
+
+  if (CHROMAS[0] < NEUTRAL_CHROMA && CHROMAS[1] < NEUTRAL_CHROMA) {
+    HUES[0] = FALLBACK_HUES[0];
+    HUES[1] = FALLBACK_HUES[1];
+    return;
+  }
+  if (CHROMAS[0] < NEUTRAL_CHROMA) HUES[0] = HUES[1];
+  if (CHROMAS[1] < NEUTRAL_CHROMA) HUES[1] = HUES[0];
+
+  const d = hueDelta(HUES[0], HUES[1]);
+  if (Math.abs(d) < MIN_SEPARATION) {
+    const push = (MIN_SEPARATION - Math.abs(d)) / 2;
+    const dir = d < 0 ? -1 : 1;
+    HUES[0] -= dir * push;
+    HUES[1] += dir * push;
+  }
+}
+
+// The colour light `i` should be this frame, written into a caller-owned
+// THREE.Color. Channels above 1 are left alone -- the composer's buffers are
+// half-float and that headroom is what the bloom pass reads -- and only
+// negatives are fitted away, because a negative channel is a hue error rather
+// than an overexposure.
+function writeLightColor(out, palette, i) {
+  solveHues(palette);
+
+  const hue = HUES[i];
+  const L = Math.min(Math.max(LEVELS[i] + LIGHT_LIFT, LIGHT_L_MIN), LIGHT_L_MAX);
+  let chroma = LIGHT_CHROMA;
+
+  for (let k = 0; k < GAMUT_TRIES; k++) {
+    oklabToLinearInto(RGB, L, chroma * Math.cos(hue), chroma * Math.sin(hue));
+    if (RGB[0] >= 0 && RGB[1] >= 0 && RGB[2] >= 0) break;
+    chroma *= GAMUT_STEP;
+  }
+
+  return out.setRGB(
+    Math.max(RGB[0], 0),
+    Math.max(RGB[1], 0),
+    Math.max(RGB[2], 0),
+    THREE.LinearSRGBColorSpace
+  );
+}
+
+// Shadows.
+//
+// Everything here exists because a spotlight's shadow camera, left alone, is
+// a 90-degree frustum from 0.5 to 500 units aimed at a crystal that occupies a
+// few dozen of them. Almost every texel in the map lands on empty space, and
+// the depth range is so long that what does land on the crystal quantizes into
+// acne. Both are fixed by fitting the frustum to the thing being shadowed,
+// which is worth far more than any amount of map resolution.
+//
+// What three lets us fit, in 0.185:
+//   near    ours outright.
+//   focus   ours -- SpotLightShadow.updateMatrices reads it every frame and
+//           sets the shadow camera's fov to the spotlight's angle times this.
+//   far     not ours. The same method overwrites camera.far with the light's
+//           `distance` on every frame it differs, and `distance` is the
+//           falloff window the illumination is built on. So the near plane
+//           does all the work here -- and it is enough: measured across the
+//           orbit it takes the depth range from a flat 1000:1 to between 5:1
+//           and 35:1, worst case at the near end of the orbit.
+
+// A guess at the cluster's reach, used until the cluster has run a frame and
+// published its real one. Generous on purpose: too small clips casters out of
+// the shadow frustum and their shadows vanish, where too large only wastes
+// texels for one frame.
+const REACH_GUESS = 80;
+
+// The near plane never gets closer to the light than this share of its
+// distance, which only matters if the cluster ever swells far enough to
+// swallow the lights.
+const MIN_NEAR_FRACTION = 0.05;
+
+// Peter-panning is the failure mode of a depth bias and acne is the failure
+// mode of none, so the offset is taken along the surface normal instead --
+// three's normalBias, which is the modern answer to both.
+//
+// It is expressed in world units, and this scene has no fixed world scale: the
+// hero tweens its whole group up from 0.00002 over six seconds, and the fit
+// scale shrinks it again on a narrow frame. So it is derived per frame rather
+// than set as a constant, from the one length that actually matters -- the
+// world size of a shadow texel, which is the frustum's width at the cluster
+// over the map's resolution. Two texels is enough on geometry this faceted.
+const NORMAL_BIAS_TEXELS = 2;
+
 const ORIGIN = new THREE.Vector3(0, 0, 0);
 const UP = new THREE.Vector3(0, 1, 0);
 const UP_ALT = new THREE.Vector3(0, 0, 1);
@@ -244,7 +414,7 @@ function randomDirection() {
   return v.lengthSq() < 1e-6 ? v.set(0, 1, 0) : v.normalize();
 }
 
-function MerkabaCluster({ geometry, fit }) {
+function MerkabaCluster({ geometry, fit, reachRef }) {
   const groupRef = useRef();
   const meshes = useRef([]);
 
@@ -473,33 +643,42 @@ function MerkabaCluster({ geometry, fit }) {
     const hold = c.blending ? A.hold + (B.hold - A.hold) * ke : A.hold;
     governor(gov, pts, COUNT, R, hold, ctx.yaw, delta);
 
+    // How far the cluster actually reaches this frame, taken in the same pass
+    // that seats the shapes. It used to be solved inside the skin branch, which
+    // meant it did not exist in 'solids' mode and was a second walk over the
+    // twelve when it did -- and the lights need it whichever mode is running,
+    // because it is what their shadow frustums are fitted to.
+    let rMax = 0;
+
     for (let i = 0; i < COUNT; i++) {
-      if (meshes.current[i]) meshes.current[i].position.copy(pts[i]);
+      const mesh = meshes.current[i];
+      if (!mesh) continue;
+
+      mesh.position.copy(pts[i]);
+      rMax = Math.max(rMax, pts[i].length() + mesh.scale.x * MODEL_TIP);
     }
+
+    reachRef.current = rMax;
 
     // The wrap reads the same centres, rotations and sizes the solids just
     // took, so it cannot drift out of step with them.
     if (skinData) {
       const { skinM4 } = scratch;
-      let rMax = 0;
 
       for (let i = 0; i < COUNT; i++) {
         const mesh = meshes.current[i];
         if (!mesh) continue;
 
-        const size = mesh.scale.x;
         skinData.shape[i].set(
           pts[i].x,
           pts[i].y,
           pts[i].z,
-          size * MODEL_PLANE_OFFSET
+          mesh.scale.x * MODEL_PLANE_OFFSET
         );
         skinM4.makeRotationFromQuaternion(mesh.quaternion);
         // A pure rotation's inverse is its transpose, so this is the world ->
         // shape transform without an actual inversion.
         skinData.invRot[i].setFromMatrix4(skinM4).transpose();
-
-        rMax = Math.max(rMax, pts[i].length() + size * MODEL_TIP);
       }
 
       skinData.uCount.value = COUNT;
@@ -538,9 +717,75 @@ function MerkabaCluster({ geometry, fit }) {
   );
 }
 
-function BrightShape({ color, initialDirection, haloTexture, fit }) {
+// Fits a spotlight's shadow camera to the cluster, once a frame.
+//
+// The cluster sits at the world origin -- the same assumption the light's own
+// target makes, one line up -- so the light's world distance to it is just the
+// length of its world position. Its local distance is the length of its
+// position inside the cluster group, and the ratio of the two is every scale
+// between here and the world: the six-second intro tween, the narrow-frame fit,
+// the lot. Nothing has to be told about any of them.
+//
+// The angles work out scale-free. The cluster subtends atan(reach / localDist)
+// from the light whatever the group is scaled to, so `focus` is solved in local
+// units and `near` is the only quantity that needs the world scale applied.
+function fitShadow(light, group, reach, world, settings) {
+  if (!group) return;
+
+  const localDist = group.position.length();
+  if (localDist < 1e-6) return;
+
+  light.getWorldPosition(world);
+  const dist = world.length();
+  const scale = dist / localDist;
+
+  // The fov the cluster actually needs, as a share of the one the spotlight
+  // casts over. Across the orbit and the cluster's own breathing this measures
+  // 0.4 to 0.9, and density goes as its square -- so between 1.3 and 6 times
+  // the texels on the crystal, for a divide. That is more than doubling the map
+  // buys, and unlike doubling the map it costs nothing.
+  //
+  // Never above 1: the shadow camera must not open wider than the light itself
+  // or it would be shadowing ground the light never reaches.
+  const shadowShare = Math.atan(reach / localDist) / light.angle;
+  light.shadow.focus = Math.min(shadowShare, 1);
+
+  // Pulled up to the near face of the cluster. `far` cannot be touched -- see
+  // the note by REACH_GUESS -- so this is the whole of the depth-precision fix.
+  light.shadow.camera.near = Math.max(
+    (localDist - reach) * scale,
+    dist * MIN_NEAR_FRACTION
+  );
+  // Ours to call. SpotLightShadow.updateMatrices refreshes the projection only
+  // when the fov, aspect or far plane it owns has changed -- the near plane is
+  // not one of them, so a frame where the focus happened to land unchanged
+  // would otherwise render this new near against the old matrix.
+  light.shadow.camera.updateProjectionMatrix();
+
+  // A texel's width where it lands on the crystal. The frustum is fitted to the
+  // cluster, so that is the cluster's own diameter over the map's resolution.
+  light.shadow.normalBias =
+    (NORMAL_BIAS_TEXELS * 2 * reach * scale) / settings.shadowMapSize;
+
+  // Only read under PCF; basic filtering takes one unfiltered sample.
+  light.shadow.radius = settings.shadowRadius;
+}
+
+function BrightShape({ index, paletteRef, reachRef, initialDirection, haloTexture, fit }) {
   const groupRef = useRef();
   const spotLightRef = useRef();
+  const coreRef = useRef();
+  const haloRef = useRef();
+  // The colour is driven from the frame loop, so this is only what the shape is
+  // built with -- solved from the palette the hero was seeded with rather than
+  // left at a default, so the first frame is already the right colour.
+  const color = useMemo(
+    () => writeLightColor(new THREE.Color(), paletteRef.current, index),
+    [paletteRef, index]
+  );
+  const { settings } = useQuality();
+  // Scratch for the shadow fit. Nothing in the frame loop allocates.
+  const lightWorld = useMemo(() => new THREE.Vector3(), []);
   // A little larger than before to hold their size at nearly twice the orbit
   // radius. Still whole numbers, so they stay a set rather than a gradient.
   const shapeSize = useMemo(() => 1 + Math.round(Math.random() * 3), []);
@@ -598,11 +843,44 @@ function BrightShape({ color, initialDirection, haloTexture, fit }) {
     };
   }, []);
 
+  // The map's resolution, driven by the governor. Not a program parameter --
+  // it is only a render target -- so this can move mid-session without a
+  // recompile. Three allocates the map lazily, so dropping the old one and
+  // nulling the handle is all it takes to have it rebuilt at the new size.
+  useEffect(() => {
+    const light = spotLightRef.current;
+    if (!light) return;
+
+    const size = settings.shadowMapSize;
+    if (light.shadow.mapSize.width === size) return;
+
+    light.shadow.mapSize.set(size, size);
+    if (light.shadow.map) {
+      light.shadow.map.dispose();
+      light.shadow.map = null;
+    }
+  }, [settings.shadowMapSize]);
+
   useFrame(() => {
     if (spotLightRef.current) {
       spotLightRef.current.target.position.set(0, 0, 0);
       spotLightRef.current.target.updateMatrixWorld();
+
+      fitShadow(spotLightRef.current, groupRef.current, reachRef.current, lightWorld, settings);
     }
+
+    // Straight from the live palette, every frame, with no easing over the top.
+    // The background itself moves slowly -- a palette takes tens of seconds to
+    // flow through the window -- so the complement of it moves just as slowly,
+    // and a smoothing term here would only lag the thing it is tracking.
+    writeLightColor(color, paletteRef.current, index);
+
+    if (coreRef.current) {
+      coreRef.current.color.copy(color);
+      coreRef.current.emissive.copy(color);
+    }
+    if (haloRef.current) haloRef.current.color.copy(color);
+    if (spotLightRef.current) spotLightRef.current.color.copy(color);
   });
 
   return (
@@ -614,6 +892,7 @@ function BrightShape({ color, initialDirection, haloTexture, fit }) {
             back as glow instead of clipping. At 1 these sat just under the
             0.7 luminance threshold and barely bloomed at all. */}
         <meshStandardMaterial
+          ref={coreRef}
           color={color}
           emissive={color}
           emissiveIntensity={3}
@@ -628,6 +907,7 @@ function BrightShape({ color, initialDirection, haloTexture, fit }) {
       {haloTexture && (
         <sprite scale={[haloSize, haloSize, 1]}>
           <spriteMaterial
+            ref={haloRef}
             map={haloTexture}
             color={color}
             blending={THREE.AdditiveBlending}
@@ -648,14 +928,12 @@ function BrightShape({ color, initialDirection, haloTexture, fit }) {
         penumbra={0.3}
         decay={1}
         castShadow
-        shadow-mapSize-width={512}
-        shadow-mapSize-height={512}
       />
     </group>
   );
 }
 
-export default function BrightCluster() {
+export default function BrightCluster({ paletteRef }) {
   const groupRef = useRef();
   const { nodes } = useGLTF(merkaba);
   const haloTexture = useTexture(StarLarge);
@@ -669,6 +947,14 @@ export default function BrightCluster() {
   const size = useThree((state) => state.size);
   const fit = 1 - FIT_STRENGTH * (1 - Math.min(1, size.width / size.height));
 
+  // How far the cluster reaches, in the group's own units, republished every
+  // frame by the cluster and read by the lights to fit their shadow frustums.
+  // A ref for the usual reason: it changes every frame and nothing renders off
+  // it. The cluster's solve runs first -- it is declared first, and r3f calls
+  // frame subscribers in mount order at equal priority -- so the lights fit
+  // against this frame's cluster rather than the last one's.
+  const reachRef = useRef(REACH_GUESS);
+
   useEffect(() => {
     haloTexture.colorSpace = THREE.SRGBColorSpace;
     haloTexture.needsUpdate = true;
@@ -678,19 +964,18 @@ export default function BrightCluster() {
     return nodes?.Scene?.children?.[0]?.geometry || new THREE.SphereGeometry(1);
   }, [nodes]);
 
-  const colors = useMemo(() => {
-    return tinycolor('#CCFF00').spin(Math.random() * 360).tetrad();
-  }, []);
-
-  // Started on opposite sides rather than at four random points, so the
-  // cluster is lit from several directions from the first frame.
+  // Started on opposite sides rather than at two random points, so the cluster
+  // is lit from both of them from the first frame. With only two lights this
+  // matters more than it did with four: two that happened to start near each
+  // other would leave the whole far side dark until the paths carried them
+  // apart, which is minutes, not seconds.
   const brightShapeDirections = useMemo(
     () =>
-      colors.map((_, i) => {
+      Array.from({ length: BRIGHT_COUNT }, (_, i) => {
         const dir = randomDirection();
         return i % 2 ? dir.negate() : dir;
       }),
-    [colors]
+    []
   );
 
   useEffect(() => {
@@ -710,14 +995,17 @@ export default function BrightCluster() {
     // The tween above drives rotation.y only, so the scale here is never
     // fought over.
     <group ref={groupRef} scale={fit}>
-      <MerkabaCluster geometry={geometry} fit={fit} />
+      <MerkabaCluster geometry={geometry} fit={fit} reachRef={reachRef} />
 
       {/* Bright shapes with lights */}
-      {colors.map((color, i) => (
+      {brightShapeDirections.map((dir, i) => (
         <BrightShape
+          // eslint-disable-next-line react/no-array-index-key
           key={`bright-${i}`}
-          color={color.toHexString()}
-          initialDirection={brightShapeDirections[i]}
+          index={i}
+          paletteRef={paletteRef}
+          reachRef={reachRef}
+          initialDirection={dir}
           haloTexture={haloTexture}
           fit={fit}
         />

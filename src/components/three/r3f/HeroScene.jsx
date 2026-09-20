@@ -11,6 +11,7 @@ import GradientGenerator from '../../utils/GradientGenerator';
 import StarLarge from '../../../images/star-sprite-large.png';
 import StarSmall from '../../../images/star-sprite-small.png';
 import { latchedSettings, getLevel, holdQuality } from '../../utils/qualityLevel';
+import { linearToOklab, oklabToLinear } from '../../utils/oklab';
 import useQuality from '../../utils/useQuality';
 import useRetiringCount from '../../utils/useRetiringCount';
 import useRenderWhenVisible from '../../utils/useRenderWhenVisible';
@@ -60,29 +61,9 @@ const SOURCE_ORBITS = Array.from({ length: COLOR_SLOTS }, (_, i) => {
 // midpoint of two stops where the eye expects it, and being a linear space the
 // mesh field's weighted average of eight sources stays meaningful. Slots are
 // uploaded as OKLab and converted back once, at the end of the shader.
-function linearToOklab(r, g, b) {
-  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
-  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
-  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
-
-  return [
-    0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
-    1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
-    0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s,
-  ];
-}
-
-function oklabToLinear([L, A, B]) {
-  const l = (L + 0.3963377774 * A + 0.2158037573 * B) ** 3;
-  const m = (L - 0.1055613458 * A - 0.0638541728 * B) ** 3;
-  const s = (L - 0.0894841775 * A - 1.2914855480 * B) ** 3;
-
-  return [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
-  ];
-}
+//
+// The transforms themselves live in utils/oklab.js, because the cluster's
+// lights read this field's colours back out and have to speak the same space.
 
 function oklabSlots(colors) {
   const stops = colors.map((c) => {
@@ -383,6 +364,44 @@ function writeChaosStops(out, strip, offset) {
 
     // Cells 1 and 2: the one the window is on and the one after it.
     polarBlend(out, i * 3, strip, (CELL + i) * 3, (2 * CELL + i) * 3, t);
+  }
+}
+
+// The same B-spline the shader reads the strip with, on the CPU. Only ever
+// called eight times a frame, for the cluster's lights -- but it has to be the
+// same curve, or the colour the lights answer to would not be the colour on
+// screen.
+function stripAt(out, o, strip, x) {
+  const xc = Math.min(Math.max(x, 1), STRIP_STOPS - 3);
+  const i = Math.floor(xc);
+  const f = xc - i;
+  const b = (i - 1) * 3;
+  const f2 = f * f;
+  const f3 = f2 * f;
+  const w0 = (1 - 3 * f + 3 * f2 - f3) / 6;
+  const w1 = (4 - 6 * f2 + 3 * f3) / 6;
+  const w2 = (1 + 3 * f + 3 * f2 - 3 * f3) / 6;
+  const w3 = f3 / 6;
+
+  for (let k = 0; k < 3; k++) {
+    out[o + k] =
+      strip[b + k] * w0 +
+      strip[b + 3 + k] * w1 +
+      strip[b + 6 + k] * w2 +
+      strip[b + 9 + k] * w3;
+  }
+}
+
+// What the background is actually showing, in OKLab, published once a frame
+// for anything that wants to key off it -- which is the cluster's lights.
+//
+// Taken along the calm field's window rather than from the chaos stops,
+// because the window is the palette and the chaos field is only a different
+// arrangement of the same eight colours. So one sampling covers both, and it
+// does not flicker between two definitions when an episode arrives.
+function sampleVisiblePalette(out, strip, offset) {
+  for (let i = 0; i < COLOR_SLOTS; i++) {
+    stripAt(out, i * 3, strip, CELL + offset + (i / (COLOR_SLOTS - 1)) * SPAN);
   }
 }
 
@@ -913,7 +932,7 @@ function stepChaos(c, dt, raw) {
 }
 
 // Animated gradient background. Calm nearly all of the time; see stepChaos.
-function AnimatedGradientBackground({ colors }) {
+function AnimatedGradientBackground({ colors, paletteRef }) {
   const resRef = useRef(new THREE.Vector2());
   const timeRef = useRef(0);
   // The source orbits run on their own clock, because energy speeds them up and
@@ -1090,6 +1109,11 @@ function AnimatedGradientBackground({ colors }) {
 
     field.mat.uniforms.uOffset.value = offsetRef.current;
 
+    // Published before anything else in the frame reads it. The cluster's
+    // lights run at priority 0, this pass at -1, so they always see the
+    // palette of the frame they are being drawn into rather than the last one.
+    sampleVisiblePalette(paletteRef.current, field.mat.uniforms.uStrip.value, offsetRef.current);
+
     const chaos = stepChaos(chaosRef.current, dt, delta);
     field.mat.uniforms.uChaos.value = chaos;
 
@@ -1173,6 +1197,17 @@ function Scene({ colors }) {
   const gl = useThree((state) => state.gl);
   const [starSmallImage, setStarSmallImage] = useState(null);
   const [starLargeImage, setStarLargeImage] = useState(null);
+
+  // The palette the background is showing right now, in OKLab, refreshed once
+  // a frame by the field pass and read by the cluster's lights. A ref rather
+  // than state: it changes every frame and nothing renders off it.
+  //
+  // Seeded with the palette the hero was handed, so the lights are already on
+  // the right side of the wheel on the very first frame rather than keying off
+  // a buffer of zeroes -- which in OKLab is black, and whose complement is
+  // nothing in particular.
+  const paletteRef = useRef(null);
+  if (paletteRef.current === null) paletteRef.current = oklabSlots(colors);
 
   const fogColor = useMemo(() => paletteAverage(colors), [colors]);
   const accentColor = useMemo(() => paletteAccent(fogColor), [fogColor]);
@@ -1291,7 +1326,7 @@ function Scene({ colors }) {
 
   return (
     <>
-      <AnimatedGradientBackground colors={colors} />
+      <AnimatedGradientBackground colors={colors} paletteRef={paletteRef} />
       <fog attach="fog" args={[fogColor, 1, 1000]} />
       <ambientLight intensity={0.2} color={0xfafafa} />
       <directionalLight intensity={0.2} color={accentColor} />
@@ -1301,7 +1336,7 @@ function Scene({ colors }) {
         <ShapeSwarm amount={5} containerSize={SWARM_LARGE} />
         <ShapeSwarm amount={5} containerSize={SWARM_SMALL} />
         <Suspense fallback={null}>
-          <BrightCluster />
+          <BrightCluster paletteRef={paletteRef} />
         </Suspense>
 
         {/* Small particles - optimized for visibility in front of camera.
@@ -1404,8 +1439,17 @@ export default function HeroScene({ colors, fallback, ready, onReady }) {
       // "percentage" is PCFShadowMap. The soft variant this scene used to ask
       // for is deprecated as of three 0.185 -- WebGLShadowMap.render downgrades
       // it to exactly this on the first frame and warns -- so naming it
-      // directly is the same picture without the detour.
-      shadows="percentage"
+      // directly is the same picture without the detour. It is also no loss:
+      // PCF absorbed the soft variant's job in that same release. It is now a
+      // 5-sample Vogel disk through hardware 4-tap comparison, rotated per
+      // pixel by interleaved gradient noise, and it honours shadow.radius --
+      // all of which used to be exactly what PCFSoft was for.
+      //
+      // Latched, because the filter is a program parameter: WebGLPrograms puts
+      // shadowMapType in the program cache key, so changing it mid-session
+      // recompiles every material in the scene. Low drops to unfiltered, which
+      // is one tap in place of twenty. See qualityLevel.
+      shadows={latchedSettings().shadowType}
       // Cross-fades up over the CSS gradient underneath, which carries the same
       // palette, so the handover reads as the field gaining depth rather than
       // as the background being replaced.
