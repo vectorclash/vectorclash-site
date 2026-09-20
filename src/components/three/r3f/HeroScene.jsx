@@ -9,7 +9,6 @@ import BrightCluster from './BrightCluster';
 import ParticleField from './ParticleField';
 import GradientGenerator from '../../utils/GradientGenerator';
 import StarLarge from '../../../images/star-sprite-large.png';
-import StarSmall from '../../../images/star-sprite-small.png';
 import { latchedSettings, getLevel, holdQuality } from '../../utils/qualityLevel';
 import { linearToOklab, oklabToLinear } from '../../utils/oklab';
 import useQuality from '../../utils/useQuality';
@@ -1195,7 +1194,6 @@ function Scene({ colors }) {
   // scroll) would re-render the whole scene.
   const camera = useThree((state) => state.camera);
   const gl = useThree((state) => state.gl);
-  const [starSmallImage, setStarSmallImage] = useState(null);
   const [starLargeImage, setStarLargeImage] = useState(null);
 
   // The palette the background is showing right now, in OKLab, refreshed once
@@ -1228,8 +1226,14 @@ function Scene({ colors }) {
   // already drawn: the position buffer is derived from the count, so changing
   // it would re-roll three hundred stars into new places -- a teleport, not a
   // fade, and no amount of easing hides it.
+  // The size range is tied to the sprite. The old small sprite was a diamond
+  // filling its whole frame, so a size of ~1 drew ~1 world unit of shape. The
+  // large sprite spends most of its frame on transparency and faint flares --
+  // its bright core is a little over a quarter of the width -- so the same
+  // number would draw a sub-pixel speck. These are scaled up to put back the
+  // apparent size, and far enough to let the flares resolve at all.
   const [smallFields, releaseSmall] = useRetiringCount(settings.smallFields, () => ({
-    size: 0.8 + Math.random() * 1.5,
+    size: 3 + Math.random() * 5,
     particles: settings.smallParticles,
   }));
 
@@ -1260,9 +1264,9 @@ function Scene({ colors }) {
   }, [settings.bloomScale]);
 
   useEffect(() => {
-    // Load star images
+    // One sprite for both fields, so the small stars carry the same cross
+    // flare as the large ones instead of reading as featureless motes.
     const loader = new THREE.ImageLoader();
-    loader.load(StarSmall, setStarSmallImage);
     loader.load(StarLarge, setStarLargeImage);
   }, []);
 
@@ -1343,12 +1347,12 @@ function Scene({ colors }) {
             Keyed by entry id rather than by index: a retiring field has to keep
             the same element across the re-render that flags it, or React
             unmounts it and the fade never runs. */}
-        {starSmallImage &&
+        {starLargeImage &&
           smallFields.map(({ id, retiring, item }) => (
             <ParticleField
               key={`small-${id}`}
               particleNum={item.particles}
-              image={starSmallImage}
+              image={starLargeImage}
               size={item.size}
               opacity={0.6}
               containerSize={SMALL_STAR_FIELD}
