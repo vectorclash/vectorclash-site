@@ -24,12 +24,28 @@ $my-color: #CCFF00;
       margin: 0;
       padding-bottom: 40px;
       font-size: 22px;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       font-family: 'Exo', sans-serif;
     }
 
+    // A heading that introduces its own section hands the space below it to
+    // the lede, rather than opening a gap and then repeating one.
+    h3:has(+ .section-lede) {
+      padding-bottom: 14px;
+    }
+
+    .section-lede {
+      max-width: 62ch;
+      margin: 0 0 52px;
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.68);
+    }
+
     p {
       font-size: 16px;
+      line-height: 1.65;
     }
   }
 }

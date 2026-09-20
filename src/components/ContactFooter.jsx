@@ -110,7 +110,7 @@ function ContactFooter() {
     <footer className="contact-footer container" ref={mount}>
       <article className="column">
         <div className="footer-left">
-          <h3>Contact me <HeadingIcon /></h3>
+          <h3>Contact <HeadingIcon /></h3>
           <p>
             <a className="phone-link" href={phone.href}>
               {phone.display}

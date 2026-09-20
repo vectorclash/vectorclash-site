@@ -119,7 +119,11 @@ function LogoGrid() {
   return (
     <section className="logo-grid container" ref={mountRef}>
       <div className="column">
-        <h3>Brands <HeadingIcon /></h3>
+        <h3>Selected clients <HeadingIcon /></h3>
+        <p className="section-lede">
+          Companies and brands whose work I have had a hand in, some of them
+          directly and some through the agencies that hold the account.
+        </p>
         <div className="logo-grid-container">
           {LOGOS.map((logo, i) => (
             <div className="logo-grid-item" key={i}>

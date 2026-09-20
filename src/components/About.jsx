@@ -184,6 +184,10 @@ function About() {
       <div className="column">
         <article className="skills" style={{ "--pill-shimmer": shimmerGradient }}>
           <h3>Skills <HeadingIcon /></h3>
+          <p className="section-lede">
+            What I work in day to day, and what I reach for when a project asks
+            for it.
+          </p>
           {skillsData.map((skillGroup) => (
             <div
               key={skillGroup.category}
@@ -207,10 +211,10 @@ function About() {
           ))}
         </article>
           <article className="about-text">
-            <h3>What I do <HeadingIcon /></h3>
+            <h3>Practice <HeadingIcon /></h3>
             <div>
               <p>I am a design engineer working at the seam between interface design and the code that makes it move. Over the past decade I have built interactive and animated work for Microsoft, Walmart, Atlassian, Gap, AT&amp;T, HTC Vive, and Subway &mdash; a permanent touch installation in Gap's San Francisco headquarters at one end of that range, an audio-reactive projection system for a live dancefloor at the other. The common thread is motion that carries meaning rather than motion applied as decoration.</p>
-              <p>Motion graphics runs alongside the interface work. For AT&amp;T I produced animated banners and social video at campaign volume &mdash; GSAP and Adobe Animate for the interactive units, After Effects for the video &mdash; and built the automation that took the resizing and exporting over. It is still part of what I do: Chromaforge, my own app, renders its own promotional video in the browser rather than in After Effects.</p>
+              <p>Advertising work is one of the longer strands of the practice. For AT&amp;T I built animated banners and social video at campaign volume, where every unit had to land on-brand inside a hard filesize budget and whatever specification the ad platform or channel imposed &mdash; GSAP and Adobe Animate for the interactive units, After Effects for the video. The more durable half of that engagement was the automation I built to take the resizing and exporting over, so the constraint work stopped being done by hand. Chromaforge, my own app, renders its own promotional video in the browser rather than in After Effects, which comes out of the same habit.</p>
               <p>Most of my work lives in the browser, in React and GSAP, and increasingly three.js when an idea calls for real-time 3D. I care about the engineering underneath the surface: the 3D scenes here scale their effects to the visitor's GPU, and the scroll choreography survives a mobile address bar collapsing mid-gesture. The other half of the practice is design proper &mdash; Figma, and a long-running interest in color as a system rather than a palette, which is where Chromaforge came from. It has since grown into a print-on-demand product with real users.</p>
               <p>
                 A selection of the banner work is collected separately:{" "}
