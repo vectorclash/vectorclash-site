@@ -42,11 +42,27 @@ const LOGOS = [
   { src: atlassian, name: "Atlassian" },
 ];
 
+const rand = (min, max) => min + Math.random() * (max - min);
+const eitherWay = () => (Math.random() < 0.5 ? -1 : 1);
+
 function logoOver(e) {
   const logo = e.currentTarget;
 
   // Let a flip finish rather than restarting it under a twitchy cursor.
   if (gsap.isTweening(logo)) return;
+
+  // Each hover picks its own numbers rather than replaying one fixed
+  // animation, so two logos flipping near each other never read as the same
+  // gesture twice. The ranges are deliberately narrow: the turn is always a
+  // whole one and the tilt stays inside a few degrees, so a logo is never
+  // left on its side or upside down -- only the direction and the weight of
+  // it vary.
+  const spin = 360 * eitherWay();
+  const tilt = rand(4, 9) * eitherWay();
+  const duration = rand(0.62, 0.82);
+  const lift = rand(70, 110);
+  const swell = rand(1.08, 1.16);
+  const half = duration / 2;
 
   // Perspective lives on .logo-grid-item in CSS -- it is what keeps this
   // from reading as a flat horizontal squash, since without it a rotationY
@@ -55,29 +71,31 @@ function logoOver(e) {
   // through the middle of it.
   const tl = gsap.timeline();
 
+  // fromTo rather than to, so the turn starts from flat every time instead
+  // of accumulating from wherever the last one signed off.
   tl.fromTo(
     logo,
     { rotationY: 0 },
     {
-      rotationY: 360,
-      duration: 0.7,
+      rotationY: spin,
+      duration,
       ease: "power2.inOut",
       transformOrigin: "50% 50%",
     }
   );
 
-  tl.to(logo, { z: 90, scale: 1.12, duration: 0.35, ease: "power2.out" }, 0);
-  tl.to(logo, { z: 0, scale: 1, duration: 0.35, ease: "power2.in" }, 0.35);
+  tl.to(logo, { z: lift, scale: swell, duration: half, ease: "power2.out" }, 0);
+  tl.to(logo, { z: 0, scale: 1, duration: half, ease: "power2.in" }, half);
 
   // A small tilt that settles after the spin, so it lands with some weight
   // rather than snapping flat.
   tl.fromTo(
     logo,
     { rotationZ: 0 },
-    { rotationZ: 6, duration: 0.35, ease: "power2.out" },
+    { rotationZ: tilt, duration: half, ease: "power2.out" },
     0
   );
-  tl.to(logo, { rotationZ: 0, duration: 0.5, ease: "back.out(3)" }, 0.35);
+  tl.to(logo, { rotationZ: 0, duration: 0.5, ease: "back.out(3)" }, half);
 }
 
 function LogoGrid() {
