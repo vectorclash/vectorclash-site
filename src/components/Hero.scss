@@ -22,13 +22,21 @@
     //
     // Measured against the brightest field the hero generates, a single
     // 0 0 40px/.5 bought 1.87:1 at the edge while darkening 8.8% of the frame.
-    // These two land 2.23:1 over 5.3%. Radii are in em so the 5rem name, the
-    // 3rem greeting and the 30px paragraph each get a shadow in proportion --
-    // a fixed pixel radius tight enough to help the name reads as an emboss on
-    // the 300-weight greeting.
+    // The tight pair lands 2.23:1 over 5.3%. Radii are in em so the 5rem name,
+    // the 3rem greeting and the 30px paragraph each get a shadow in proportion
+    // -- a fixed pixel radius tight enough to help the name reads as an emboss
+    // on the 300-weight greeting.
+    //
+    // The tight pair only holds while the cluster is near the copy, lending its
+    // own dark mass behind the glyphs. When it drifts off and leaves the type on
+    // open gradient, the edge contrast is there but the type stops sitting on
+    // anything. The third layer is that ground: wide enough to read as a bed
+    // rather than an outline, and at .22 it stays under the bloom's blotch
+    // threshold, costing about 2% more darkened frame at the hero's brightest.
     text-shadow:
       0 0 0.25em rgba(0, 0, 0, 0.42),
-      0 0 0.06em rgba(0, 0, 0, 0.36);
+      0 0 0.06em rgba(0, 0, 0, 0.36),
+      0 0 1.1em rgba(0, 0, 0, 0.22);
     z-index: 1;
 
     .logo {
