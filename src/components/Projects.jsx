@@ -48,16 +48,11 @@ function Projects() {
     <section className={`container projects ${isProjectActive ? 'project-open' : ''}`} ref={mountRef}>
       <div className="project-three-container" ref={threeContainerRef}></div>
       <div className="column">
-        {/* Wrapped so the pair collapses as one box. Collapsing them
-            separately would mean fighting the shared heading rules in
-            App.scss for the padding, and the h3's own padding would survive
-            a max-height of zero anyway -- nothing here sets border-box. */}
+        {/* Wrapped so the heading collapses as a box. Its own padding would
+            survive a max-height of zero otherwise -- nothing here sets
+            border-box. */}
         <div className="projects-intro" aria-hidden={isProjectActive}>
           <h3>Projects <HeadingIcon /></h3>
-          <p className="section-lede">
-            Work I have designed and built end to end, from the first idea
-            through to the code that ships it. Select one to open it.
-          </p>
         </div>
         <ProjectGrid
           projects={projects}

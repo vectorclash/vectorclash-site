@@ -184,10 +184,6 @@ function About() {
       <div className="column">
         <article className="skills" style={{ "--pill-shimmer": shimmerGradient }}>
           <h3>Skills <HeadingIcon /></h3>
-          <p className="section-lede">
-            What I work in day to day, and what I reach for when a project asks
-            for it.
-          </p>
           {skillsData.map((skillGroup) => (
             <div
               key={skillGroup.category}
