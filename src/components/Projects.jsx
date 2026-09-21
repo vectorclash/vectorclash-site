@@ -52,7 +52,7 @@ function Projects() {
             survive a max-height of zero otherwise -- nothing here sets
             border-box. */}
         <div className="projects-intro" aria-hidden={isProjectActive}>
-          <h3>Projects <HeadingIcon /></h3>
+          <h3>Case Studies <HeadingIcon /></h3>
         </div>
         <ProjectGrid
           projects={projects}
