@@ -35,6 +35,19 @@ const FAR_WALL = CAMERA_Z + 150;
 // about what a screen used to show of it.
 const FRAME_HEIGHT = 165;
 
+// How far the portrait correction below is allowed to go. Fitting the frame to
+// the viewport's width means dividing by its aspect, and a phone's aspect is
+// small enough to divide by that the frame outgrows the backdrop: at 19.5:9 it
+// asked for 358 units of a box that is only 300 across, so the top and bottom
+// of the shot fell past the wall's edges into open fog. That empty band above
+// and below the scene is what the correction was costing.
+const ASPECT_FLOOR = 0.72;
+
+// And a hard ceiling under the box's own 300, for any aspect stranger than the
+// floor anticipates. The scene is inside the box, so the frame has to stay
+// inside it too.
+const MAX_FRAME_HEIGHT = 240;
+
 // A quarter turn over the length of the section. The backdrop is a box, so 90
 // degrees is its whole symmetry -- the study ends on a composition equivalent
 // to the one it opened with rather than part way through a face.
@@ -56,8 +69,11 @@ function useFramedCamera() {
     const vertical = Math.tan(Math.atan(FRAME_HEIGHT / 2 / FAR_WALL));
     // A portrait viewport keeping the full height would show barely a hundred
     // units across, which is a different composition rather than the same one
-    // on a narrower screen. Below square the frame is fitted to its width.
-    return aspect >= 1 ? vertical : vertical / aspect;
+    // on a narrower screen. Below square the frame is fitted to its width --
+    // but only down to ASPECT_FLOOR, past which the fit costs more than it
+    // buys and the frame starts to overrun the backdrop.
+    const fitted = aspect >= 1 ? vertical : vertical / Math.max(aspect, ASPECT_FLOOR);
+    return Math.min(fitted, MAX_FRAME_HEIGHT / 2 / FAR_WALL);
   }, [aspect]);
 
   useLayoutEffect(() => {
@@ -135,11 +151,52 @@ function useLingering(on, ms) {
 // 300 unit box that clears the wall, so the choice is a small shape that floats
 // or a large one the backdrop keeps taking bites out of. The second is the more
 // interesting object, and the tumble means it is never cut the same way twice.
+//
+// `narrowBias` is the portrait arrangement. A tall frame cannot hold both large
+// shapes and lateral spread -- at phone width a shape sized for the height uses
+// most of the width, leaving nothing to offset it with, and all three collapse
+// onto the centreline. So portrait spreads them down the frame instead of
+// across it, which is the axis a phone actually has to spend: the large one
+// high, the middle one at eye level, the small one low, each nudged a little
+// off centre so they do not read as a stack.
+// `narrowRadius` goes with it. Left to the landscape sizes, the width guard
+// below caps all three at whatever the narrow frame allows and they arrive the
+// same size on screen -- which throws away the large/medium/small reading that
+// is what makes the depths legible in the first place.
 const VIDEO_PLACEMENTS = [
-  { id: 'far', depth: -142, radius: 0.82, bias: [0.34, 0.26], spin: 0.4 },
-  { id: 'mid', depth: -20, radius: 0.42, bias: [-0.78, -0.62], spin: 1 },
-  { id: 'near', depth: 70, radius: 0.36, bias: [0.72, 0.64], spin: 1.7 },
+  {
+    id: 'far',
+    depth: -142,
+    radius: 0.82,
+    narrowRadius: 0.62,
+    bias: [0.34, 0.26],
+    narrowBias: [-0.3, 0.82],
+    spin: 0.4,
+  },
+  {
+    id: 'mid',
+    depth: -20,
+    radius: 0.42,
+    narrowRadius: 0.26,
+    bias: [-0.78, -0.62],
+    narrowBias: [0.62, -0.1],
+    spin: 1,
+  },
+  {
+    id: 'near',
+    depth: 70,
+    radius: 0.36,
+    narrowRadius: 0.16,
+    bias: [0.72, 0.64],
+    narrowBias: [-0.8, -0.95],
+    spin: 1.7,
+  },
 ];
+
+// How much of the frame's width a shape may take. Only a guard: it binds on a
+// phone, where sizing purely by height would push a shape past the edges, and
+// never on a landscape screen.
+const VIDEO_WIDTH_GUARD = 0.62;
 
 // Clearance between a shape's widest reach and the frame's edge, as a fraction
 // of the frame's half height at that shape's depth.
@@ -157,18 +214,29 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   // moves is small enough for the frame to hold all of it.
   const videoPlacements = useMemo(
     () =>
-      VIDEO_PLACEMENTS.map(({ id, depth, radius, bias, spin }) => {
+      VIDEO_PLACEMENTS.map(({ id, depth, radius, narrowRadius, bias, narrowBias, spin }) => {
         const halfHeight = (CAMERA_Z - depth) * frame.tanHalfV;
         const halfWidth = halfHeight * frame.aspect;
 
-        const size = Math.min(halfHeight, halfWidth) * radius;
+        // Measured against the frame's height, with the width only as a guard.
+        // Taking the smaller of the two outright meant that on a phone -- where
+        // the frame is narrow and tall -- every shape was sized by the width
+        // and came out a third of its intended proportion, which is what left
+        // them looking stranded in the middle of a tall shot.
+        const narrow = frame.aspect < 1;
+        const size = Math.min(
+          halfHeight * (narrow ? narrowRadius : radius),
+          halfWidth * VIDEO_WIDTH_GUARD,
+        );
         const margin = halfHeight * VIDEO_MARGIN;
 
         // What the centre can travel before a vertex touches the edge.
         const roomX = Math.max(0, halfWidth - size - margin);
         const roomY = Math.max(0, halfHeight - size - margin);
 
-        return { id, size, spin, position: [roomX * bias[0], roomY * bias[1], depth] };
+        const placed = narrow ? narrowBias : bias;
+
+        return { id, size, spin, position: [roomX * placed[0], roomY * placed[1], depth] };
       }),
     [frame.tanHalfV, frame.aspect],
   );
