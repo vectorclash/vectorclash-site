@@ -330,6 +330,19 @@
           margin-bottom: 0;
         }
 
+        // Every part of the rollover runs on one duration and one curve, so the
+        // lift, the underline and the arrow are read as a single move. They
+        // used to differ: the underline took 0.4s against everyone else's 0.3s,
+        // and it finished a beat after the button had already settled.
+        //
+        // The curve overshoots at the end only. The old one undershot at the
+        // start as well, which is anticipation on a transform but nothing at
+        // all on a width -- it clamps at zero -- so the underline held still
+        // for the first sixth of the transition and then rushed to catch up.
+        // That pause was the second seam.
+        $link-move: 0.3s;
+        $link-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+
         a {
           position: relative;
           color: #d4ff00;
@@ -337,7 +350,13 @@
           text-decoration: none;
           padding: 4px 10px;
           border-radius: 3px;
-          transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+          // Named rather than `all`: the only properties that should move are
+          // the ones the hover state changes.
+          transition:
+            color $link-move $link-ease,
+            background $link-move $link-ease,
+            transform $link-move $link-ease,
+            box-shadow $link-move $link-ease;
           display: inline-block;
           background: linear-gradient(to right, rgba(#d4ff00, 0.1), rgba(#d4ff00, 0.15));
           border-bottom: 2px solid rgba(#d4ff00, 0.3);
@@ -348,10 +367,16 @@
             position: absolute;
             bottom: -2px;
             left: 0;
-            width: 0;
+            // Full width, revealed by a scale, so the sweep is a transform like
+            // the lift and the arrow are. A width cannot take the overshoot at
+            // the end of the curve either -- it would clamp there the same way
+            // it clamped at the start.
+            width: 100%;
             height: 2px;
+            transform: scaleX(0);
+            transform-origin: left;
             background: linear-gradient(to right, #d4ff00, #ccff00, #d4ff00);
-            transition: width 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: transform $link-move $link-ease;
             box-shadow: 0 0 8px rgba(#d4ff00, 0.6);
           }
 
@@ -359,7 +384,7 @@
             content: '\2192';
             margin-left: 4px;
             display: inline-block;
-            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transition: transform $link-move $link-ease;
           }
 
           &:hover {
@@ -369,7 +394,7 @@
             box-shadow: 0 4px 12px rgba(#d4ff00, 0.3);
 
             &::before {
-              width: 100%;
+              transform: scaleX(1);
             }
 
             &::after {
