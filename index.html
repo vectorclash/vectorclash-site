@@ -40,9 +40,18 @@
          far end of it. Pinning it to the viewport is what makes it the one
          screenful it is drawn to be. -->
     <style>
+      /* Declared as a property because three places paint it: the root, the
+         bundled stylesheet's copy of this rule, and the hero, which covers the
+         root as soon as React mounts and has to hand over to the real palette
+         without a change of ground. One value, defined before the first
+         paint. */
+      :root {
+        --load-gradient: linear-gradient(42deg, #0f1405 0%, #1d2a08 55%, #33470b 100%);
+      }
+
       html {
         background-color: #CCFF00;
-        background-image: linear-gradient(42deg, #0f1405 0%, #1d2a08 55%, #33470b 100%);
+        background-image: var(--load-gradient);
         background-attachment: fixed;
       }
     </style>

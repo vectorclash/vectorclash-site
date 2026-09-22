@@ -114,6 +114,19 @@ const visibleHeight = (el) =>
 const resyncScrollTriggers = (snap) => {
   ScrollTrigger.refresh();
   if (!snap) return;
+  snapScrubbedTriggers();
+};
+
+/**
+ * Complete every scrubbed tween without re-measuring anything.
+ *
+ * The cheap half of the above, for the moment the scroll jumps back up after a
+ * close: it stops those triggers travelling through the jump, and it has to
+ * happen in that same frame. Re-measuring does not, and it is the expensive
+ * part, so the close leaves it until the grid has finished arriving rather
+ * than paying for it on the frame that has the most to do.
+ */
+const snapScrubbedTriggers = () => {
   ScrollTrigger.getAll().forEach((trigger) => {
     const scrub = trigger.getTween && trigger.getTween();
     if (scrub) scrub.progress(1);
@@ -612,17 +625,20 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       // the whole grid appear at once where the panel used to be.
       if (returningToGridRef.current) {
         returningToGridRef.current = false;
-        // Instantly, not smoothly: the panel has already faded out and the grid
-        // is not painted yet, so there is nothing on screen for a scroll to
-        // travel across. The document is several screens shorter than it was a
-        // moment ago, so everything measured against it has to be told.
-        window.scrollTo(0, gridScrollRef.current);
         const tiles = mountRef.current.querySelectorAll("li");
-        // Hidden before the refresh, so the grid cannot paint at full strength
-        // in the frame between them.
+
+        // Hidden before anything measures, so the grid cannot paint at full
+        // strength in the frame between them.
         if (tiles.length > 0) gsap.set(tiles, { opacity: 0, y: -14 });
 
-        resyncScrollTriggers(true);
+        // Instantly, not smoothly: the panel has gone and the grid is not
+        // painted yet, so there is nothing on screen for a scroll to travel
+        // across. The heading above it never moved, so the page is already
+        // the height it will stay.
+        window.scrollTo(0, gridScrollRef.current);
+
+        // Snap the scrubbed triggers so they do not travel through that jump.
+        snapScrubbedTriggers();
 
         // Straight away, in the same frame the panel left. Waiting a frame put
         // a hole between the two halves, and a hole is what reads as the
@@ -632,6 +648,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         // leaves downwards, so an entrance rising the other way is a second,
         // opposing gesture where what is wanted is the continuation of the
         // first: the study drops away, the grid drops in behind it.
+        //
+        // Nothing in here changes the height of anything, so the measurement
+        // at the end cannot come out different from the one at the start.
         if (tiles.length > 0) {
           gsap.to(tiles, {
             opacity: 1,
@@ -640,7 +659,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             ease: "power2.out",
             stagger: { amount: 0.14 },
             clearProps: "opacity,transform",
+            onComplete: () => resyncScrollTriggers(true),
           });
+        } else {
+          // No tiles to wait on, so the re-measure has nothing to be held for.
+          resyncScrollTriggers(true);
         }
       }
     }
@@ -965,13 +988,17 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     const projectContent = detail.querySelector(".case-study-body");
     // Everything the panel draws, so one tween can take all of it. Anything
     // left out of this list has nothing fading it and would snap away when the
-    // panel unmounts -- which is why the loader, the footer controls and the
-    // pagination are here too, not just the reading flow.
+    // panel unmounts -- which is why the footer controls and the pagination
+    // are here too, not just the reading flow.
+    //
+    // The loader is the exception, and is faded separately below: it is
+    // centred with a transform of its own, so a tween writing y onto it would
+    // be a second thing claiming the same property.
     const pieces = [
-      detail.querySelector(".case-study-loader"),
-      detail.querySelector(".case-study-header h2"),
-      detail.querySelector(".case-study-header .tools"),
-      detail.querySelector(".case-study-header .case-study-controls"),
+      // The header itself, not the three things inside it. Its dashed rule is
+      // a border on this element, so animating only its children left the
+      // line hanging there while the title and tools left from under it.
+      detail.querySelector(".case-study-header"),
       ...detail.querySelectorAll(".case-block"),
       detail.querySelector(".case-study-footer-nav"),
       detail.querySelector(".case-study-pagination"),
@@ -999,7 +1026,12 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     // stopped first read as a hitch -- the content sliding to a halt and then
     // waiting to be taken away.
     //
-    // Nothing above this fades any more, so the panel itself is left alone.
+    // The panel itself is left alone -- nothing above these elements fades.
+    const loader = detail.querySelector(".case-study-loader");
+    if (loader) {
+      tl.to(loader, { opacity: 0, duration: 0.26, ease: "power1.in" }, 0);
+    }
+
     if (pieces.length > 0) {
       tl.to(
         pieces,

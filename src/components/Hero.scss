@@ -2,9 +2,16 @@
   // Was a hardcoded red/navy gradient, which had nothing to do with the palette
   // this load actually generated -- it painted for a beat on every load and then
   // was covered by the real gradient fading in, reading as a flash of the wrong
-  // colour. The base tone matches html, so the palette now fades up from one
-  // consistent ground.
-  background-color: #333333;
+  // colour.
+  //
+  // It is the load gradient now, the same one the root carries and pinned the
+  // same way, because this element covers the root the moment React mounts. A
+  // flat tone here meant the load went gradient, then flat, then palette --
+  // three grounds where there should be one. The generated palette fades up
+  // over the identical paint the page opened on.
+  background-color: #CCFF00;
+  background-image: var(--load-gradient);
+  background-attachment: fixed;
   height: 100vh;
   min-height: 777px;
 

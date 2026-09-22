@@ -1,10 +1,10 @@
-/* Matches the inline rule in index.html, which is what the first paint uses.
-   Kept in step with it: this file loads later, so a different value here would
-   simply take over once the stylesheet arrives. See that rule for why the page
-   sits on the brand colour rather than a neutral. */
+/* Repeats the inline rule in index.html, which is what the first paint uses;
+   this file only arrives later and would otherwise take the background away
+   again. The gradient itself is the property index.html defines, so the two
+   cannot drift. See that rule for why the page sits on the brand colour. */
 html {
   background-color: #CCFF00;
-  background-image: linear-gradient(42deg, #0f1405 0%, #1d2a08 55%, #33470b 100%);
+  background-image: var(--load-gradient);
   /* Pinned to the viewport: a root background is otherwise painted across the
      whole document, and this one is many screens tall. See index.html. */
   background-attachment: fixed;

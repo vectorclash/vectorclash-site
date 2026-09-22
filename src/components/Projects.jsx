@@ -48,10 +48,13 @@ function Projects() {
     <section className={`container projects ${isProjectActive ? 'project-open' : ''}`} ref={mountRef}>
       <div className="project-three-container" ref={threeContainerRef}></div>
       <div className="column">
-        {/* Wrapped so the heading collapses as a box. Its own padding would
-            survive a max-height of zero otherwise -- nothing here sets
-            border-box. */}
-        <div className="projects-intro" aria-hidden={isProjectActive}>
+        {/* The heading stays put through a study opening and closing. It used
+            to collapse away, which was worth doing when it carried a
+            three-line subhead under it -- that much type above an open study
+            was too much. With one line left there is nothing to reclaim, and
+            a box that changes height mid-transition is a moving target for
+            every scroll measurement on the page. */}
+        <div className="projects-intro">
           <h3>Case Studies <HeadingIcon /></h3>
         </div>
         <ProjectGrid
