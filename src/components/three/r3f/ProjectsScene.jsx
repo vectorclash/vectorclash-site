@@ -278,16 +278,18 @@ export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] })
   // nothing is being shown.
   const [canvasRef, frameloop] = useRenderWhenVisible(Boolean(textureURL || videoURLs));
   const [fogColor, setFogColor] = useState('#fb0097');
-  const [backgroundColor, setBackgroundColor] = useState('#fb0097');
 
+  // The hue is the scene's alone. It used to be set as the canvas element's CSS
+  // background as well, which was paint that could never be seen -- the context
+  // is created with alpha: false, so the drawing buffer is opaque and whatever
+  // sits behind it is covered. What it did reach was Safari, which colours its
+  // toolbars from the page's own background and so jumped to a different hue
+  // with every project opened. Nothing outside the canvas carries this colour
+  // now, so the studies can be as various as they like without the browser's
+  // chrome following them.
   useEffect(() => {
-    if (textureURL) {
-      const newColor = tinycolor('#CCFF00').spin(Math.random() * 360);
-      setFogColor(newColor.toHexString());
-      setBackgroundColor(newColor.toHexString());
-    } else {
-      setBackgroundColor('transparent');
-    }
+    if (!textureURL) return;
+    setFogColor(tinycolor('#CCFF00').spin(Math.random() * 360).toHexString());
   }, [textureURL]);
 
   return (
@@ -322,7 +324,6 @@ export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] })
       // from this box, so a section thousands of pixels tall no longer means a
       // canvas thousands of pixels tall.
       style={{
-        background: backgroundColor,
         position: 'sticky',
         top: 0,
         height: '100vh',
