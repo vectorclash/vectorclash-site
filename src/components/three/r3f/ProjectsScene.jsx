@@ -179,7 +179,7 @@ const VIDEO_PLACEMENTS = [
     // the margin beside the study's column on a wide screen, and low on a
     // phone, where the column runs the full width and nothing can clear it.
     centre: [-0.54, -0.22],
-    narrowCentre: [-0.16, -0.41],
+    narrowCentre: [-0.3, -0.41],
     spin: 1.25,
   },
 ];
