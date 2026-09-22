@@ -22,17 +22,22 @@ import me from "../images/me.png";
 // full-size file.
 const thumbURL = (url) => url.replace(/\.jpg$/, "_thumb.jpg");
 
+// The image a study opens on: the first figure of its first plate. It is the
+// one the entrance puts on screen, the one the shape wears before a scroll has
+// happened, and so the one worth fetching ahead of the swap.
+const leadFigure = (project) => {
+  const blocks = buildCaseBlocks(project);
+  const plate = blocks.find((block) => block.type === "plate");
+  return plate ? plate.figures[0] : 0;
+};
+
+const leadImage = (project) => project.images[leadFigure(project)];
+
 // A case study reads as a run of prose and plates rather than as a column of
 // text beside a gallery, so the panel renders from a flattened list of blocks
 // instead of from the fields directly. `figures` indexes into `images`, which
 // stays a plain list of URLs -- the 3D shape, the grid tile and the lightbox
 // all still address an image by its position in it.
-const leadImage = (project) => {
-  const blocks = buildCaseBlocks(project);
-  const plate = blocks.find((block) => block.type === "plate");
-  return project.images[plate ? plate.figures[0] : 0];
-};
-
 const buildCaseBlocks = (project) => {
   const blocks = [];
   const claimed = new Set();
@@ -83,6 +88,22 @@ const buildCaseBlocks = (project) => {
 
   return blocks;
 };
+
+// The shape behind the panel follows the read rather than waiting to be
+// clicked: whichever plate the scroll has settled on is what it wears. The unit
+// is the plate and not the figure, so a four-up grid is one change and not
+// four, and `figures[0]` is the section's image because it is already what the
+// study leads with.
+//
+// A plate counts as settled when the middle of the viewport is inside it, or
+// within this much of it -- as a fraction of viewport height. Anything looser
+// and two plates are candidates at once on a tall screen.
+const SCENE_BAND = 0.3;
+
+// And it has to stay the candidate for this long before the texture moves. A
+// scroll that races past a plate never dwells on it, which is what keeps the
+// shape from flickering through the whole study in one flick of the wheel.
+const SCENE_DWELL = 180;
 
 // How far down the flow the cold-open entrance reaches. A study runs to several
 // screens and the blocks past this point are below the fold when it plays, so
@@ -252,6 +273,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const [currentVideo, setCurrentVideo] = useState(null);
   const [currentImageURLs, setCurrentImageURLs] = useState([]);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  // Which image the shape in the scene is wearing. Separate from
+  // `activeImageIndex`, which is the lightbox's own position: scrolling the
+  // study moves the shape, and it must not quietly move where a later click
+  // would open.
+  const [sceneIndex, setSceneIndex] = useState(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [previousImageIndex, setPreviousImageIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -273,6 +299,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   // Set by prev/next on the way out and read back by the layout effect once the
   // new project has been committed, which is what tells the effect to run the
   // swap entrance instead of the cold open.
+  // The two nested timers a lightbox prev/next runs on. Held so a close can
+  // cancel them: they outlive the overlay otherwise, and the one at 50ms writes
+  // an index the reader is no longer looking at.
+  const galleryTimersRef = useRef([]);
   const swapRef = useRef(null);
   const swapTimelineRef = useRef(null);
   // Where the page stood when the grid was left. Closing a study several
@@ -348,6 +378,134 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     renderThreeScene();
   }, [currentTexture, currentVideo, currentImageURLs]);
 
+  // Walks the plates as the study is read and hands the settled one to the
+  // shape. Every image of the open project is already a warm texture by this
+  // point -- ProjectShape loads the whole set behind the lead -- so a change
+  // here costs nothing but the crossfade.
+  useEffect(() => {
+    if (!isProjectActive || activeProjectID === null) return undefined;
+    if (isProjectTransitioning || isClosing) return undefined;
+
+    const project = projects[activeProjectID];
+    if (!project || !project.images || project.images.length === 0) {
+      return undefined;
+    }
+
+    const root = mountRef.current;
+    if (!root) return undefined;
+
+    const plates = Array.from(root.querySelectorAll("[data-scene-figure]"));
+    if (plates.length === 0) return undefined;
+
+    let frame = null;
+    let recheck = null;
+    let pending = null;
+
+    // The scroll can stop before a dwell is up, and no further scroll event
+    // would come to finish the count. This is what carries it, and it is also
+    // how the checks that bail below get retried.
+    const scheduleRecheck = () => {
+      if (recheck !== null) return;
+      recheck = window.setTimeout(() => {
+        recheck = null;
+        evaluate();
+      }, SCENE_DWELL);
+    };
+
+    const evaluate = () => {
+      // The lightbox covers the scene, so a plate scrolling under it is not
+      // something anyone is looking at. Whatever it settles on can wait.
+      if (isGalleryOpen) return;
+
+      // The entrance is still moving the plates, so where they are now is not
+      // where they are going to be. Measuring through it would hand the shape
+      // a plate the reader never saw arrive.
+      if (openTimelineRef.current) {
+        scheduleRecheck();
+        return;
+      }
+
+      const middle = window.innerHeight / 2;
+
+      let best = null;
+      let bestGap = Infinity;
+
+      plates.forEach((node) => {
+        const rect = node.getBoundingClientRect();
+        // Distance from the middle of the viewport to the nearest edge of the
+        // plate, and zero while the middle is inside it. Measuring to the
+        // plate's own centre instead would push a tall single-image plate out
+        // of the running at exactly the moment it fills the screen.
+        const gap = Math.max(rect.top - middle, middle - rect.bottom, 0);
+        if (gap < bestGap) {
+          bestGap = gap;
+          best = node;
+        }
+      });
+
+      // Nothing is properly centred. The candidate is dropped rather than
+      // left standing: holding it would bank the dwell it spent off screen and
+      // commit the instant the plate came back into the band.
+      if (!best || bestGap > window.innerHeight * SCENE_BAND) {
+        pending = null;
+        return;
+      }
+
+      const figure = Number(best.dataset.sceneFigure);
+      if (!Number.isInteger(figure) || figure < 0) return;
+      if (figure >= project.images.length) return;
+      if (figure === sceneIndex) {
+        pending = null;
+        return;
+      }
+
+      if (!pending || pending.figure !== figure) {
+        pending = { figure, since: performance.now() };
+      }
+
+      if (performance.now() - pending.since < SCENE_DWELL) {
+        scheduleRecheck();
+        return;
+      }
+
+      pending = null;
+      setSceneIndex(figure);
+      setCurrentTexture(project.images[figure]);
+    };
+
+    const onScroll = () => {
+      if (frame !== null) return;
+      // Cleared here rather than inside evaluate, which the recheck timer also
+      // calls: doing it there would drop the handle on a frame still queued,
+      // and the cleanup below could no longer cancel it.
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        evaluate();
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    // The entrance leaves the study somewhere other than the top of the flow
+    // on a project swap, so the opening plate is not always the one in view.
+    evaluate();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      if (recheck !== null) window.clearTimeout(recheck);
+    };
+  }, [
+    isProjectActive,
+    activeProjectID,
+    isProjectTransitioning,
+    isClosing,
+    isGalleryOpen,
+    sceneIndex,
+  ]);
+
   // Notify parent component when project active state changes
   useEffect(() => {
     if (onProjectActiveChange) {
@@ -389,13 +547,15 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       }
 
       const newImageURLs = project.images;
-      const newTexture = newImageURLs[0];
+      const lead = leadFigure(project);
+      const newTexture = newImageURLs[lead];
       const newColor = tinycolor("#CCFF00").spin(Math.random() * 360);
 
       setCurrentImageURLs(newImageURLs);
       setCurrentTexture(newTexture);
       setCurrentVideo(newVideo);
       setActiveImageIndex(0);
+      setSceneIndex(lead);
 
       const headerElement = mountRef.current.querySelector(".case-study-header");
       const newBorderColor = newColor.setAlpha(0.4).toRgbString();
@@ -1083,12 +1243,12 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   }, [isProjectActive, isGalleryOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A plate is the only way into the lightbox now that the thumbnail strip is
-  // gone, so it does both jobs the strip and the hero image used to split
-  // between them: it moves the shape in the scene behind the panel to this
-  // image, and it opens the full size view.
+  // gone, and that is the whole of its job. It used to move the shape behind
+  // the panel as well, which was the one thing a reader could never see it do:
+  // the lightbox opens over the scene in the same breath. The shape follows the
+  // scroll instead, and a click is free to mean one thing.
   const onFigureClick = (index) => {
     setActiveImageIndex(index);
-    setCurrentTexture(projects[activeProjectID].images[index]);
     setIsGalleryOpen(true);
   };
 
@@ -1103,14 +1263,17 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     setIsTransitioning(true);
     setTransitionDirection('backward');
 
-    setTimeout(() => {
-      setActiveImageIndex(prevIndex);
-      setCurrentTexture(images[prevIndex]);
+    galleryTimersRef.current.push(
+      window.setTimeout(() => {
+        setActiveImageIndex(prevIndex);
 
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 400);
-    }, 50);
+        galleryTimersRef.current.push(
+          window.setTimeout(() => {
+            setIsTransitioning(false);
+          }, 400)
+        );
+      }, 50)
+    );
   };
 
   const onGalleryNextClick = (e) => {
@@ -1124,15 +1287,30 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     setIsTransitioning(true);
     setTransitionDirection('forward');
 
-    setTimeout(() => {
-      setActiveImageIndex(nextIndex);
-      setCurrentTexture(images[nextIndex]);
+    galleryTimersRef.current.push(
+      window.setTimeout(() => {
+        setActiveImageIndex(nextIndex);
 
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 400);
-    }, 50);
+        galleryTimersRef.current.push(
+          window.setTimeout(() => {
+            setIsTransitioning(false);
+          }, 400)
+        );
+      }, 50)
+    );
   };
+
+  // Every way out of the lightbox lands here -- the backdrop, the close button
+  // and Escape all just clear isGalleryOpen -- so the reset hangs off the state
+  // rather than being repeated in each of them. Closing mid-transition used to
+  // leave isTransitioning set, which reopened the caption at opacity 0 and let
+  // the pending timer overwrite the index of whatever plate was clicked next.
+  useEffect(() => {
+    if (isGalleryOpen) return;
+    galleryTimersRef.current.forEach((id) => window.clearTimeout(id));
+    galleryTimersRef.current = [];
+    setIsTransitioning(false);
+  }, [isGalleryOpen]);
 
   const onGalleryClose = (e) => {
     if (e) e.stopPropagation();
@@ -1199,12 +1377,16 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
                   className={`case-block case-plate${
                     block.figures.length > 1 ? " case-plate--grid" : ""
                   }`}
+                  // What the shape wears while this plate is the one being
+                  // read. The scroll driver measures these and nothing else,
+                  // which is what keeps a grid of four to a single change.
+                  data-scene-figure={block.figures[0]}
                 >
                   {block.figures.map((n) => (
                     <figure
                       key={n}
                       className={`case-figure${
-                        n === safeImageIndex ? " is-active" : ""
+                        n === sceneIndex ? " is-active" : ""
                       }`}
                     >
                       <button
@@ -1308,7 +1490,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
                   </>
                 )}
                 {captions[safeImageIndex] && (
-                  <div className="lightbox-caption">
+                  <div
+                    className={`lightbox-caption${
+                      isTransitioning ? " is-swapping" : ""
+                    }`}
+                  >
                     {captions[safeImageIndex]}
                   </div>
                 )}

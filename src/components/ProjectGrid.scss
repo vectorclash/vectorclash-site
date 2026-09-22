@@ -471,8 +471,9 @@
         }
       }
 
-      // Which plate the shape in the scene behind the panel is currently
-      // wearing. Clicking a plate is what moves it.
+      // Which image the shape in the scene behind the panel is currently
+      // wearing. The scroll moves it, so this tracks the read down the flow
+      // rather than marking something the reader did.
       &.is-active .case-figure-frame {
         box-shadow: 0 0 0 2px #d4ff00;
       }
@@ -543,10 +544,26 @@
   cursor: pointer;
   animation: lightboxFadeIn 0.4s ease forwards;
 
+  // The controls hang outside the image rather than over it -- the arrows to
+  // either side, the close above, the counter below -- so the image cannot be
+  // sized against the viewport alone. It used to be 90vw by 90vh, which leaves
+  // the chrome whatever 5% happens to come to: 72px on a 1440 screen, against
+  // the 80px the arrows need, so they were clipped by the edge rather than
+  // sitting beside the image. The room they take is a fixed number of pixels,
+  // so the image is measured back from it.
+  --lightbox-gutter-x: 104px;
+  --lightbox-gutter-y: 72px;
+
+  @media only screen and (max-width: 777px) {
+    // The arrows move inside the image at this width, so the only things still
+    // outside it are the close and the counter.
+    --lightbox-gutter-x: 16px;
+  }
+
   .lightbox-content {
     position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
+    max-width: calc(100vw - var(--lightbox-gutter-x) * 2);
+    max-height: calc(100vh - var(--lightbox-gutter-y) * 2);
     cursor: default;
     opacity: 0;
     transform: scale(0.9);
@@ -555,7 +572,7 @@
     .lightbox-image-previous,
     .lightbox-image-current {
       max-width: 100%;
-      max-height: 90vh;
+      max-height: calc(100vh - var(--lightbox-gutter-y) * 2);
       display: block;
       border-radius: 4px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -678,6 +695,21 @@
       text-align: center;
       pointer-events: none;
       z-index: 4;
+
+      // The caption belongs to the image, so it leaves with it. It used to
+      // hold still at the top of the stack while the old image blurred out
+      // underneath it and the new one flew in, which read as a pane the
+      // pictures were passing behind rather than as this picture's words.
+      //
+      // Out inside the 50ms before the index moves, so the text has changed
+      // before it can be caught changing. Back on the frame the incoming
+      // image lands.
+      transition: opacity 0.22s ease;
+
+      &.is-swapping {
+        opacity: 0;
+        transition-duration: 0.05s;
+      }
     }
 
     .lightbox-counter {
