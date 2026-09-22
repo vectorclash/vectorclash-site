@@ -2,7 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- viewport-fit=cover, so the page is laid out across the whole screen
+         rather than inside the safe areas. Without it iOS insets the layout
+         viewport past the status bar and the home indicator, and the study's
+         sticky canvas ends at those insets instead of running under Safari's
+         chrome -- the scene stopped at a grey strip top and bottom. Content is
+         kept clear of the insets by .container's padding, which adds the safe
+         area to its own. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#CCFF00" />
 
     <!-- Inline so the very first paint is already the page's base tone. As a

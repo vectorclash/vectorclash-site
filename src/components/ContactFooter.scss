@@ -6,6 +6,14 @@
   // Starts hidden on the column, not the footer -- see .logo-grid.
   .column {
     opacity: 0;
+    // The last content on the page, so this is the one place the bottom of the
+    // screen is somewhere content rests rather than passes -- it would sit
+    // under the home indicator otherwise.
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+
+    @media only screen and (max-width: 600px) {
+      padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    }
     position: relative;
     z-index: 1;
     display: flex;

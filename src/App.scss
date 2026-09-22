@@ -11,9 +11,16 @@ $my-color: #CCFF00;
 
   .column {
     position: relative;
-    padding: 120px 40px;
+    // The horizontal safe area is added to the padding, because the page now
+    // lays out across the whole screen -- see viewport-fit in index.html --
+    // and in landscape the notch eats into the side the text starts at. The
+    // vertical insets are left alone: everything here scrolls, so the top and
+    // bottom of the screen is somewhere content passes rather than somewhere
+    // it rests. The footer is the exception and handles its own. Without
+    // insets every env() resolves to zero and this is the padding it was.
+    padding: 120px calc(40px + env(safe-area-inset-right)) 120px calc(40px + env(safe-area-inset-left));
     @media only screen and (max-width: 600px) {
-      padding: 60px 30px;
+      padding: 60px calc(30px + env(safe-area-inset-right)) 60px calc(30px + env(safe-area-inset-left));
     }
     width: 100%;
     max-width: 1080px;
