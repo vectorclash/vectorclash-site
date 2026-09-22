@@ -1,6 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import gsap from "gsap/all";
 // Shares the async three/r3f chunk with HeroScene, so by the time a project
 // is opened this is almost always already resolved.
@@ -1157,60 +1157,71 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           </div>
         </div>
 
-        {isGalleryOpen && (
-          <div
-            className="gallery-lightbox"
-            onClick={onGalleryClose}
-          >
-            <div className="lightbox-content">
-              {isTransitioning && (
+        {/*
+          On document.body rather than here in the tree. The panel renders
+          inside `.column`, which is position:relative with a z-index, and that
+          is a stacking context -- so the overlay's z-index of 1000 only ever
+          counted against its siblings inside the panel. Scroll past the section
+          with an image open and everything after it painted straight over the
+          top of it. A portal puts the overlay in the root stacking context,
+          where fixed positioning means what it says.
+        */}
+        {isGalleryOpen &&
+          createPortal(
+            <div
+              className="gallery-lightbox"
+              onClick={onGalleryClose}
+            >
+              <div className="lightbox-content">
+                {isTransitioning && (
+                  <img
+                    src={project.images[previousImageIndex]}
+                    alt={project.title}
+                    className={`lightbox-image-previous ${transitionDirection}`}
+                  />
+                )}
                 <img
-                  src={project.images[previousImageIndex]}
+                  src={currentImage}
                   alt={project.title}
-                  className={`lightbox-image-previous ${transitionDirection}`}
+                  className={isTransitioning ? `lightbox-image-current transitioning ${transitionDirection}` : "lightbox-image-current"}
                 />
-              )}
-              <img
-                src={currentImage}
-                alt={project.title}
-                className={isTransitioning ? `lightbox-image-current transitioning ${transitionDirection}` : "lightbox-image-current"}
-              />
-              <button
-                className="lightbox-close"
-                onClick={onGalleryClose}
-                aria-label="Close"
-              >
-                <img src={close} alt="Close" />
-              </button>
-              {project.images.length > 1 && (
-                <>
-                  <button
-                    className="lightbox-prev"
-                    onClick={onGalleryPrevClick}
-                    aria-label="Previous Image"
-                  >
-                    <img src={left} alt="Previous" />
-                  </button>
-                  <button
-                    className="lightbox-next"
-                    onClick={onGalleryNextClick}
-                    aria-label="Next Image"
-                  >
-                    <img src={right} alt="Next" />
-                  </button>
-                </>
-              )}
-              {captions[safeImageIndex] && (
-                <div className="lightbox-caption">
-                  {captions[safeImageIndex]}
+                <button
+                  className="lightbox-close"
+                  onClick={onGalleryClose}
+                  aria-label="Close"
+                >
+                  <img src={close} alt="Close" />
+                </button>
+                {project.images.length > 1 && (
+                  <>
+                    <button
+                      className="lightbox-prev"
+                      onClick={onGalleryPrevClick}
+                      aria-label="Previous Image"
+                    >
+                      <img src={left} alt="Previous" />
+                    </button>
+                    <button
+                      className="lightbox-next"
+                      onClick={onGalleryNextClick}
+                      aria-label="Next Image"
+                    >
+                      <img src={right} alt="Next" />
+                    </button>
+                  </>
+                )}
+                {captions[safeImageIndex] && (
+                  <div className="lightbox-caption">
+                    {captions[safeImageIndex]}
+                  </div>
+                )}
+                <div className="lightbox-counter">
+                  {safeImageIndex + 1} / {project.images.length}
                 </div>
-              )}
-              <div className="lightbox-counter">
-                {safeImageIndex + 1} / {project.images.length}
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
 
         {/*
           Repeated at the end of the flow rather than pinned over it. A study is
