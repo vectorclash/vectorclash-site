@@ -173,8 +173,8 @@ const VIDEO_PLACEMENTS = [
   {
     id: 'near',
     depth: 96,
-    radius: 0.95,
-    narrowRadius: 0.5,
+    radius: 1.05,
+    narrowRadius: 0.78,
     // The same positions the smaller shape held, now stated directly: out in
     // the margin beside the study's column on a wide screen, and low on a
     // phone, where the column runs the full width and nothing can clear it.
@@ -184,10 +184,19 @@ const VIDEO_PLACEMENTS = [
   },
 ];
 
-// A ceiling on how much of the frame's width the shape may take, so a narrow
-// viewport cannot hand it the whole screen. It binds on a phone and never on a
-// landscape one.
-const VIDEO_WIDTH_GUARD = 0.9;
+// A ceiling on how much of the frame's width the shape may take. It was set
+// under 1 to keep the shape inside the frame on a phone, which is no longer
+// what is wanted -- the shape crosses the edge everywhere else, and holding it
+// back only on the screen with the least room made it smallest exactly where
+// it needed to carry most. Past 1 now, so it still cannot swallow a narrow
+// viewport whole but may run off both sides. High enough now that the radius
+// is what decides the size on every screen and this is only the safety net.
+//
+// Worth knowing when tuning either number: a tetrahedron's faces sit a third
+// of its radius from the centre, so most of the time its silhouette is far
+// smaller than the radius suggests. Values that look reckless written down
+// read as generous on screen.
+const VIDEO_WIDTH_GUARD = 1.6;
 
 function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const projectGroupRef = useRef();
