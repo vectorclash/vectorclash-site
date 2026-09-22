@@ -102,7 +102,7 @@ const visibleHeight = (el) =>
 // the bottom ends up doing something the one at the top does not.
 function ProjectControls({ onPrev, onClose, onNext }) {
   return (
-    <div className="project-controls">
+    <div className="case-study-controls">
       <button
         type="button"
         className="prev-button"
@@ -265,8 +265,8 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   // what made the panel look like it was closing and reopening.
   const swapPieces = (detail) =>
     [
-      detail.querySelector(".project-header h2"),
-      detail.querySelector(".project-header .tools"),
+      detail.querySelector(".case-study-header h2"),
+      detail.querySelector(".case-study-header .tools"),
       ...detail.querySelectorAll(".case-block"),
     ].filter(Boolean);
 
@@ -336,7 +336,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   useLayoutEffect(() => {
     if (!mountRef.current) return;
 
-    const projectContent = mountRef.current.querySelector(".project-content");
+    const projectContent = mountRef.current.querySelector(".case-study-body");
 
     if (isProjectActive && activeProjectID !== null) {
       const project = projects[activeProjectID];
@@ -360,7 +360,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       setCurrentVideo(newVideo);
       setActiveImageIndex(0);
 
-      const headerElement = mountRef.current.querySelector(".project-header");
+      const headerElement = mountRef.current.querySelector(".case-study-header");
       const newBorderColor = newColor.setAlpha(0.4).toRgbString();
 
       // Arriving from prev/next: the panel is already open and pinned at the
@@ -382,7 +382,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       // loader fade interrupted by the swap would otherwise leave its inline
       // height and opacity behind on the elements this pass reuses.
       gsap.set(mountRef.current, { clearProps: "height,overflow" });
-      const staleLoader = mountRef.current.querySelector(".project-loader");
+      const staleLoader = mountRef.current.querySelector(".case-study-loader");
       if (staleLoader) {
         gsap.killTweensOf(staleLoader);
         gsap.set(staleLoader, { clearProps: "opacity,top" });
@@ -420,7 +420,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         // collapsed height back on the same tick, so the expanded state is
         // never painted.
         const collapsedHeight = detail.offsetHeight;
-        const loader = detail.querySelector(".project-loader");
+        const loader = detail.querySelector(".case-study-loader");
 
         flushSync(() => setIsProjectLoading(false));
 
@@ -449,10 +449,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           gsap.set(loader, { top: collapsedHeight / 2 });
         }
 
-        const header = mountRef.current?.querySelector(".project-header");
+        const header = mountRef.current?.querySelector(".case-study-header");
         const projectTitle = header?.querySelector("h2");
         const tools = header?.querySelector(".tools");
-        const controls = header?.querySelector(".project-controls");
+        const controls = header?.querySelector(".case-study-controls");
         const entering = Array.from(
           projectContent?.querySelectorAll(".case-block") || []
         ).slice(0, ENTRANCE_BLOCKS);
@@ -789,12 +789,12 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
       projectLoadTimeoutRef.current = null;
 
-      const header = detail.querySelector(".project-header");
+      const header = detail.querySelector(".case-study-header");
       if (header && borderColor) {
         gsap.to(header, { borderBottomColor: borderColor, duration: SWAP_IN_DURATION });
       }
 
-      const projectContent = detail.querySelector(".project-content");
+      const projectContent = detail.querySelector(".case-study-body");
       const pieces = swapPieces(detail);
 
       killOpenTimeline();
@@ -916,11 +916,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       return;
     }
 
-    const projectContent = detail.querySelector(".project-content");
+    const projectContent = detail.querySelector(".case-study-body");
     const pieces = [
-      detail.querySelector(".project-header h2"),
-      detail.querySelector(".project-header .tools"),
-      detail.querySelector(".project-header .project-controls"),
+      detail.querySelector(".case-study-header h2"),
+      detail.querySelector(".case-study-header .tools"),
+      detail.querySelector(".case-study-header .case-study-controls"),
       ...detail.querySelectorAll(".case-block"),
     ].filter(Boolean);
 
@@ -1057,16 +1057,16 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
     return (
       <div
-        className={`project-detail ${isProjectLoading ? "is-loading" : ""}`}
+        className={`case-study ${isProjectLoading ? "is-loading" : ""}`}
         ref={mountRef}
       >
         {isLoaderMounted && (
-          <div className="project-loader">
+          <div className="case-study-loader">
             <HexagonLoader />
           </div>
         )}
-        <div className="project-header">
-          <div className="project-meta">
+        <div className="case-study-header">
+          <div className="case-study-meta">
             <h2>{project.title}</h2>
             <ul className="tools">
               {project.tools.map((tool, i) => (
@@ -1081,7 +1081,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           />
         </div>
 
-        <div className="project-content">
+        <div className="case-study-body">
           <div className="case-flow">
             {caseBlocks.map((block) =>
               block.type === "prose" ? (
@@ -1218,7 +1218,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           nothing has to sit over the plates for the whole of the read to put it
           there.
         */}
-        <div className="project-footer-nav">
+        <div className="case-study-footer-nav">
           <ProjectControls
             onPrev={onProjectPrevClick}
             onClose={onProjectCloseClick}
@@ -1226,7 +1226,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           />
         </div>
 
-        <div className="project-pagination">
+        <div className="case-study-pagination">
           Case Study {activeProjectID + 1} of {projects.length}
         </div>
       </div>

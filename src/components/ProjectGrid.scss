@@ -1,4 +1,4 @@
-.project-loader {
+.case-study-loader {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -109,12 +109,12 @@
   }
 }
 
-.project-detail {
+.case-study {
   position: relative;
   width: 100%;
 
   // Start ALL content hidden so GSAP can animate them in
-  .project-content {
+  .case-study-body {
     opacity: 0;
 
     &.hidden {
@@ -123,8 +123,8 @@
     }
   }
 
-  .project-header {
-    h2, .tools, .project-controls {
+  .case-study-header {
+    h2, .tools, .case-study-controls {
       opacity: 0;
     }
   }
@@ -145,15 +145,15 @@
       min-height: clamp(440px, 60svh, 520px);
     }
 
-    .project-header,
-    .project-content,
-    .project-footer-nav,
-    .project-pagination {
+    .case-study-header,
+    .case-study-body,
+    .case-study-footer-nav,
+    .case-study-pagination {
       display: none;
     }
   }
 
-  .project-loader {
+  .case-study-loader {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -175,7 +175,7 @@
     will-change: opacity;
   }
 
-  .project-header {
+  .case-study-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -189,7 +189,7 @@
       margin-bottom: 30px;
     }
 
-    .project-meta {
+    .case-study-meta {
       flex: 1;
 
       h2 {
@@ -230,14 +230,14 @@
       }
     }
 
-    .project-controls {
+    .case-study-controls {
       @media only screen and (max-width: 777px) {
         margin-top: 20px;
       }
     }
   }
 
-  .project-controls {
+  .case-study-controls {
     display: flex;
     gap: 15px;
     opacity: 0.8;
@@ -277,14 +277,14 @@
 
   // The study opens under a dashed rule and closes over one, so the flow is
   // bracketed by the same line at both ends.
-  .project-footer-nav {
+  .case-study-footer-nav {
     display: flex;
     justify-content: flex-end;
     padding-top: 20px;
     border-top: 1px dashed rgba(#d4ff00, 0.5);
   }
 
-  .project-content {
+  .case-study-body {
     margin-bottom: 40px;
 
     .case-flow {
@@ -656,7 +656,7 @@
     }
   }
 
-  .project-pagination {
+  .case-study-pagination {
     text-align: right;
     font-size: 14px;
     font-weight: bold;
