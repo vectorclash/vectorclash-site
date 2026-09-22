@@ -48,6 +48,12 @@ const ASPECT_FLOOR = 0.72;
 // inside it too.
 const MAX_FRAME_HEIGHT = 240;
 
+// How far the scene hangs past the top and bottom of the viewport. Enough to
+// clear iOS's status bar and its toolbar, which are the two the scene was
+// stopping at; on a browser with no overlaid chrome it is simply overdraw at
+// the edges of a scene that is a backdrop anyway.
+const SCENE_BLEED = 120;
+
 // A quarter turn over the length of the section. The backdrop is a box, so 90
 // degrees is its whole symmetry -- the study ends on a composition equivalent
 // to the one it opened with rather than part way through a face.
@@ -391,10 +397,18 @@ export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] })
       // under it. It also bounds the drawing buffer: r3f sizes the renderer
       // from this box, so a section thousands of pixels tall no longer means a
       // canvas thousands of pixels tall.
+      // Sticky, and pinned past both edges of the screen rather than at them.
+      // Safari holds fixed and sticky elements inside the area its own chrome
+      // does not cover, so a scene pinned at top: 0 stops at the status bar and
+      // again at the toolbar, while the study's text -- ordinary flow content
+      // -- scrolls the full height and passes under both. The scene read as
+      // boxed in between them. Overhanging the viewport by SCENE_BLEED at each
+      // end puts the canvas under the chrome whatever rect the pinning is
+      // measured against, so this does not depend on which inset is at work.
       style={{
         position: 'sticky',
-        top: 0,
-        height: '100vh',
+        top: `${-SCENE_BLEED}px`,
+        height: `calc(100vh + ${SCENE_BLEED * 2}px)`,
       }}
     >
       <Scene
