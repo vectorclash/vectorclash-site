@@ -180,16 +180,16 @@
         "body": "<p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states.</p>",
         "figures": [
           2,
-          4,
-          5,
-          6
+          6,
+          7,
+          5
         ]
       },
       {
         "body": "<p>Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p>",
         "figures": [
-          7,
-          3
+          3,
+          4
         ]
       },
       {
@@ -208,14 +208,14 @@
       "/projects/forge/images/forge_img08.jpg"
     ],
     "captions": [
-      "A generated piece at full saturation. The algorithm proposes the relationships and the composition follows.",
-      "The same system in a softer register, with the palette collapsed toward a single hue.",
-      "The studio's control panel: the parameters that steer a result, rather than a color picker.",
-      "The print-on-demand flow, choosing from pieces already generated in the studio.",
-      "One seed's output, the structure held while the palette shifts.",
-      "Depth of field and grain applied over the generated geometry.",
-      "The softest end of the range, where the structure reads as light rather than as edges.",
-      "A generated piece placed on a garment — the studio and the storefront in one view."
+      "A generated piece at its most diffuse, where broad overlapping planes let the palette read as light rather than as edges.",
+      "The landing screen: generate something new, or return to what has already been saved, with the studio itself one step further in.",
+      "The studio's control panel, open on color. The palette is a list to be edited or swapped wholesale, not a picker to hunt through.",
+      "Choosing which generated piece goes onto a garment, drawn from the same saved designs the studio produces.",
+      "The product page, where size, quantity and price resolve against a print-on-demand fulfiller behind the scenes.",
+      "The gallery, where every generated piece keeps the name the algorithm gave it.",
+      "A piece on a dark ground, the geometry held to hard edges and full saturation.",
+      "Dense overlap at the other end of the range, the structure legible only where the planes disagree."
     ],
     "videos": [
       "/projects/forge/videos/FusedCryosphere-ebeb.mp4",
