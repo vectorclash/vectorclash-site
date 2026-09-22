@@ -7,9 +7,16 @@
 
     <!-- Inline so the very first paint is already the page's base tone. As a
          rule in the bundled stylesheet it only applies once that file has been
-         fetched, and the browser shows its default white until then. -->
+         fetched, and the browser shows its default white until then.
+
+         The brand colour rather than a neutral, because this is also the colour
+         Safari's toolbars take. Safari samples the page at its top and bottom
+         edges instead of reading theme-color, and the hero's gradient fades up
+         from transparent over 900ms -- so for the whole of that window the page
+         really is this value, and so are the bars. It matches theme-color above
+         for the browsers that still read the meta. -->
     <style>
-      html { background-color: #333333; }
+      html { background-color: #CCFF00; }
     </style>
 
     <title>VECTORCLASH | Aaron Ezra Sterczewski, Design Engineer</title>

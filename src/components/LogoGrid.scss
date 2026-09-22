@@ -1,8 +1,15 @@
 .logo-grid {
-  overflow: hidden;
-  opacity: 0;
+  // Was inheriting the root background, which is now the brand colour that
+  // Safari's toolbars sample -- so this section has to name the tone it always
+  // showed rather than take whatever the document sits on.
+  background-color: #333333;
 
+  overflow: hidden;
+
+  // The reveal starts here rather than on the section, so the background stays
+  // put while the content comes up.
   .column {
+    opacity: 0;
     padding-top: 0;
     margin-bottom: -50px;
     @media only screen and (max-width: 777px) {

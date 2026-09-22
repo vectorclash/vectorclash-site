@@ -1,5 +1,9 @@
+/* Matches the inline rule in index.html, which is what the first paint uses.
+   Kept in step with it: this file loads later, so a different value here would
+   simply take over once the stylesheet arrives. See that rule for why the page
+   sits on the brand colour rather than a neutral. */
 html {
-  background-color: #333333;
+  background-color: #CCFF00;
 }
 
 body {

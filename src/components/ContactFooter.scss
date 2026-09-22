@@ -1,7 +1,11 @@
 .contact-footer {
-  opacity: 0;
-  
+  // Named for the same reason as .logo-grid: the root colour is the brand
+  // yellow now, and this section is the one under the bottom of the document.
+  background-color: #333333;
+
+  // Starts hidden on the column, not the footer -- see .logo-grid.
   .column {
+    opacity: 0;
     position: relative;
     z-index: 1;
     display: flex;

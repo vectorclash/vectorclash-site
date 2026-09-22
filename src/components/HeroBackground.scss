@@ -1,4 +1,4 @@
-// The page sits on a flat #333 until the bundle parses and React paints this
+// The page sits on a flat #CCFF00 until the bundle parses and React paints this
 // gradient, which arrived as a hard cut -- the first of the load flashes. Easing
 // it up from transparent turns that swap into the lights coming on. It runs as a
 // keyframe rather than a class toggle so there is no frame where the element is

@@ -104,7 +104,15 @@ function LogoGrid() {
   useEffect(() => {
     const tl = gsap.timeline({ paused: true });
 
-    tl.fromTo(mountRef.current, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
+    // The inner column rather than the section. The section paints the page's
+    // base tone now, and fading the element that carries a background drags the
+    // background in with the content -- a grey panel wiping over the root
+    // colour, scrubbed to the scroll, which is not what the reveal is for.
+    tl.fromTo(
+      mountRef.current.querySelector(".column"),
+      { alpha: 0 },
+      { alpha: 1, duration: 1, ease: "quad.inOut" }
+    );
     tl.fromTo(
       mountRef.current.querySelectorAll(".logo-grid-item"),
       { alpha: 0, y: 100 },

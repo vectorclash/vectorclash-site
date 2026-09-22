@@ -39,7 +39,13 @@ function ContactFooter() {
   useEffect(() => {
     const tl = gsap.timeline({ paused: true });
 
-    tl.fromTo(mount.current, { alpha: 0 }, { duration: 1, alpha: 1, ease: "quad.inOut" });
+    // The inner column, for the reason given in LogoGrid: this element paints a
+    // background now, so fading it would fade the background too.
+    tl.fromTo(
+      mount.current.querySelector(".column"),
+      { alpha: 0 },
+      { duration: 1, alpha: 1, ease: "quad.inOut" }
+    );
     tl.fromTo(
       mount.current.querySelectorAll("p, li, .copyright"),
       { alpha: 0, y: 20 },
