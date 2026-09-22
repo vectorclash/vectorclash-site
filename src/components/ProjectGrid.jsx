@@ -620,27 +620,26 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         const tiles = mountRef.current.querySelectorAll("li");
         // Hidden before the refresh, so the grid cannot paint at full strength
         // in the frame between them.
-        if (tiles.length > 0) gsap.set(tiles, { opacity: 0, y: 16 });
+        if (tiles.length > 0) gsap.set(tiles, { opacity: 0, y: -14 });
 
         resyncScrollTriggers(true);
 
-        // On the next frame, not this one. The refresh above re-measures every
-        // trigger on the page and is the most expensive thing in the whole
-        // transition -- and it lands on exactly the frame the grid first
-        // paints. A tween started in that frame is time-based, so it does not
-        // wait: it opens already part way through, which on a phone, where the
-        // measuring costs most, is the tiles appearing half faded rather than
-        // rising in. One frame's wait buys the entrance its own first frame.
+        // Straight away, in the same frame the panel left. Waiting a frame put
+        // a hole between the two halves, and a hole is what reads as the
+        // transition not being one thing.
+        //
+        // The tiles come down into place rather than up out of it. The study
+        // leaves downwards, so an entrance rising the other way is a second,
+        // opposing gesture where what is wanted is the continuation of the
+        // first: the study drops away, the grid drops in behind it.
         if (tiles.length > 0) {
-          gsap.delayedCall(0, () => {
-            gsap.to(tiles, {
-              opacity: 1,
-              y: 0,
-              duration: 0.35,
-              ease: "power2.out",
-              stagger: { amount: 0.18 },
-              clearProps: "opacity,transform",
-            });
+          gsap.to(tiles, {
+            opacity: 1,
+            y: 0,
+            duration: 0.32,
+            ease: "power2.out",
+            stagger: { amount: 0.14 },
+            clearProps: "opacity,transform",
           });
         }
       }
@@ -950,7 +949,12 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       closeTimelineRef.current = null;
       returningToGridRef.current = true;
       setIsClosing(false);
-      setIsProjectActive(false);
+      // flushSync, so the panel comes out of the DOM and the grid's layout
+      // effect runs inside the frame the exit finished in. Left to React's own
+      // scheduling the re-render lands a frame or two later, and the exit and
+      // the entrance stop being one gesture -- the content has gone and
+      // nothing has arrived, which is the seam between the two halves.
+      flushSync(() => setIsProjectActive(false));
     };
 
     if (!detail) {
@@ -1001,10 +1005,14 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         pieces,
         {
           opacity: 0,
-          y: 12,
-          duration: 0.24,
-          ease: "power2.in",
-          stagger: { amount: 0.07, from: "end" },
+          y: 26,
+          // power2 over 12px was most of its travel spent barely moving and
+          // then a jerk at the end, which is the easing reading as odd. A
+          // gentler curve over twice the distance is the same length of exit
+          // with a move in it you can actually follow.
+          ease: "power1.in",
+          duration: 0.26,
+          stagger: { amount: 0.06, from: "end" },
         },
         0
       );
@@ -1016,7 +1024,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       // and it is timed to land with the last staggered piece rather than
       // holding on past it.
       gsap.killTweensOf(threeContainer);
-      tl.to(threeContainer, { alpha: 0, duration: 0.31, ease: "power2.in" }, 0);
+      tl.to(threeContainer, { alpha: 0, duration: 0.32, ease: "power1.in" }, 0);
     }
   };
 
