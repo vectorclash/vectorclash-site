@@ -233,46 +233,80 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const composerMounted = useLingering(grainOn, GRAIN_FADE * 1000 + 100);
 
   useEffect(() => {
+    // The container is the box the sticky canvas is free to travel through,
+    // so its bounds are also the range the scroll link is measured against.
+    const range = gl.domElement.closest('.project-three-container');
+    if (!range) return undefined;
+
     let rotationTween = null;
 
-    const handleScroll = () => {
-      // The container is the box the sticky canvas is free to travel through,
-      // so its bounds are also the range the scroll link is measured against.
-      const range = gl.domElement.closest('.project-three-container');
-      if (!range || !scrollGroupRef.current) return;
-
-      const rect = range.getBoundingClientRect();
-      // What the sticky canvas actually has to travel: everything past the one
-      // viewport it occupies. Floored at a pixel so a section shorter than the
-      // screen cannot divide by zero.
-      const travel = Math.max(1, rect.height - window.innerHeight);
-      const progress = Math.min(1, Math.max(0, -rect.top / travel));
+    const turnTo = (progress, immediate) => {
+      const group = scrollGroupRef.current;
+      if (!group) return;
 
       if (rotationTween) rotationTween.kill();
+
+      // A re-measure is not a scroll. Opening a study grows this section from
+      // a collapsed panel to several screens, and every intermediate height is
+      // a range the page's current scroll position sits at some meaningless
+      // point of -- most of them at the very end, because a box barely taller
+      // than the window divides a large distance by a small one. Tweening
+      // through those readings is what sent the backdrop through its whole
+      // quarter turn and back in the moment a project finished loading. Set
+      // absolutely instead: the transient values pass by unseen behind a
+      // section still at zero opacity, and the one that is true when the
+      // panel settles is the one the scene fades up on.
+      if (immediate) {
+        group.rotation.y = progress * SCROLL_ROTATION;
+        return;
+      }
 
       // Turning the backdrop rather than sliding the camera down past it. The
       // camera drift this replaces moved the framing off the shape instead of
       // moving through anything, and a case study is long enough that it spent
       // most of the read parked at the bottom of its range.
-      //
-      // Measured as progress through the section rather than against a raw
-      // scroll distance the way the hero is, because a study can be three
-      // screens or six: the quarter turn has to spread over whichever it is.
-      rotationTween = gsap.to(scrollGroupRef.current.rotation, {
+      rotationTween = gsap.to(group.rotation, {
         duration: 0.5,
         y: progress * SCROLL_ROTATION,
         ease: 'quad.out',
       });
     };
 
-    // The section grows by several screens when a case study opens, so the
-    // range is re-read on every scroll rather than measured once here. This
-    // first call is only to set the scene against wherever the page already is.
-    handleScroll();
+    const measure = (immediate) => {
+      const rect = range.getBoundingClientRect();
+      // What the sticky canvas actually has to travel: everything past the one
+      // viewport it occupies. A section with none of that is not a range that
+      // has been read part of the way through -- it is one standing at its
+      // start, so it reads as zero rather than dividing by a floored pixel and
+      // landing at the far end.
+      const travel = rect.height - window.innerHeight;
+      const progress = travel > 0 ? Math.min(1, Math.max(0, -rect.top / travel)) : 0;
 
+      // Measured as progress through the section rather than against a raw
+      // scroll distance the way the hero is, because a study can be three
+      // screens or six: the quarter turn has to spread over whichever it is.
+      turnTo(progress, immediate);
+    };
+
+    // Set the scene against wherever the page already is, without animating
+    // there. The section is mid-expansion at this point on the first project
+    // opened, so this reading is one of the transient ones.
+    measure(true);
+
+    const handleScroll = () => measure(false);
     window.addEventListener('scroll', handleScroll);
+
+    // The section is several screens taller once a study is open and several
+    // screens shorter again when it closes, and neither change is a scroll --
+    // so the range is watched as well as listened to, or the link keeps
+    // dividing by whichever height it last happened to see.
+    const observer =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => measure(true));
+    if (observer) observer.observe(range);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (observer) observer.disconnect();
       if (rotationTween) rotationTween.kill();
     };
   }, [gl]);
