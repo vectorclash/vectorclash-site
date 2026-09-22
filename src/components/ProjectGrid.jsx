@@ -959,11 +959,18 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     }
 
     const projectContent = detail.querySelector(".case-study-body");
+    // Everything the panel draws, so one tween can take all of it. Anything
+    // left out of this list has nothing fading it and would snap away when the
+    // panel unmounts -- which is why the loader, the footer controls and the
+    // pagination are here too, not just the reading flow.
     const pieces = [
+      detail.querySelector(".case-study-loader"),
       detail.querySelector(".case-study-header h2"),
       detail.querySelector(".case-study-header .tools"),
       detail.querySelector(".case-study-header .case-study-controls"),
       ...detail.querySelectorAll(".case-block"),
+      detail.querySelector(".case-study-footer-nav"),
+      detail.querySelector(".case-study-pagination"),
     ].filter(Boolean);
 
     // Nothing else may be tweening these elements once the exit starts: the
@@ -980,16 +987,20 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     const tl = gsap.timeline({ onComplete: finish });
     closeTimelineRef.current = tl;
 
-    // The pieces move, the panel fades, and only the panel fades. Both used to
-    // animate opacity, and since the pieces are inside the panel the two
-    // multiplied: content left at a rate neither curve describes, dropping out
-    // early and taking the stagger with it, which is most of what read as
-    // clunky. The stagger survives as motion instead -- the lower blocks start
-    // down before the upper ones, and the fade above carries all of it.
+    // One tween, so the slide and the fade are not two animations to keep in
+    // step -- they are the same one. They were split before: the content
+    // animated its position while the panel around it animated opacity, and
+    // because the panel is their ancestor the timings could not be reconciled.
+    // Whichever finished first, the other was still going, and the piece that
+    // stopped first read as a hitch -- the content sliding to a halt and then
+    // waiting to be taken away.
+    //
+    // Nothing above this fades any more, so the panel itself is left alone.
     if (pieces.length > 0) {
       tl.to(
         pieces,
         {
+          opacity: 0,
           y: 12,
           duration: 0.24,
           ease: "power2.in",
@@ -999,14 +1010,13 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       );
     }
 
-    tl.to(detail, { opacity: 0, duration: 0.24, ease: "power2.in" }, 0.03);
-
     if (threeContainer) {
-      // The scene still outlives the panel, but only just -- the whole exit is
-      // 0.30s now rather than 0.45s. The backdrop is what is left behind rather
-      // than the grid arriving on top of a live canvas.
+      // The scene still outlives the panel, but only just. The backdrop is what
+      // is left behind rather than the grid arriving on top of a live canvas,
+      // and it is timed to land with the last staggered piece rather than
+      // holding on past it.
       gsap.killTweensOf(threeContainer);
-      tl.to(threeContainer, { alpha: 0, duration: 0.3, ease: "power2.inOut" }, 0);
+      tl.to(threeContainer, { alpha: 0, duration: 0.31, ease: "power2.in" }, 0);
     }
   };
 
