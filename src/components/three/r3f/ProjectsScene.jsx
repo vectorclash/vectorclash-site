@@ -69,7 +69,14 @@ const DEG = 180 / Math.PI;
 function useFramedCamera() {
   const camera = useThree((state) => state.camera);
   const size = useThree((state) => state.size);
-  const aspect = size.width / size.height;
+
+  // The canvas is taller than the screen by SCENE_BLEED at each end, so the
+  // window that is actually looked at is the middle of it. Everything about
+  // the composition -- how much of the wall is held, where the shapes hang --
+  // is measured against that window rather than against the whole canvas,
+  // which would frame the shot for two bands of it nobody sees.
+  const visibleHeight = Math.max(1, size.height - SCENE_BLEED * 2);
+  const aspect = size.width / visibleHeight;
 
   const tanHalfV = useMemo(() => {
     const vertical = Math.tan(Math.atan(FRAME_HEIGHT / 2 / FAR_WALL));
@@ -83,9 +90,13 @@ function useFramedCamera() {
   }, [aspect]);
 
   useLayoutEffect(() => {
-    camera.fov = 2 * Math.atan(tanHalfV) * DEG;
+    // The lens has to cover the whole canvas, bleed included, while the frame
+    // above describes only the visible middle -- so it opens by the ratio
+    // between them.
+    const overdraw = size.height / visibleHeight;
+    camera.fov = 2 * Math.atan(tanHalfV * overdraw) * DEG;
     camera.updateProjectionMatrix();
-  }, [camera, tanHalfV]);
+  }, [camera, tanHalfV, size.height, visibleHeight]);
 
   return { tanHalfV, aspect };
 }
@@ -135,72 +146,45 @@ function useLingering(on, ms) {
   return on || lingering;
 }
 
-// Where the video shapes stand, and how big each one is.
+// Where the video shape stands, and how big it is.
 //
-// One shape had to be small enough for the frame to hold it whole, which left
-// it reading as an ornament. Three of them can divide that job: a large one set
-// back near the box's far wall carries the video, a middle one holds the lower
-// left where the single shape used to sit, and a small one near the camera
-// gives the other two something to be behind. They are all fed by one video
-// element, so this is a composition rather than three players.
+// One shape, close to the camera. Three of them at three depths gave the shot
+// more objects than it had room to compose: the backdrop is already turning
+// with the scroll and tumbling on its own, and the study's text sits over all
+// of it, so every extra solid was another thing competing with the reading
+// rather than framing it. Near the camera a single shape is large on screen
+// while staying small in the world, which is what lets it sit clear of the
+// text instead of behind it -- and the parallax against a backdrop 300 units
+// away does the work the other two depths were there to do.
 //
 // `depth` is a world z, inside the 300 unit backdrop box. `radius` is a
-// fraction of the shorter half of the frame *at that depth*, and `bias` places
-// the centre within what is left of that frame once the radius and a margin are
-// taken out -- so every shape stays whole at any aspect, and the arrangement
-// keeps its proportions instead of its pixel positions. `spin` scales the idle
-// tumble: the nearer and smaller the shape, the faster it turns, which is the
-// same cue the depth is already giving.
-//
-// The far shape is set deep enough that the backdrop's wall cuts through it as
-// the box tumbles, and it is meant to: at this size there is no depth inside a
-// 300 unit box that clears the wall, so the choice is a small shape that floats
-// or a large one the backdrop keeps taking bites out of. The second is the more
-// interesting object, and the tumble means it is never cut the same way twice.
-//
-// `narrowBias` is the portrait arrangement. A tall frame cannot hold both large
-// shapes and lateral spread -- at phone width a shape sized for the height uses
-// most of the width, leaving nothing to offset it with, and all three collapse
-// onto the centreline. So portrait spreads them down the frame instead of
-// across it, which is the axis a phone actually has to spend: the large one
-// high, the middle one at eye level, the small one low, each nudged a little
-// off centre so they do not read as a stack.
-// `narrowRadius` goes with it. Left to the landscape sizes, the width guard
-// below caps all three at whatever the narrow frame allows and they arrive the
-// same size on screen -- which throws away the large/medium/small reading that
-// is what makes the depths legible in the first place.
+// fraction of the visible frame's half height *at that depth*, guarded by its
+// width, and `bias` places the centre within what is left of that frame once
+// the radius and a margin are taken out -- so the shape stays whole at any
+// aspect and the composition keeps its proportions rather than its pixels.
+// `narrowBias` and `narrowRadius` are the portrait arrangement, where the
+// frame is tall and the text column runs nearly its full width.
 const VIDEO_PLACEMENTS = [
   {
-    id: 'far',
-    depth: -142,
-    radius: 0.82,
-    narrowRadius: 0.62,
-    bias: [0.34, 0.26],
-    narrowBias: [-0.3, 0.82],
-    spin: 0.4,
-  },
-  {
-    id: 'mid',
-    depth: -20,
-    radius: 0.42,
-    narrowRadius: 0.26,
-    bias: [-0.78, -0.62],
-    narrowBias: [0.62, -0.1],
-    spin: 1,
-  },
-  {
     id: 'near',
-    depth: 70,
-    radius: 0.36,
-    narrowRadius: 0.16,
-    bias: [0.72, 0.64],
-    narrowBias: [-0.8, -0.95],
-    spin: 1.7,
+    depth: 96,
+    // Sized to leave itself somewhere to go. At 0.66 of the frame's height it
+    // filled the height and had no vertical room left to be placed within, so
+    // it sat centred whatever bias it was given.
+    radius: 0.52,
+    narrowRadius: 0.34,
+    // Out in the margin beside the study's column rather than behind it. The
+    // column is 1080px at most, so on a wide screen the shape clears it; on a
+    // phone the column runs the full width and nothing can, so portrait drops
+    // it low instead, under the run of the text.
+    bias: [-0.8, -0.55],
+    narrowBias: [-0.55, -0.7],
+    spin: 1.25,
   },
 ];
 
-// How much of the frame's width a shape may take. Only a guard: it binds on a
-// phone, where sizing purely by height would push a shape past the edges, and
+// How much of the frame's width the shape may take. Only a guard: it binds on
+// a phone, where sizing purely by height would push it past the edges, and
 // never on a landscape screen.
 const VIDEO_WIDTH_GUARD = 0.62;
 
