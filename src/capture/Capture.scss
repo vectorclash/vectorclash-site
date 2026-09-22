@@ -1,0 +1,113 @@
+// Same numbers as Capture.jsx: a 367px ring, 10px thick, centred on the card.
+$logo-scale: 1.235;
+$ring-weight: 6.12;
+$ring-centre: 180px;
+
+body {
+  margin: 0;
+  background: #111;
+  color: #ddd;
+  font: 14px/1.4 system-ui, sans-serif;
+}
+
+.capture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+// Sized inline from WIDTH and HEIGHT. The scene is laid out at the card's own
+// size, so what is on screen is the crop.
+.capture-frame {
+  position: relative;
+  flex: none;
+  overflow: hidden;
+}
+
+// Placed so the ring's centre, not the SVG's box, sits on the card's centre --
+// the logo's viewBox is off-centre from its own ring.
+.capture-logo {
+  position: absolute;
+  left: calc(50% - #{$ring-centre * $logo-scale});
+  top: calc(50% - #{$ring-centre * $logo-scale});
+  z-index: 1;
+  pointer-events: none;
+
+  .logo svg {
+    width: 313.4px * $logo-scale;
+    max-width: none;
+
+    path {
+      stroke-width: $ring-weight;
+    }
+  }
+
+  // Overrides what the animation writes inline, dashes included, so a line
+  // caught mid-draw still comes out whole.
+  &.is-white .logo svg line {
+    stroke: #fff !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+.capture-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out;
+
+  &.is-on {
+    opacity: 0.35;
+    transition: none;
+  }
+}
+
+.capture-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  button {
+    padding: 6px 12px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    background: #222;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &[aria-pressed="true"] {
+      background: #ccff00;
+      border-color: #ccff00;
+      color: #111;
+    }
+  }
+}
+
+.capture-modes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  span {
+    margin-right: 4px;
+    color: #888;
+  }
+}
+
+.capture-hint {
+  color: #888;
+}
+
+.capture-save.capture-save {
+  background: #ccff00;
+  border-color: #ccff00;
+  color: #111;
+  font-weight: 600;
+}

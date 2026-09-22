@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "capture": "vite --open /capture.html",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest"
