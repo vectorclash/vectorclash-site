@@ -21,9 +21,30 @@
          edges instead of reading theme-color, and the hero's gradient fades up
          from transparent over 900ms -- so for the whole of that window the page
          really is this value, and so are the bars. It matches theme-color above
-         for the browsers that still read the meta. -->
+         for the browsers that still read the meta.
+
+         The gradient over it is what the eye gets, and every stop of it is
+         dark. The flat colour alone held the whole screen at full brightness
+         until the bundle parsed and the hero mounted, and the hero's palettes
+         are weighted dark -- so the page opened on a bright flood and then
+         dropped away from it. This is the same 42deg the hero uses, in the
+         register the hero usually lands in, so the real palette crossfades
+         over it rather than replacing it. Safari reads the colour rather than
+         the image, which is why the brand value stays declared above even
+         though nothing shows it.
+
+         background-attachment matters as much as the stops. A background on
+         the root is painted across the whole document, not the viewport, and
+         this document is many screens tall -- so an unpinned gradient spends
+         its whole length on the scroll and the top of the page shows only the
+         far end of it. Pinning it to the viewport is what makes it the one
+         screenful it is drawn to be. -->
     <style>
-      html { background-color: #CCFF00; }
+      html {
+        background-color: #CCFF00;
+        background-image: linear-gradient(42deg, #0f1405 0%, #1d2a08 55%, #33470b 100%);
+        background-attachment: fixed;
+      }
     </style>
 
     <title>VECTORCLASH | Aaron Ezra Sterczewski, Design Engineer</title>

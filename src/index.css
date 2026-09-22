@@ -4,6 +4,10 @@
    sits on the brand colour rather than a neutral. */
 html {
   background-color: #CCFF00;
+  background-image: linear-gradient(42deg, #0f1405 0%, #1d2a08 55%, #33470b 100%);
+  /* Pinned to the viewport: a root background is otherwise painted across the
+     whole document, and this one is many screens tall. See index.html. */
+  background-attachment: fixed;
 }
 
 body {
