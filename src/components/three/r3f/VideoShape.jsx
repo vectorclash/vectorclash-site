@@ -115,11 +115,20 @@ export default function VideoShape({ urls = [], placements = [] }) {
     });
   });
 
-  // Animate placeholders out on first load. The shapes arrive in turn rather
-  // than together: three identical eases firing on one frame reads as a single
-  // event, which loses the depth the placements are there to build.
+  // Animate placeholders out on first load -- once, and only once. This used
+  // to re-run whenever `placements` changed, and placements are rebuilt on
+  // every resize: each rebuild restarted a gsap.from() that scales the mesh
+  // from nothing, so dragging a window edge kept snapping the shape back to
+  // invisible, and a drag that ended mid-tween killed it there and left the
+  // shape gone for good.
+  //
+  // The shapes arrive in turn rather than together: identical eases firing on
+  // one frame read as a single event, which loses the depth the placements
+  // are there to build.
+  const revealed = useRef(false);
   useEffect(() => {
-    if (!videoLoaded) return undefined;
+    if (!videoLoaded || revealed.current) return undefined;
+    revealed.current = true;
 
     const tweens = [];
     placements.forEach((placement, i) => {
@@ -148,8 +157,11 @@ export default function VideoShape({ urls = [], placements = [] }) {
       );
     });
 
+    // Killed only when the component goes away, not when a resize rebuilds
+    // the placements, so a tween that is interrupted leaves the scale where
+    // the tween had got to rather than at nothing.
     return () => tweens.forEach(tween => tween.kill());
-  }, [videoLoaded, placements]);
+  }, [videoLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>

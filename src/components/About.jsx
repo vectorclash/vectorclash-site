@@ -58,6 +58,7 @@ function About() {
 
     let skillsTl = null;
     let aboutTl = null;
+    let aboutTrigger = null;
     let aboutSplit = null;
     const triggers = [];
     let meMounted = false;
@@ -100,14 +101,25 @@ function About() {
       return tl;
     };
 
-    const buildAboutTimeline = () => {
+    // A line split wraps each line of the paragraph in its own element, and
+    // those elements keep the words they were given at the width the split ran
+    // at. Narrow the window afterwards and every one of them wraps again
+    // inside itself, which is how the copy ended up ragged -- a long line, a
+    // stranded half line, a long line. autoSplit re-runs the split when the
+    // width changes, and onSplit rebuilds what was animating the old lines.
+    //
+    // The timeline and its trigger are rebuilt together, because a
+    // ScrollTrigger cannot be handed a different animation after the fact.
+    // Returning the timeline lets SplitText revert it before the next split.
+    const buildAboutTimeline = (lines) => {
+      if (aboutTrigger) aboutTrigger.kill();
+      if (aboutTl) aboutTl.kill();
+
       const tl = gsap.timeline({ paused: true });
 
       tl.fromTo(aboutContainer, { alpha: 0 }, { alpha: 1, duration: 1, ease: "quad.inOut" });
-
-      aboutSplit = new SplitText(aboutContainer.querySelectorAll("p"), { type: "lines" });
       tl.from(
-        aboutSplit.lines,
+        lines,
         {
           duration: 0.5,
           y: 10,
@@ -117,6 +129,21 @@ function About() {
         },
         0.5
       );
+
+      aboutTl = tl;
+      aboutTrigger = ScrollTrigger.create({
+        trigger: aboutContainer,
+        start: "top bottom",
+        end: "top top",
+        scrub: 1,
+        animation: tl,
+        onEnter: () => {
+          if (!meMounted) {
+            meMounted = true;
+            animateMe();
+          }
+        },
+      });
 
       return tl;
     };
@@ -138,7 +165,6 @@ function About() {
       if (cancelled) return;
 
       skillsTl = buildSkillsTimeline();
-      aboutTl = buildAboutTimeline();
 
       triggers.push(
         ScrollTrigger.create({
@@ -150,21 +176,13 @@ function About() {
         })
       );
 
-      triggers.push(
-        ScrollTrigger.create({
-          trigger: aboutContainer,
-          start: "top bottom",
-          end: "top top",
-          scrub: 1,
-          animation: aboutTl,
-          onEnter: () => {
-            if (!meMounted) {
-              meMounted = true;
-              animateMe();
-            }
-          },
-        })
-      );
+      // onSplit runs for the first split as well as every re-split, so this is
+      // also what builds the about timeline to begin with.
+      aboutSplit = SplitText.create(aboutContainer.querySelectorAll("p"), {
+        type: "lines",
+        autoSplit: true,
+        onSplit: (self) => buildAboutTimeline(self.lines),
+      });
     });
 
     // The ScrollTriggers used to outlive the component -- only the timelines
@@ -173,6 +191,7 @@ function About() {
       cancelled = true;
       triggers.forEach((trigger) => trigger.kill());
       if (skillsTl) skillsTl.kill();
+      if (aboutTrigger) aboutTrigger.kill();
       if (aboutTl) aboutTl.kill();
       if (aboutSplit) aboutSplit.revert();
       gsap.killTweensOf(".geometric-me");
