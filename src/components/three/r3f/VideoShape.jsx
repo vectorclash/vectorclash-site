@@ -61,8 +61,14 @@ export default function VideoShape({ urls = [], placements = [] }) {
     texture.magFilter = THREE.LinearFilter;
     texture.format = THREE.RGBAFormat;
 
+    // play() rejects when a new source interrupts it -- every project switch --
+    // and when the browser refuses autoplay outright, as iOS does in Low Power
+    // Mode. Neither is worth an unhandled rejection: the shape keeps showing
+    // whatever frame it has, which is all a texture can do anyway.
+    const play = () => videoElement.play().catch(() => {});
+
     const handleCanPlay = () => {
-      videoElement.play();
+      play();
       setVideoTexture(texture);
       setVideoLoaded(true);
     };
@@ -72,7 +78,7 @@ export default function VideoShape({ urls = [], placements = [] }) {
     const handleEnded = () => {
       const list = urlsRef.current;
       if (list.length <= 1) {
-        videoElement.play();
+        play();
       } else {
         setCurrentIndex(i => (i + 1) % list.length);
       }

@@ -376,10 +376,14 @@ export default function ProjectsScene({ textureURL, videoURLs, imageURLs = [] })
   // with every project opened. Nothing outside the canvas carries this colour
   // now, so the studies can be as various as they like without the browser's
   // chrome following them.
+  //
+  // Rolled per study, not per texture. The texture changes as the study is
+  // scrolled now, and keyed on it the hue jumped at every plate, snapping the
+  // whole scene's tint mid-read while the image itself crossfaded.
   useEffect(() => {
-    if (!textureURL) return;
+    if (imageURLs.length === 0) return;
     setFogColor(tinycolor('#CCFF00').spin(Math.random() * 360).toHexString());
-  }, [textureURL]);
+  }, [imageURLs]);
 
   return (
     <Canvas

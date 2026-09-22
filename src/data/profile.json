@@ -13,13 +13,13 @@
   "contact": {
     "phone": {
       "display": "+1 720 519 8217",
-      "href": "tel:720-519-8217"
+      "href": "tel:+17205198217"
     },
     "email": "aaron@vectorclash.com",
     "social": [
       {
         "id": "bluesky",
-        "label": "Blue Sky",
+        "label": "Bluesky",
         "url": "https://bsky.app/profile/vectorclash.bsky.social"
       },
       {
@@ -29,7 +29,7 @@
       },
       {
         "id": "linkedin",
-        "label": "Linkedin",
+        "label": "LinkedIn",
         "url": "https://www.linkedin.com/in/aaronezra/"
       }
     ]

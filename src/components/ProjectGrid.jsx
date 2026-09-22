@@ -305,6 +305,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const galleryTimersRef = useRef([]);
   const swapRef = useRef(null);
   const swapTimelineRef = useRef(null);
+  // Bumped by every swap entrance and every close. An entrance waiting on its
+  // lead image holds the value it started with, and runs only if nothing has
+  // bumped it since -- the load listeners outlive a close, and one landing
+  // after it would otherwise play the entrance over the grid.
+  const swapEntranceRef = useRef(0);
   // Where the page stood when the grid was left. Closing a study several
   // screens tall from the bottom of it would otherwise hand back a page that is
   // suddenly one screen long, and the browser clamps the scroll to wherever
@@ -870,8 +875,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   };
 
   const onProjectClick = (index) => {
-    // On mobile/touch devices, use two-tap behavior
-    if (window.innerWidth <= 1024) {
+    // On touch devices, use two-tap behavior. Asked of the device rather than
+    // the window: this used to be a width check, which put a mouse in a
+    // half-screen desktop window on the two-tap path too, where the first
+    // click only showed the hover state it already had.
+    if (window.matchMedia?.("(hover: none)").matches) {
       if (activeThumbnailID === index) {
         // Second tap - open the project
         gridScrollRef.current = window.scrollY;
@@ -975,6 +983,19 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         0
       );
     }
+
+    // The controls stay out of the swap, but a swap started during the cold
+    // open has just killed the timeline that was bringing them in -- and
+    // nothing else ever would, so they stayed wherever it stopped, often at
+    // zero. Settled here instead. Already at rest, this moves nothing.
+    const controls = detail.querySelector(".case-study-header .case-study-controls");
+    if (controls) {
+      tl.to(
+        controls,
+        { opacity: 0.8, x: 0, duration: SWAP_OUT_DURATION, ease: "power2.out" },
+        0
+      );
+    }
   };
 
   // Runs from the layout effect, with the new project already committed to the
@@ -993,6 +1014,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     gsap.set(detail, { height: fromHeight });
 
     const threeContainer = threeContainerRef.current;
+    const token = ++swapEntranceRef.current;
 
     // Two studies of different lengths are usually both taller than the screen,
     // and tweening between two heights that are each past the fold animates
@@ -1006,7 +1028,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       const detail = mountRef.current;
       // A close, or another swap, may have landed while we waited on the
       // decode.
-      if (!detail || swapRef.current) return;
+      if (!detail || swapRef.current || token !== swapEntranceRef.current) return;
 
       projectLoadTimeoutRef.current = null;
 
@@ -1106,7 +1128,13 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const onProjectPrevClick = () => startProjectSwap(-1);
 
   const onProjectCloseClick = () => {
-    if (isClosing) return;
+    // The ref as well as the state: Escape calls this from a listener bound
+    // before the close began, whose isClosing is still false, so a second
+    // press restarted the exit and ran finish twice.
+    if (isClosing || closeTimelineRef.current) return;
+
+    // Any swap entrance still waiting on its image is now stale.
+    swapEntranceRef.current++;
 
     if (projectLoadTimeoutRef.current) {
       clearTimeout(projectLoadTimeoutRef.current);
