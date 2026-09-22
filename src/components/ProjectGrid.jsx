@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, memo, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal, flushSync } from "react-dom";
-import gsap from "gsap/all";
+import { gsap, ScrollTrigger } from "gsap/all";
 // Shares the async three/r3f chunk with HeroScene, so by the time a project
 // is opened this is almost always already resolved.
 const ProjectsScene = lazy(() => import("./three/r3f/ProjectsScene"));
@@ -95,6 +95,30 @@ const ENTRANCE_BLOCKS = 4;
 // nobody can see -- and moves the part they can see several times too fast.
 const visibleHeight = (el) =>
   Math.max(0, window.innerHeight - el.getBoundingClientRect().top);
+
+/**
+ * Re-measure every ScrollTrigger on the page, and optionally snap the scrubbed
+ * ones to the state the current scroll position implies.
+ *
+ * Opening and closing a case study changes the height of the document by
+ * several screens, and ScrollTrigger only re-measures on resize -- so every
+ * other section's trigger is left holding start and end positions belonging to
+ * a page that no longer exists.
+ *
+ * `snap` is for the close. The scroll position moves back up by however far the
+ * study was read, and a scrubbed trigger treats that the way it treats any other
+ * scroll: it animates through it. That is what took the site footer back out
+ * after a project was closed from the bottom of one. Completing each scrub tween
+ * leaves those triggers at the right state without travelling to it.
+ */
+const resyncScrollTriggers = (snap) => {
+  ScrollTrigger.refresh();
+  if (!snap) return;
+  ScrollTrigger.getAll().forEach((trigger) => {
+    const scrub = trigger.getTween && trigger.getTween();
+    if (scrub) scrub.progress(1);
+  });
+};
 
 // The same three controls open and close the study. They are a component
 // rather than markup repeated twice because a study is now long enough to need
@@ -465,6 +489,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         const tl = gsap.timeline({
           onComplete: () => {
             openTimelineRef.current = null;
+            // At the end of the entrance rather than the start of it: the panel
+            // spends the whole expansion at a height that is not its final one.
+            resyncScrollTriggers(false);
           },
         });
         openTimelineRef.current = tl;
@@ -587,8 +614,10 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         returningToGridRef.current = false;
         // Instantly, not smoothly: the panel has already faded out and the grid
         // is not painted yet, so there is nothing on screen for a scroll to
-        // travel across.
+        // travel across. The document is several screens shorter than it was a
+        // moment ago, so everything measured against it has to be told.
         window.scrollTo(0, gridScrollRef.current);
+        resyncScrollTriggers(true);
         const tiles = mountRef.current.querySelectorAll("li");
         if (tiles.length > 0) {
           gsap.fromTo(
@@ -803,6 +832,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         onComplete: () => {
           openTimelineRef.current = null;
           setIsProjectTransitioning(false);
+          // Two studies are rarely the same length, so a swap moves the page
+          // height too.
+          resyncScrollTriggers(false);
         },
       });
       openTimelineRef.current = tl;
