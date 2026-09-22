@@ -158,39 +158,36 @@ function useLingering(on, ms) {
 // away does the work the other two depths were there to do.
 //
 // `depth` is a world z, inside the 300 unit backdrop box. `radius` is a
-// fraction of the visible frame's half height *at that depth*, guarded by its
-// width, and `bias` places the centre within what is left of that frame once
-// the radius and a margin are taken out -- so the shape stays whole at any
-// aspect and the composition keeps its proportions rather than its pixels.
-// `narrowBias` and `narrowRadius` are the portrait arrangement, where the
-// frame is tall and the text column runs nearly its full width.
+// fraction of the visible frame's half height *at that depth*, and `centre` is
+// where the shape sits, in fractions of that frame's half extents -- so the
+// composition keeps its proportions at any aspect rather than its pixels.
+//
+// The centre is stated outright rather than as a share of the room left over
+// after the radius, which is how it used to be given. That older form kept
+// every shape whole, but it also meant size and position fought each other:
+// growing the shape ate the room it had to be placed within and dragged it
+// back to the middle. A foreground object this large has to be free to cross
+// the frame's edge -- it hangs off the left and the bottom, which is what
+// reads as something near the camera rather than a small solid in a gap.
 const VIDEO_PLACEMENTS = [
   {
     id: 'near',
     depth: 96,
-    // Sized to leave itself somewhere to go. At 0.66 of the frame's height it
-    // filled the height and had no vertical room left to be placed within, so
-    // it sat centred whatever bias it was given.
-    radius: 0.52,
-    narrowRadius: 0.34,
-    // Out in the margin beside the study's column rather than behind it. The
-    // column is 1080px at most, so on a wide screen the shape clears it; on a
-    // phone the column runs the full width and nothing can, so portrait drops
-    // it low instead, under the run of the text.
-    bias: [-0.8, -0.55],
-    narrowBias: [-0.55, -0.7],
+    radius: 0.95,
+    narrowRadius: 0.5,
+    // The same positions the smaller shape held, now stated directly: out in
+    // the margin beside the study's column on a wide screen, and low on a
+    // phone, where the column runs the full width and nothing can clear it.
+    centre: [-0.54, -0.22],
+    narrowCentre: [-0.16, -0.41],
     spin: 1.25,
   },
 ];
 
-// How much of the frame's width the shape may take. Only a guard: it binds on
-// a phone, where sizing purely by height would push it past the edges, and
-// never on a landscape screen.
-const VIDEO_WIDTH_GUARD = 0.62;
-
-// Clearance between a shape's widest reach and the frame's edge, as a fraction
-// of the frame's half height at that shape's depth.
-const VIDEO_MARGIN = 0.08;
+// A ceiling on how much of the frame's width the shape may take, so a narrow
+// viewport cannot hand it the whole screen. It binds on a phone and never on a
+// landscape one.
+const VIDEO_WIDTH_GUARD = 0.9;
 
 function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const projectGroupRef = useRef();
@@ -199,34 +196,25 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const gl = useThree((state) => state.gl);
   const frame = useFramedCamera();
 
-  // The sizes and the offsets come out of one measurement, because the two
-  // cannot be decided apart: an offset only reads as placement if the shape it
-  // moves is small enough for the frame to hold all of it.
+  // Both the size and the position are read off the frame at the shape's own
+  // depth, so the composition is the same one on any screen. Nothing here
+  // keeps the shape inside the frame: at this size it is meant to run past the
+  // edge.
   const videoPlacements = useMemo(
     () =>
-      VIDEO_PLACEMENTS.map(({ id, depth, radius, narrowRadius, bias, narrowBias, spin }) => {
+      VIDEO_PLACEMENTS.map(({ id, depth, radius, narrowRadius, centre, narrowCentre, spin }) => {
         const halfHeight = (CAMERA_Z - depth) * frame.tanHalfV;
         const halfWidth = halfHeight * frame.aspect;
 
-        // Measured against the frame's height, with the width only as a guard.
-        // Taking the smaller of the two outright meant that on a phone -- where
-        // the frame is narrow and tall -- every shape was sized by the width
-        // and came out a third of its intended proportion, which is what left
-        // them looking stranded in the middle of a tall shot.
         const narrow = frame.aspect < 1;
         const size = Math.min(
           halfHeight * (narrow ? narrowRadius : radius),
           halfWidth * VIDEO_WIDTH_GUARD,
         );
-        const margin = halfHeight * VIDEO_MARGIN;
 
-        // What the centre can travel before a vertex touches the edge.
-        const roomX = Math.max(0, halfWidth - size - margin);
-        const roomY = Math.max(0, halfHeight - size - margin);
+        const at = narrow ? narrowCentre : centre;
 
-        const placed = narrow ? narrowBias : bias;
-
-        return { id, size, spin, position: [roomX * placed[0], roomY * placed[1], depth] };
+        return { id, size, spin, position: [halfWidth * at[0], halfHeight * at[1], depth] };
       }),
     [frame.tanHalfV, frame.aspect],
   );
