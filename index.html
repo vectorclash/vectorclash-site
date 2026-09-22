@@ -23,6 +23,18 @@
          really is this value, and so are the bars. It matches theme-color above
          for the browsers that still read the meta.
 
+         On iOS this outlives the load. viewport-fit=cover lays the page out
+         under Safari's chrome, so the bars sit over the safe areas -- which are
+         outside the viewport, and the gradient below is pinned to the viewport.
+         It does not paint there. What is behind the bars is this flat colour,
+         for the whole of the session and not just the first 900ms. It is not a
+         fallback; it is the value, and it does not move.
+
+         The same reach is why the scrollbar gutter is lime: it too is outside
+         the viewport the gradient is pinned to. That edge is wanted, so it is
+         kept, and the scrollbar's thumb is darkened against it in index.css
+         rather than the ground being changed here.
+
          The gradient over it is what the eye gets, and every stop of it is
          dark. The flat colour alone held the whole screen at full brightness
          until the bundle parsed and the hero mounted, and the hero's palettes
@@ -31,7 +43,7 @@
          register the hero usually lands in, so the real palette crossfades
          over it rather than replacing it. Safari reads the colour rather than
          the image, which is why the brand value stays declared above even
-         though nothing shows it.
+         though nothing on a desktop shows it.
 
          background-attachment matters as much as the stops. A background on
          the root is painted across the whole document, not the viewport, and

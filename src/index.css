@@ -10,6 +10,34 @@ html {
   background-attachment: fixed;
 }
 
+/* The gutter beside the page sits outside the viewport the load gradient is
+   pinned to, so the gradient never reaches it. In Safari what shows there is
+   the brand colour on html above, and that lime edge is wanted -- so the bar
+   is painted to match it rather than left to whatever each engine happens to
+   put behind a transparent track. Safari shows the canvas through one; Firefox
+   shows its own near-white. Naming the colour is what makes them agree.
+
+   The ground itself could not be changed even if the edge were unwanted. The
+   same colour sits behind Safari's toolbars on iOS, by the same mechanism --
+   viewport-fit=cover puts the bars over the safe areas, which the viewport-
+   pinned gradient does not reach either. Darkening the root to change this
+   strip takes the toolbars with it.
+
+   So the thumb is what carries: the gradient's darkest stop, the page's own
+   ink, which is the one thing that reads at a glance against lime. It was
+   briefly the brand colour at 60%, which is to say lime on lime -- the control
+   was drawn the whole time and could not be seen.
+
+   Left to scrollbar-color rather than ::-webkit-scrollbar: Safari does not
+   apply those pseudo-elements to the document scroller, but a width on them
+   still reserves the gutter, so they bought an empty strip and nothing else.
+   This one property covers Firefox, Chrome 121+ and Safari 18+, and keeps the
+   platform's own metrics. */
+:root {
+  /* Thumb, then track. */
+  scrollbar-color: #0f1405 #ccff00;
+}
+
 body {
   margin: 0;
   font-family: 'Quicksand',sans-serif;
