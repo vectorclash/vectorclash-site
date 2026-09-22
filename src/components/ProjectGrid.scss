@@ -121,13 +121,6 @@
       opacity: 0 !important;
       visibility: hidden;
     }
-
-    // Hide everything initially for animation
-    .project-description,
-    .gallery-main,
-    .thumbnail {
-      opacity: 0;
-    }
   }
 
   .project-header {
@@ -138,10 +131,9 @@
 
   // While the project loads the panel is collapsed to a box a little under a
   // screen tall, so "centre of the panel" and "centre of what you can see" are
-  // the same point at every width. Centring on the full panel only looked right
-  // on desktop by coincidence: on mobile the description, gallery and
-  // thumbnails stack to two or three screens, which is what the old 200px
-  // offset was compensating for.
+  // the same point at every width. Centring on the full panel was never going
+  // to work: a case study is several screens of prose and plates at any width,
+  // which is what the old 200px offset was compensating for.
   &.is-loading {
     // The floor is not arbitrary: the loader's glow is a 150px circle under a
     // 42px blur, so its real footprint is a little over 400px, and the panel
@@ -155,6 +147,7 @@
 
     .project-header,
     .project-content,
+    .project-footer-nav,
     .project-pagination {
       display: none;
     }
@@ -238,60 +231,94 @@
     }
 
     .project-controls {
-      display: flex;
-      gap: 15px;
-      opacity: 0.8;
-
       @media only screen and (max-width: 777px) {
         margin-top: 20px;
-      }
-
-      button {
-        // Real buttons now, for keyboard and screen reader access -- so they
-        // need the chrome stripped back to what the divs looked like.
-        appearance: none;
-        padding: 0;
-        border: 0;
-        background: none;
-        display: block;
-        height: 30px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-
-        @media only screen and (max-width: 777px) {
-          height: 40px;
-        }
-
-        img {
-          height: 100%;
-          filter: brightness(0) invert(1);
-        }
-
-        &:hover {
-          opacity: 1;
-          transform: scale(1.1);
-        }
-
-        &:focus-visible {
-          outline: 2px solid #ffffff;
-          outline-offset: 4px;
-        }
       }
     }
   }
 
+  .project-controls {
+    display: flex;
+    gap: 15px;
+    opacity: 0.8;
+
+    button {
+      // Real buttons now, for keyboard and screen reader access -- so they
+      // need the chrome stripped back to what the divs looked like.
+      appearance: none;
+      padding: 0;
+      border: 0;
+      background: none;
+      display: block;
+      height: 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      @media only screen and (max-width: 777px) {
+        height: 40px;
+      }
+
+      img {
+        height: 100%;
+        filter: brightness(0) invert(1);
+      }
+
+      &:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+
+      &:focus-visible {
+        outline: 2px solid #ffffff;
+        outline-offset: 4px;
+      }
+    }
+  }
+
+  // The study opens under a dashed rule and closes over one, so the flow is
+  // bracketed by the same line at both ends.
+  .project-footer-nav {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px dashed rgba(#d4ff00, 0.5);
+  }
+
   .project-content {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: 60px;
     margin-bottom: 40px;
 
-    @media only screen and (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      gap: 40px;
+    .case-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 70px;
+
+      @media only screen and (max-width: 777px) {
+        gap: 45px;
+      }
     }
 
-    .project-description {
+    // The measure is what makes this read as a case study rather than as a page
+    // of copy. Prose is held to a column a little over half the panel's width
+    // and alternates sides down the flow, so a plate between two sections
+    // always has a different edge to sit against.
+    .case-prose {
+      max-width: 62ch;
+
+      &--offset {
+        margin-left: auto;
+      }
+
+      .case-heading {
+        font-family: "Roboto", sans-serif;
+        font-size: 13px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #d4ff00;
+        margin: 0 0 16px 0;
+        text-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+      }
+
       p {
         color: #fafafa;
         font-size: 16px;
@@ -357,129 +384,108 @@
       }
     }
 
-    .project-gallery {
-      position: relative;
+    .case-plate {
+      display: grid;
+      gap: 24px;
 
-      .gallery-main {
+      &--grid {
+        grid-template-columns: repeat(2, 1fr);
+
+        @media only screen and (max-width: 777px) {
+          grid-template-columns: 1fr;
+        }
+
+        // An odd run ends on a plate with no partner. Rather than leave a hole
+        // in the grid it takes the full width, which is also where the last
+        // image of a section carries the most weight.
+        .case-figure:last-child:nth-child(odd) {
+          grid-column: 1 / -1;
+        }
+      }
+    }
+
+    .case-figure {
+      margin: 0;
+
+      .case-figure-frame {
+        appearance: none;
         position: relative;
+        display: block;
         width: 100%;
-        margin-bottom: 20px;
-        background: rgba(0, 0, 0, 0.2);
+        padding: 0;
+        border: 0;
         border-radius: 4px;
+        background: rgba(0, 0, 0, 0.2);
         overflow: hidden;
+        cursor: zoom-in;
 
         img {
           width: 100%;
           height: auto;
-          // Every project image is 1920x1080. Without the ratio reserved the
-          // slot is zero-height until the JPEG decodes and the panel jumps
-          // taller underneath the entrance animation.
+          // Every project image is 1920x1080. Reserving the ratio matters more
+          // now than it did with one hero image: a whole study's worth of
+          // plates is in the document from the start, and without it the panel
+          // would be measured short and grow underneath the entrance as each
+          // one decoded.
           aspect-ratio: 16 / 9;
           display: block;
+          transition: transform 0.4s ease;
         }
 
-        .gallery-counter {
-          position: absolute;
-          bottom: 15px;
-          right: 15px;
-          background: rgba(0, 0, 0, 0.7);
-          color: #fff;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: bold;
-          letter-spacing: 1px;
+        &:hover img {
+          transform: scale(1.03);
         }
 
-        .gallery-magnify {
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(0, 0, 0, 0.7);
-          border: none;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          opacity: 0;
-
-          @media only screen and (max-width: 1024px) {
-            opacity: 1;
-          }
-
-          svg {
-            width: 20px;
-            height: 20px;
-            color: #fff;
-          }
-
-          &:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: scale(1.1);
-          }
-        }
-
-        &:hover .gallery-magnify {
+        &:hover .case-figure-magnify {
           opacity: 1;
         }
+
+        &:focus-visible {
+          outline: 2px solid #ffffff;
+          outline-offset: 4px;
+        }
       }
 
-      .gallery-nav {
-        display: none;
+      // Which plate the shape in the scene behind the panel is currently
+      // wearing. Clicking a plate is what moves it.
+      &.is-active .case-figure-frame {
+        box-shadow: 0 0 0 2px #d4ff00;
       }
 
-      .gallery-thumbnails {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 10px;
-        margin-bottom: 20px;
+      figcaption {
+        margin-top: 14px;
+        padding-left: 14px;
+        border-left: 2px solid rgba(#d4ff00, 0.6);
+        color: #cccccc;
+        font-size: 13px;
+        line-height: 1.6;
+        text-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+      }
+    }
 
-        @media only screen and (max-width: 777px) {
-          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-          gap: 8px;
-        }
+    .case-figure-magnify {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
 
-        .thumbnail {
-          position: relative;
-          width: 100%;
-          padding-bottom: 75%;
-          overflow: hidden;
-          cursor: pointer;
-          border-radius: 4px;
-          border: 3px solid transparent;
-          // transition: all 0.3s ease;
-          background: rgba(0, 0, 0, 0.2);
+      @media only screen and (max-width: 1024px) {
+        opacity: 1;
+      }
 
-          img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-          }
-
-          &:hover {
-            border-color: rgba(#d4ff00, 0.5);
-
-            img {
-              transform: scale(1.1);
-            }
-          }
-
-          &.active {
-            border-color: #d4ff00;
-
-            img {
-              opacity: 1;
-            }
-          }
-        }
+      svg {
+        width: 20px;
+        height: 20px;
+        color: #fff;
       }
     }
   }
@@ -617,6 +623,22 @@
         @media only screen and (max-width: 777px) {
           right: 10px;
         }
+      }
+
+      .lightbox-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 48px 24px 18px;
+        border-radius: 0 0 4px 4px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
+        color: #fafafa;
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: center;
+        pointer-events: none;
+        z-index: 4;
       }
 
       .lightbox-counter {

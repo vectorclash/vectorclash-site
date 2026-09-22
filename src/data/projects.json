@@ -1,13 +1,34 @@
 [
   {
     "title": "Spinor",
-    "body": "<p>Site preloaders exist to fill dead time, and most of them do nothing with it. Spinor set out to treat that interval as the first thing a visitor actually experiences: a three-dimensional introduction that resolves into the page, rather than a spinner that merely occupies the wait.</p><p>Built on three.js, the scene selects its visual elements procedurally at runtime, so each page load resolves into a subtly different composition—enough variation to stay interesting for a returning visitor without drifting off-brand. A preloader that is itself slow to start defeats its own purpose, so the scene had to reach its first frame quickly and stay cheap to run while the rest of the page loaded behind it. GSAP gave me the timing precision to orchestrate the sequences, and the whole thing ships as a self-contained module inside a WordPress site, with Sass and Webpack rounding out the build pipeline.</p>",
     "tools": [
       "three.js",
       "GSAP",
       "Sass",
       "Webpack",
       "WordPress"
+    ],
+    "sections": [
+      {
+        "body": "<p>Site preloaders exist to fill dead time, and most of them do nothing with it. Spinor set out to treat that interval as the first thing a visitor actually experiences: a three-dimensional introduction that resolves into the page, rather than a spinner that merely occupies the wait.</p>",
+        "figures": [
+          0
+        ]
+      },
+      {
+        "body": "<p>Built on three.js, the scene selects its visual elements procedurally at runtime, so each page load resolves into a subtly different composition—enough variation to stay interesting for a returning visitor without drifting off-brand.</p>",
+        "figures": [
+          1,
+          2
+        ]
+      },
+      {
+        "body": "<p>A preloader that is itself slow to start defeats its own purpose, so the scene had to reach its first frame quickly and stay cheap to run while the rest of the page loaded behind it. GSAP gave me the timing precision to orchestrate the sequences, and the whole thing ships as a self-contained module inside a WordPress site, with Sass and Webpack rounding out the build pipeline.</p>",
+        "figures": [
+          3,
+          4
+        ]
+      }
     ],
     "images": [
       "/projects/spinor/images/spinor_img01.jpg",
@@ -16,16 +37,51 @@
       "/projects/spinor/images/spinor_img04.jpg",
       "/projects/spinor/images/spinor_img05.jpg"
     ],
+    "captions": [
+      "The body at its largest, a moment before the camera passes through it and the page arrives.",
+      "Names drift past while the scene assembles — Jupiter's outer moons among plain words, a different set each load.",
+      "A second composition from the same code, with the body off to one side and the nebula carrying the frame.",
+      "The sequence resolves on the wordmark, which is where the preloader hands the page over.",
+      "One body and two labels: the drift at its densest, just before the approach begins."
+    ],
     "videos": [
       "/projects/spinor/videos/spinor.mp4"
     ]
   },
   {
     "title": "Winc",
-    "body": "<p>Winc was a complete ecommerce platform built from the ground up on native web components—no framework, just the browser's own component model. It was my first time working that close to the platform, and the constraint turned out to be the interesting part: everything the project needed had to be assembled from primitives rather than pulled from an ecosystem.</p><p>Each component was a self-contained unit carrying its own encapsulated animations, driven by GSAP so that motion stayed with the element it belonged to instead of being coordinated from above. That decision shaped everything downstream. Composing a page meant assembling components that already knew how to animate themselves, which kept layouts flexible without a central timeline to keep in sync, and it meant animation behavior stayed consistent because each part brought its own. The library grew to cover the full shopping experience, and the payoff was that new page variations could be composed from existing pieces rather than built from scratch.</p>",
     "tools": [
       "Web Components",
       "GSAP"
+    ],
+    "sections": [
+      {
+        "body": "<p>Winc was a complete ecommerce platform built from the ground up on native web components—no framework, just the browser's own component model. It was my first time working that close to the platform, and the constraint turned out to be the interesting part: everything the project needed had to be assembled from primitives rather than pulled from an ecosystem.</p>",
+        "figures": [
+          0
+        ]
+      },
+      {
+        "body": "<p>Each component was a self-contained unit carrying its own encapsulated animations, driven by GSAP so that motion stayed with the element it belonged to instead of being coordinated from above.</p>",
+        "figures": [
+          1,
+          2
+        ]
+      },
+      {
+        "body": "<p>That decision shaped everything downstream. Composing a page meant assembling components that already knew how to animate themselves, which kept layouts flexible without a central timeline to keep in sync, and it meant animation behavior stayed consistent because each part brought its own.</p>",
+        "figures": [
+          3,
+          4
+        ]
+      },
+      {
+        "body": "<p>The library grew to cover the full shopping experience, and the payoff was that new page variations could be composed from existing pieces rather than built from scratch.</p>",
+        "figures": [
+          5,
+          6
+        ]
+      }
     ],
     "images": [
       "/projects/winc/images/winc_img01.jpg",
@@ -36,18 +92,53 @@
       "/projects/winc/images/winc_img06.jpg",
       "/projects/winc/images/winc_img07.jpg"
     ],
+    "captions": [
+      "The homepage hero. The organic mask is a component that carries its own reveal.",
+      "Winemaker photography inside the same masked form, with the heading set over it.",
+      "The delivery panel — the same primitives under a different palette and shape.",
+      "The product grid, composed from the card component rather than laid out by hand.",
+      "Testimonials, each portrait clipped to a shape from the library.",
+      "Gift membership tiers, built from the same card as the product grid.",
+      "The library itself: the icons, wine shapes and type scales the pages were assembled from."
+    ],
     "videos": [
       "/projects/winc/videos/winc.mp4"
     ]
   },
   {
     "title": "Honey 10",
-    "body": "<p>Honey Soundsystem's 10th anniversary called for a dancefloor projection—not a backdrop looping regardless of what was happening in the room, but a visual layer that belonged to the night and moved with the DJ sets as they unfolded.</p><p>Using three.js as the rendering foundation, I built a generative geometric system around a deliberate constraint: keep the forms simple enough to read from across a room at speed, and let the complexity come from how they move rather than from how they look. Because those motions are driven by formula rather than keyframes, every parameter in them is a number that something else can push—and what pushes them is the music. Audio data from the sound system feeds the animation parameters directly, so the projection surface stops being a screen showing something and becomes a visual reading of what the room is hearing.</p>",
     "tools": [
       "Event Projection",
       "Sound Reactivity",
       "three.js",
       "GSAP"
+    ],
+    "sections": [
+      {
+        "body": "<p>Honey Soundsystem's 10th anniversary called for a dancefloor projection—not a backdrop looping regardless of what was happening in the room, but a visual layer that belonged to the night and moved with the DJ sets as they unfolded.</p>",
+        "figures": [
+          0
+        ]
+      },
+      {
+        "body": "<p>Using three.js as the rendering foundation, I built a generative geometric system around a deliberate constraint: keep the forms simple enough to read from across a room at speed, and let the complexity come from how they move rather than from how they look.</p>",
+        "figures": [
+          1
+        ]
+      },
+      {
+        "body": "<p>Because those motions are driven by formula rather than keyframes, every parameter in them is a number that something else can push—and what pushes them is the music. A direct line from the DJ's output was the intention, and not something the resources available at the time would stretch to. What the night got instead was a machine left in the room with the DJ, listening through its own microphone—ambient input that at that volume is overwhelmingly the music—and that signal feeds the animation parameters directly: the low end displaces the large form the whole scene sits inside, the middle pushes the smaller shapes outward from the centre, and the high end drives how fast they turn.</p>",
+        "figures": [
+          2,
+          3
+        ]
+      },
+      {
+        "body": "<p>The palette moves on peaks rather than on a timer, and the threshold it listens for recalibrates itself as the room gets louder over the course of a night. The projection surface stops being a screen showing something and becomes a visual reading of what the room is hearing.</p>",
+        "figures": [
+          4
+        ]
+      }
     ],
     "images": [
       "/projects/honey/images/honey_img01.jpg",
@@ -56,6 +147,13 @@
       "/projects/honey/images/honey_img04.jpg",
       "/projects/honey/images/honey_img05.jpg"
     ],
+    "captions": [
+      "The big tetrahedron the camera sits inside. Bass displaces its vertices through Perlin noise, the slow breathing under everything else.",
+      "Simple shapes throughout — icosahedra on cosine curves. The structure is in the arrangement, not in the forms.",
+      "Treble sets how fast the rings turn; mid pushes the shapes further out from the centre.",
+      "Each ring is scaled by its own frequency bin, so the structure opens and closes across the spectrum.",
+      "Two complementary lights carry the palette, and a peak in the room swaps both for a new pair."
+    ],
     "videos": [
       "/projects/honey/videos/honey.mp4"
     ]
@@ -63,13 +161,41 @@
   {
     "title": "Chromaforge",
     "pinned": true,
-    "body": "<p>Chromaforge began as a question I wanted to answer for myself: how much of what makes a palette work is structural, and whether that structure could be generated rather than picked by hand. The experiment became a React application—a generative art studio running in the browser, where the algorithm proposes the color relationships and the artwork follows from them. Every decision in it is mine, design and engineering both, arrived at by iteration rather than by specification.</p><p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states. Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p><p><a href='https://chromaforge.app/' target='_blank' rel='noopener noreferrer'>View Project</a></p>",
     "tools": [
       "React",
       "Vite",
       "GSAP",
       "tinycolor",
       "Supabase"
+    ],
+    "sections": [
+      {
+        "body": "<p>Chromaforge began as a question I wanted to answer for myself: how much of what makes a palette work is structural, and whether that structure could be generated rather than picked by hand. The experiment became a React application—a generative art studio running in the browser, where the algorithm proposes the color relationships and the artwork follows from them. Every decision in it is mine, design and engineering both, arrived at by iteration rather than by specification.</p>",
+        "figures": [
+          0,
+          1
+        ]
+      },
+      {
+        "body": "<p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states.</p>",
+        "figures": [
+          2,
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "body": "<p>Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p>",
+        "figures": [
+          7,
+          3
+        ]
+      },
+      {
+        "body": "<p><a href='https://chromaforge.app/' target='_blank' rel='noopener noreferrer'>View Project</a></p>",
+        "figures": []
+      }
     ],
     "images": [
       "/projects/forge/images/forge_img01.jpg",
@@ -81,6 +207,16 @@
       "/projects/forge/images/forge_img07.jpg",
       "/projects/forge/images/forge_img08.jpg"
     ],
+    "captions": [
+      "A generated piece at full saturation. The algorithm proposes the relationships and the composition follows.",
+      "The same system in a softer register, with the palette collapsed toward a single hue.",
+      "The studio's control panel: the parameters that steer a result, rather than a color picker.",
+      "The print-on-demand flow, choosing from pieces already generated in the studio.",
+      "One seed's output, the structure held while the palette shifts.",
+      "Depth of field and grain applied over the generated geometry.",
+      "The softest end of the range, where the structure reads as light rather than as edges.",
+      "A generated piece placed on a garment — the studio and the storefront in one view."
+    ],
     "videos": [
       "/projects/forge/videos/FusedCryosphere-ebeb.mp4",
       "/projects/forge/videos/GeodesicVortex-49ea.mp4"
@@ -88,10 +224,39 @@
   },
   {
     "title": "Gap Denim",
-    "body": "<p>Gap has been woven into the fabric of American culture since 1969, and the brief was to chronicle that history as an interactive application—a permanent installation for the Gap museum at their San Francisco headquarters, where it sits between the company's past and the employees and visitors who move through the space every day. Work that is installed rather than deployed carries its own set of constraints: it runs unattended, it is touched by people who never chose to open it, and nobody is going to redeploy it when a browser updates.</p><p>I built it to work as much as an experience as an archive, moving visitors through decades of cultural moments, campaigns, and brand milestones by touch. GSAP gave me the precision and expressiveness to bring each chapter of the timeline to life, and Webpack kept the build lean enough to hold up under continuous unattended use. The aim throughout was for it to read as something a visitor moves through, rather than a corporate timeline being presented to them.</p>",
     "tools": [
       "GSAP",
       "Webpack"
+    ],
+    "sections": [
+      {
+        "body": "<p>Gap has been woven into the fabric of American culture since 1969, and the brief was to chronicle that history as an interactive application—a permanent installation for the Gap museum at their San Francisco headquarters, where it sits between the company's past and the employees and visitors who move through the space every day. Work that is installed rather than deployed carries its own set of constraints: it runs unattended, it is touched by people who never chose to open it, and nobody is going to redeploy it when a browser updates.</p>",
+        "figures": [
+          0
+        ]
+      },
+      {
+        "body": "<p>I built it to work as much as an experience as an archive, moving visitors through decades of cultural moments, campaigns, and brand milestones by touch.</p>",
+        "figures": [
+          1,
+          2,
+          3,
+          5,
+          6
+        ]
+      },
+      {
+        "body": "<p>GSAP gave me the precision and expressiveness to bring each chapter of the timeline to life, and Webpack kept the build lean enough to hold up under continuous unattended use.</p>",
+        "figures": [
+          4
+        ]
+      },
+      {
+        "body": "<p>The aim throughout was for it to read as something a visitor moves through, rather than a corporate timeline being presented to them.</p>",
+        "figures": [
+          7
+        ]
+      }
     ],
     "images": [
       "/projects/gap/images/gap_img01.jpg",
@@ -103,29 +268,87 @@
       "/projects/gap/images/gap_img07.jpg",
       "/projects/gap/images/gap_img08.jpg"
     ],
-    "videos": []
+    "captions": [
+      "The attract screen the installation rests on between visitors.",
+      "1969 and the 1970s: the opening chapter, built from Gap's own advertising archive.",
+      "The Know-How campaign of 1985, with the fits and washes of the period alongside it.",
+      "1986, shot by Barry McKinley in Taos. Each chapter pairs a campaign with its production notes.",
+      "A quote spread from Maggie Gross and Don Fisher, where the timeline pauses on a single decision.",
+      "Easy Fit Denim, 1990, photographed by Herb Ritts.",
+      "Product (RED), 2006–2007, with the campaign's tagline, its denim products and the numbers behind it.",
+      "Alex Gray, VP of Denim Design, on denim as the one product that improves with wear."
+    ]
   },
   {
     "title": "Nylas",
-    "body": "<p>Nylas needed to explain a complex platform to an audience that would not read an architecture diagram twice. The brief was an immersive SVG animation module living inside their WordPress site—an explainer carrying the shape of the product's feature set in a way that static copy and diagrams could not, while staying accurate enough to survive a technical readership. The difficulty in work like this is rarely the animation; it is deciding what to leave out without misrepresenting how the system actually behaves.</p><p>I architected the animation system as a self-contained module, designed to drop into the existing WordPress environment without disturbing the page infrastructure around it. GSAP served as the animation engine, sequencing layered SVG elements across multiple synchronized timelines. Each passage was choreographed to move the viewer's attention through one idea at a time—connections, data flows, and API interactions rendered as purposeful motion rather than as labeled boxes. The test of a piece like this is whether a developer and a decision-maker come away with the same understanding, which is a harder target than either one alone.</p>",
     "tools": [
       "GSAP",
       "WordPress"
+    ],
+    "sections": [
+      {
+        "body": "<p>Nylas needed to explain a complex platform to an audience that would not read an architecture diagram twice. The brief was an immersive SVG animation module living inside their WordPress site—an explainer carrying the shape of the product's feature set in a way that static copy and diagrams could not, while staying accurate enough to survive a technical readership. The difficulty in work like this is rarely the animation; it is deciding what to leave out without misrepresenting how the system actually behaves.</p>",
+        "figures": [
+          2
+        ]
+      },
+      {
+        "body": "<p>I architected the animation system as a self-contained module, designed to drop into the existing WordPress environment without disturbing the page infrastructure around it. GSAP served as the animation engine, sequencing layered SVG elements across multiple synchronized timelines. Each passage was choreographed to move the viewer's attention through one idea at a time—connections, data flows, and API interactions rendered as purposeful motion rather than as labeled boxes.</p>",
+        "figures": [
+          0,
+          1
+        ]
+      },
+      {
+        "body": "<p>The test of a piece like this is whether a developer and a decision-maker come away with the same understanding, which is a harder target than either one alone.</p>",
+        "figures": []
+      }
     ],
     "images": [
       "/projects/nylas/images/nylas_img01.jpg",
       "/projects/nylas/images/nylas_img02.jpg",
       "/projects/nylas/images/nylas_img03.jpg"
     ],
-    "videos": []
+    "captions": [
+      "A frame from the explainer, with the calendar surface above and the API payload that produced it below.",
+      "The same passage further on, the scheduling flow resolved into a single event.",
+      "The module in place on the Nylas homepage, running inside the existing WordPress page."
+    ]
   },
   {
     "title": "AT&T",
-    "body": "<p>AT&amp;T ran on volume—animated banner ads and social video produced continuously for a brand almost everyone in the country recognizes on sight. The discipline the work demanded was less about any single execution than about consistency: every animation had to land as polished and on-brand while fitting the technical specifications of whichever ad platform or social channel it was bound for. GSAP drove the interactive banners, where precise timing control mattered because layered text, imagery, and transitions all had to be choreographed inside tight filesize limits. After Effects handled the social video pipeline, where the motion needed to feel cinematic and still hold up on a phone.</p><p>The more interesting half of the engagement had little to do with the creative. Producing at that rate surfaces the same bottlenecks over and over, and most of them were mechanical: resizing, reformatting, and exporting the same creative across every spec a campaign required. I designed and built automation workflows to take that handoff over, and what had been a labor-intensive process of duplicating files and adjusting them by hand became a pipeline that ran itself. The value was less the time saved than what the time got spent on instead—the quality of the work rather than the mechanics of shipping it.</p>",
     "tools": [
       "GSAP",
       "Adobe Animate",
       "After Effects"
+    ],
+    "sections": [
+      {
+        "body": "<p>AT&amp;T ran on volume—animated banner ads and social video produced continuously for a brand almost everyone in the country recognizes on sight.</p>",
+        "figures": [
+          0,
+          3
+        ]
+      },
+      {
+        "body": "<p>The discipline the work demanded was less about any single execution than about consistency: every animation had to land as polished and on-brand while fitting the technical specifications of whichever ad platform or social channel it was bound for.</p>",
+        "figures": [
+          1,
+          2
+        ]
+      },
+      {
+        "body": "<p>GSAP drove the interactive banners, where precise timing control mattered because layered text, imagery, and transitions all had to be choreographed inside tight filesize limits. After Effects handled the social video pipeline, where the motion needed to feel cinematic and still hold up on a phone.</p>",
+        "figures": [
+          4,
+          5,
+          6
+        ]
+      },
+      {
+        "body": "<p>The more interesting half of the engagement had little to do with the creative. Producing at that rate surfaces the same bottlenecks over and over, and most of them were mechanical: resizing, reformatting, and exporting the same creative across every spec a campaign required. I designed and built automation workflows to take that handoff over, and what had been a labor-intensive process of duplicating files and adjusting them by hand became a pipeline that ran itself. The value was less the time saved than what the time got spent on instead—the quality of the work rather than the mechanics of shipping it.</p>",
+        "figures": []
+      }
     ],
     "images": [
       "/projects/att/images/att_img01.jpg",
@@ -135,6 +358,15 @@
       "/projects/att/images/att_img05.jpg",
       "/projects/att/images/att_img06.jpg",
       "/projects/att/images/att_img07.jpg"
+    ],
+    "captions": [
+      "A social spot built around Craig, the brand's device character.",
+      "One Samsung Galaxy campaign across the full set of banner specs.",
+      "FirstNet creative resized for every placement the campaign required.",
+      "The same device character in another execution, carrying the Dynamic Defense legal line.",
+      "Fixed-wireless creative: one execution, six sizes, all produced from a single source.",
+      "iPhone 17 Pro, the vertical and square cuts built out of the same file.",
+      "A frame from the delivery spot, which runs on the business side of the account like everything else here."
     ],
     "videos": [
       "/projects/att/videos/delivery.mp4",

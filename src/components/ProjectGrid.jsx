@@ -15,11 +15,124 @@ import right from "../images/angle-right.svg";
 import close from "../images/window-close.svg";
 import me from "../images/me.png";
 
-// Grid tiles render at roughly 390x220 and gallery thumbnails at 100-150px
-// wide, so both were being handed 1920x1080 sources -- around 2MB of decode
-// work for the seven tiles alone. The 800px derivatives sit next to each
-// original; the full-size file is still what the lightbox and the 3D shape use.
+// Grid tiles render at roughly 390x220 and a paired plate at around 590 wide,
+// so both were being handed 1920x1080 sources -- around 2MB of decode work for
+// the seven tiles alone. The 800px derivatives sit next to each original; the
+// lightbox, the 3D shape and a plate standing on its own still use the
+// full-size file.
 const thumbURL = (url) => url.replace(/\.jpg$/, "_thumb.jpg");
+
+// A case study reads as a run of prose and plates rather than as a column of
+// text beside a gallery, so the panel renders from a flattened list of blocks
+// instead of from the fields directly. `figures` indexes into `images`, which
+// stays a plain list of URLs -- the 3D shape, the grid tile and the lightbox
+// all still address an image by its position in it.
+const leadImage = (project) => {
+  const blocks = buildCaseBlocks(project);
+  const plate = blocks.find((block) => block.type === "plate");
+  return project.images[plate ? plate.figures[0] : 0];
+};
+
+const buildCaseBlocks = (project) => {
+  const blocks = [];
+  const claimed = new Set();
+  let prose = 0;
+
+  const sections =
+    project.sections && project.sections.length > 0
+      ? project.sections
+      : [{ body: project.body, figures: [] }];
+
+  sections.forEach((section, i) => {
+    blocks.push({
+      type: "prose",
+      key: `prose-${i}`,
+      heading: section.heading,
+      body: section.body,
+      // Alternating the measure from side to side is what gives the flow its
+      // rhythm: a plate between two sections always has a different edge to
+      // sit against.
+      offset: prose++ % 2 === 1,
+    });
+
+    const figures = (section.figures || []).filter(
+      (n) => Number.isInteger(n) && n >= 0 && n < project.images.length
+    );
+    figures.forEach((n) => claimed.add(n));
+    if (figures.length > 0) {
+      blocks.push({
+        type: "plate",
+        key: `plate-${i}`,
+        figures,
+        // The one plate that is on screen when the panel opens, and so the one
+        // image of the study worth fetching eagerly.
+        lead: !blocks.some((b) => b.type === "plate"),
+      });
+    }
+  });
+
+  // Nothing in the data gets to drop an image silently. Anything no section
+  // claimed -- including every image of a project written before `sections`
+  // existed -- closes the study out rather than going unseen.
+  const rest = project.images
+    .map((_, n) => n)
+    .filter((n) => !claimed.has(n));
+  if (rest.length > 0) {
+    blocks.push({ type: "plate", key: "plate-rest", figures: rest });
+  }
+
+  return blocks;
+};
+
+// How far down the flow the cold-open entrance reaches. A study runs to several
+// screens and the blocks past this point are below the fold when it plays, so
+// staggering them too would only stretch the tail of the timeline.
+const ENTRANCE_BLOCKS = 4;
+
+// The height of the panel that is actually on screen. Both the expansion and
+// the swap tween a height, and now that the panel can be five screens tall,
+// tweening to the full one spends nearly all of its duration moving content
+// nobody can see -- and moves the part they can see several times too fast.
+const visibleHeight = (el) =>
+  Math.max(0, window.innerHeight - el.getBoundingClientRect().top);
+
+// The same three controls open and close the study. They are a component
+// rather than markup repeated twice because a study is now long enough to need
+// them at both ends, and two copies that could drift apart is how the one at
+// the bottom ends up doing something the one at the top does not.
+function ProjectControls({ onPrev, onClose, onNext }) {
+  return (
+    <div className="project-controls">
+      <button
+        type="button"
+        className="prev-button"
+        onClick={onPrev}
+        title="Previous Case Study"
+        aria-label="Previous Case Study"
+      >
+        <img src={left} alt="" />
+      </button>
+      <button
+        type="button"
+        className="close-button"
+        onClick={onClose}
+        title="Close"
+        aria-label="Close Case Study"
+      >
+        <img src={close} alt="" />
+      </button>
+      <button
+        type="button"
+        className="next-button"
+        onClick={onNext}
+        title="Next Case Study"
+        aria-label="Next Case Study"
+      >
+        <img src={right} alt="" />
+      </button>
+    </div>
+  );
+}
 
 function GradientFiller() {
   const layerARef = useRef(null);
@@ -125,6 +238,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   // swap entrance instead of the cold open.
   const swapRef = useRef(null);
   const swapTimelineRef = useRef(null);
+  // Where the page stood when the grid was left. Closing a study several
+  // screens tall from the bottom of it would otherwise hand back a page that is
+  // suddenly one screen long, and the browser clamps the scroll to wherever
+  // that leaves it -- usually past the section entirely.
+  const gridScrollRef = useRef(0);
 
   const killOpenTimeline = () => {
     if (openTimelineRef.current) {
@@ -149,9 +267,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     [
       detail.querySelector(".project-header h2"),
       detail.querySelector(".project-header .tools"),
-      detail.querySelector(".project-description"),
-      detail.querySelector(".gallery-main"),
-      ...detail.querySelectorAll(".thumbnail"),
+      ...detail.querySelectorAll(".case-block"),
     ].filter(Boolean);
 
   // The parent dims the section while a project is open. It is told the project
@@ -310,20 +426,21 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
         const expandedHeight = detail.offsetHeight;
 
-        // The scene canvas is height:100% of a section that is about to grow
-        // for the length of the expansion, so it was resizing every frame of
-        // it -- and with the postprocessing composer mounted, reallocating its
-        // render targets every frame too. That is what was arriving half drawn
-        // and snapping into place at the end. Pinning the container to the
-        // height the section is about to have takes the resize out of the
-        // animation entirely: one resize, here, while the canvas is still at
-        // zero alpha and nobody can see it. By the time the tween clears this
-        // the section has caught up, so the pin comes off against an identical
-        // height and costs a second resize of nothing.
-        const section = threeContainerRef.current?.parentElement;
-        if (section) {
-          gsap.set(threeContainerRef.current, { height: section.offsetHeight });
-        }
+        // The tween stops at the bottom of the viewport and clearProps hands
+        // the real height back at the end, where the rest of the study is off
+        // screen and the difference cannot be seen.
+        const openTarget = Math.min(
+          expandedHeight,
+          Math.max(collapsedHeight, visibleHeight(detail))
+        );
+
+        // The scene canvas used to be sized from a section that grows for the
+        // length of this expansion, so it resized every frame of it -- and with
+        // the postprocessing composer mounted, reallocated its render targets
+        // every frame too. That is what arrived half drawn and snapped into
+        // place at the end, and it needed the canvas pinned to the height the
+        // section was about to have. A sticky scene is a viewport tall whatever
+        // the section does, so there is nothing left to pin.
 
         // The loader is centred on the panel, so left to itself it would ride
         // downwards as the panel grows. Pinning it to where it already is
@@ -336,9 +453,9 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         const projectTitle = header?.querySelector("h2");
         const tools = header?.querySelector(".tools");
         const controls = header?.querySelector(".project-controls");
-        const description = projectContent?.querySelector(".project-description");
-        const galleryMain = projectContent?.querySelector(".gallery-main");
-        const thumbnails = projectContent?.querySelectorAll(".thumbnail");
+        const entering = Array.from(
+          projectContent?.querySelectorAll(".case-block") || []
+        ).slice(0, ENTRANCE_BLOCKS);
 
         killOpenTimeline();
 
@@ -360,7 +477,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           detail,
           { height: collapsedHeight, overflow: "hidden" },
           {
-            height: expandedHeight,
+            height: openTarget,
             duration: EXPAND_DURATION,
             ease: "power2.inOut",
             clearProps: "height,overflow",
@@ -405,33 +522,22 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           tl.to(controls, { opacity: 0.8, x: 0, duration: 0.5, ease: "power2.out" }, 0.1);
         }
 
-        // Animate description
-        if (description) {
+        // Rise the opening run of the flow in, prose and plates alike, in the
+        // order they are read. fromTo rather than to: the blocks past
+        // ENTRANCE_BLOCKS are never tweened, so nothing may leave them sitting
+        // at an opacity the timeline would have to clear.
+        if (entering.length > 0) {
           tl.fromTo(
-            description,
+            entering,
             { y: 30, opacity: 0 },
-            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              ease: "power2.out",
+              stagger: { amount: 0.18 },
+            },
             0.1
-          );
-        }
-
-        // Animate gallery main image
-        if (galleryMain) {
-          tl.fromTo(
-            galleryMain,
-            { y: 30, opacity: 0 },
-            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-            0.15
-          );
-        }
-
-        // Animate thumbnails with stagger - slide up from below
-        if (thumbnails && thumbnails.length > 0) {
-          tl.fromTo(
-            thumbnails,
-            { y: 30, opacity: 0 },
-            { opacity: 1, y: 0, duration: 0.5, stagger: 0.04, ease: "bounce.out" },
-            0.2
           );
         }
 
@@ -447,9 +553,6 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
               alpha: 1,
               duration: 0.6,
               ease: "power2.out",
-              // The pin comes off here rather than with the height tween, so
-              // nothing touches the canvas size while it is fading up.
-              clearProps: "height",
             },
             EXPAND_DURATION + 0.1
           );
@@ -475,15 +578,17 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
       if (threeContainerRef.current) {
         gsap.killTweensOf(threeContainerRef.current);
-        // clearProps as well as alpha: a close part way through the entrance
-        // kills the tween that would otherwise have taken the height pin off.
-        gsap.set(threeContainerRef.current, { alpha: 0, clearProps: "height" });
+        gsap.set(threeContainerRef.current, { alpha: 0 });
       }
 
       // Returning from a project: stagger the tiles back in rather than having
       // the whole grid appear at once where the panel used to be.
       if (returningToGridRef.current) {
         returningToGridRef.current = false;
+        // Instantly, not smoothly: the panel has already faded out and the grid
+        // is not painted yet, so there is nothing on screen for a scroll to
+        // travel across.
+        window.scrollTo(0, gridScrollRef.current);
         const tiles = mountRef.current.querySelectorAll("li");
         if (tiles.length > 0) {
           gsap.fromTo(
@@ -548,6 +653,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     if (window.innerWidth <= 1024) {
       if (activeThumbnailID === index) {
         // Second tap - open the project
+        gridScrollRef.current = window.scrollY;
         setIsProjectActive(true);
         setActiveProjectID(index);
         setActiveThumbnailID(null);
@@ -557,6 +663,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       }
     } else {
       // Desktop - direct click to open
+      gridScrollRef.current = window.scrollY;
       setIsProjectActive(true);
       setActiveProjectID(index);
     }
@@ -568,6 +675,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
   const onProjectKeyDown = (index, e) => {
     if (e.key !== "Enter" && e.key !== " " && e.key !== "Spacebar") return;
     e.preventDefault();
+    gridScrollRef.current = window.scrollY;
     setIsProjectActive(true);
     setActiveProjectID(index);
     setActiveThumbnailID(null);
@@ -605,7 +713,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     // the time the new content fades in the JPEG is usually ready, and the
     // gallery slot is not an empty box for a frame.
     const preload = new Image();
-    preload.src = projects[target].images[0];
+    preload.src = leadImage(projects[target]);
 
     const pieces = swapPieces(detail);
     gsap.killTweensOf(pieces);
@@ -663,18 +771,15 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     const toHeight = detail.offsetHeight;
     gsap.set(detail, { height: fromHeight });
 
-    // Same reasoning as the cold open: the canvas is height:100% of a section
-    // that is about to change size for the length of the tween, so it would
-    // resize -- and reallocate the composer's render targets -- every frame of
-    // it. Pinned to the height the section is about to have, it resizes once,
-    // here, while it is still faded out.
     const threeContainer = threeContainerRef.current;
-    const section = threeContainer?.parentElement;
-    if (section) {
-      gsap.set(threeContainer, {
-        height: section.offsetHeight + (toHeight - fromHeight),
-      });
-    }
+
+    // Two studies of different lengths are usually both taller than the screen,
+    // and tweening between two heights that are each past the fold animates
+    // nothing anyone can see. Where that is the case the panel is handed
+    // straight back to the layout and only the content cross-fades.
+    const cap = visibleHeight(detail);
+    const animateHeight = fromHeight < cap || toHeight < cap;
+    const heightTarget = Math.min(toHeight, Math.max(cap, fromHeight));
 
     const start = () => {
       const detail = mountRef.current;
@@ -702,16 +807,20 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       });
       openTimelineRef.current = tl;
 
-      tl.to(
-        detail,
-        {
-          height: toHeight,
-          duration: SWAP_IN_DURATION,
-          ease: "power2.inOut",
-          clearProps: "height,overflow",
-        },
-        0
-      );
+      if (animateHeight) {
+        tl.to(
+          detail,
+          {
+            height: heightTarget,
+            duration: SWAP_IN_DURATION,
+            ease: "power2.inOut",
+            clearProps: "height,overflow",
+          },
+          0
+        );
+      } else {
+        tl.set(detail, { clearProps: "height,overflow" }, 0);
+      }
 
       if (projectContent) {
         tl.set(projectContent, { opacity: 1 }, 0);
@@ -738,9 +847,6 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
             alpha: 1,
             duration: 0.5,
             ease: "power2.out",
-            // Off here rather than with the height tween, so nothing touches
-            // the canvas size while it is fading back up.
-            clearProps: "height",
           },
           0.12
         );
@@ -815,9 +921,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       detail.querySelector(".project-header h2"),
       detail.querySelector(".project-header .tools"),
       detail.querySelector(".project-header .project-controls"),
-      detail.querySelector(".project-description"),
-      detail.querySelector(".gallery-main"),
-      ...detail.querySelectorAll(".thumbnail"),
+      ...detail.querySelectorAll(".case-block"),
     ].filter(Boolean);
 
     // Nothing else may be tweening these elements once the exit starts: the
@@ -861,13 +965,33 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
   const onProjectNextClick = () => startProjectSwap(1);
 
-  const onImageClick = (index) => {
-    const newTexture = projects[activeProjectID].images[index];
-    setActiveImageIndex(index);
-    setCurrentTexture(newTexture);
-  };
+  // The one exit that costs no room on screen, which is what makes it worth
+  // having now that the controls at the top of a study scroll away from under
+  // the reader. The lightbox takes it first: it is the inner layer, and closing
+  // the whole study out from under an open image would be a surprise.
+  useEffect(() => {
+    if (!isProjectActive) return undefined;
 
-  const onMainImageClick = () => {
+    const handleKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      if (isGalleryOpen) {
+        setIsGalleryOpen(false);
+      } else {
+        onProjectCloseClick();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isProjectActive, isGalleryOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A plate is the only way into the lightbox now that the thumbnail strip is
+  // gone, so it does both jobs the strip and the hero image used to split
+  // between them: it moves the shape in the scene behind the panel to this
+  // image, and it opens the full size view.
+  const onFigureClick = (index) => {
+    setActiveImageIndex(index);
+    setCurrentTexture(projects[activeProjectID].images[index]);
     setIsGalleryOpen(true);
   };
 
@@ -928,6 +1052,8 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
 
     const safeImageIndex = Math.min(activeImageIndex, project.images.length - 1);
     const currentImage = project.images[safeImageIndex];
+    const captions = project.captions || [];
+    const caseBlocks = buildCaseBlocks(project);
 
     return (
       <div
@@ -948,96 +1074,85 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
               ))}
             </ul>
           </div>
-          <div className="project-controls">
-            <button
-              type="button"
-              className="prev-button"
-              onClick={onProjectPrevClick}
-              title="Previous Project"
-              aria-label="Previous Project"
-            >
-              <img src={left} alt="" />
-            </button>
-            <button
-              type="button"
-              className="close-button"
-              onClick={onProjectCloseClick}
-              title="Close"
-              aria-label="Close Project"
-            >
-              <img src={close} alt="" />
-            </button>
-            <button
-              type="button"
-              className="next-button"
-              onClick={onProjectNextClick}
-              title="Next Project"
-              aria-label="Next Project"
-            >
-              <img src={right} alt="" />
-            </button>
-          </div>
+          <ProjectControls
+            onPrev={onProjectPrevClick}
+            onClose={onProjectCloseClick}
+            onNext={onProjectNextClick}
+          />
         </div>
 
         <div className="project-content">
-          <div className="project-description">
-            <span
-              dangerouslySetInnerHTML={{
-                __html: project.body,
-              }}
-            ></span>
-          </div>
-
-          <div className="project-gallery">
-            <div className="gallery-main">
-              <img src={currentImage} alt={project.title} />
-              <div className="gallery-counter">
-                {safeImageIndex + 1} / {project.images.length}
-              </div>
-              <button
-                className="gallery-magnify"
-                onClick={onMainImageClick}
-                aria-label="View Full Size"
-                title="View Full Size"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  <line x1="11" y1="8" x2="11" y2="14"></line>
-                  <line x1="8" y1="11" x2="14" y2="11"></line>
-                </svg>
-              </button>
-            </div>
-
-            <div className="gallery-thumbnails">
-              {project.images.map((image, i) => (
+          <div className="case-flow">
+            {caseBlocks.map((block) =>
+              block.type === "prose" ? (
                 <div
-                  className={`thumbnail ${i === safeImageIndex ? "active" : ""}`}
-                  key={i}
-                  onClick={() => onImageClick(i)}
+                  key={block.key}
+                  className={`case-block case-prose${
+                    block.offset ? " case-prose--offset" : ""
+                  }`}
                 >
-                  <img src={thumbURL(image)} alt="" loading="lazy" />
+                  {block.heading && (
+                    <h3 className="case-heading">{block.heading}</h3>
+                  )}
+                  <span dangerouslySetInnerHTML={{ __html: block.body }}></span>
                 </div>
-              ))}
-            </div>
-
-            {project.images.length > 1 && (
-              <div className="gallery-nav">
-                <button
-                  className="gallery-nav-prev"
-                  onClick={onGalleryPrevClick}
-                  aria-label="Previous Image"
+              ) : (
+                <div
+                  key={block.key}
+                  className={`case-block case-plate${
+                    block.figures.length > 1 ? " case-plate--grid" : ""
+                  }`}
                 >
-                  <img src={left} alt="Previous" />
-                </button>
-                <button
-                  className="gallery-nav-next"
-                  onClick={onGalleryNextClick}
-                  aria-label="Next Image"
-                >
-                  <img src={right} alt="Next" />
-                </button>
-              </div>
+                  {block.figures.map((n) => (
+                    <figure
+                      key={n}
+                      className={`case-figure${
+                        n === safeImageIndex ? " is-active" : ""
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        className="case-figure-frame"
+                        onClick={() => onFigureClick(n)}
+                        aria-label={`View full size: ${
+                          captions[n] || project.title
+                        }`}
+                      >
+                        <img
+                          // A plate in a pair renders at roughly half the
+                          // panel's width, which is what the 800px derivative
+                          // was cut for. Only a plate standing on its own is
+                          // wide enough to need the original.
+                          src={
+                            block.figures.length > 1
+                              ? thumbURL(project.images[n])
+                              : project.images[n]
+                          }
+                          alt={captions[n] || ""}
+                          // Every plate is in the document from the moment the
+                          // panel opens now, and a study runs to several
+                          // screens of them. Only the ones in the entrance can
+                          // be seen while it plays.
+                          loading={
+                            block.lead && n === block.figures[0]
+                              ? "eager"
+                              : "lazy"
+                          }
+                        />
+                        <span className="case-figure-magnify" aria-hidden="true">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                          </svg>
+                        </span>
+                      </button>
+                      {captions[n] && <figcaption>{captions[n]}</figcaption>}
+                    </figure>
+                  ))}
+                </div>
+              )
             )}
           </div>
         </div>
@@ -1085,6 +1200,11 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
                   </button>
                 </>
               )}
+              {captions[safeImageIndex] && (
+                <div className="lightbox-caption">
+                  {captions[safeImageIndex]}
+                </div>
+              )}
               <div className="lightbox-counter">
                 {safeImageIndex + 1} / {project.images.length}
               </div>
@@ -1092,8 +1212,22 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           </div>
         )}
 
+        {/*
+          Repeated at the end of the flow rather than pinned over it. A study is
+          read top to bottom, so this is where it is finished with -- and
+          nothing has to sit over the plates for the whole of the read to put it
+          there.
+        */}
+        <div className="project-footer-nav">
+          <ProjectControls
+            onPrev={onProjectPrevClick}
+            onClose={onProjectCloseClick}
+            onNext={onProjectNextClick}
+          />
+        </div>
+
         <div className="project-pagination">
-          Project {activeProjectID + 1} of {projects.length}
+          Case Study {activeProjectID + 1} of {projects.length}
         </div>
       </div>
     );
@@ -1107,7 +1241,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
           className={activeThumbnailID === i ? 'active' : ''}
           role="button"
           tabIndex={0}
-          aria-label={`Open project: ${project.title}`}
+          aria-label={`Open case study: ${project.title}`}
           onMouseEnter={(e) => onProjectOver(i, e)}
           // Keyboard focus recolours the tile the same way a pointer does,
           // otherwise tabbing through the grid moves an invisible cursor.
