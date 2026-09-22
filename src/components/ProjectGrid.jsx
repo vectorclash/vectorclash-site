@@ -617,21 +617,31 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
         // travel across. The document is several screens shorter than it was a
         // moment ago, so everything measured against it has to be told.
         window.scrollTo(0, gridScrollRef.current);
-        resyncScrollTriggers(true);
         const tiles = mountRef.current.querySelectorAll("li");
+        // Hidden before the refresh, so the grid cannot paint at full strength
+        // in the frame between them.
+        if (tiles.length > 0) gsap.set(tiles, { opacity: 0, y: 16 });
+
+        resyncScrollTriggers(true);
+
+        // On the next frame, not this one. The refresh above re-measures every
+        // trigger on the page and is the most expensive thing in the whole
+        // transition -- and it lands on exactly the frame the grid first
+        // paints. A tween started in that frame is time-based, so it does not
+        // wait: it opens already part way through, which on a phone, where the
+        // measuring costs most, is the tiles appearing half faded rather than
+        // rising in. One frame's wait buys the entrance its own first frame.
         if (tiles.length > 0) {
-          gsap.fromTo(
-            tiles,
-            { opacity: 0, y: 16 },
-            {
+          gsap.delayedCall(0, () => {
+            gsap.to(tiles, {
               opacity: 1,
               y: 0,
               duration: 0.35,
               ease: "power2.out",
               stagger: { amount: 0.18 },
               clearProps: "opacity,transform",
-            }
-          );
+            });
+          });
         }
       }
     }
@@ -970,13 +980,18 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
     const tl = gsap.timeline({ onComplete: finish });
     closeTimelineRef.current = tl;
 
+    // The pieces move, the panel fades, and only the panel fades. Both used to
+    // animate opacity, and since the pieces are inside the panel the two
+    // multiplied: content left at a rate neither curve describes, dropping out
+    // early and taking the stagger with it, which is most of what read as
+    // clunky. The stagger survives as motion instead -- the lower blocks start
+    // down before the upper ones, and the fade above carries all of it.
     if (pieces.length > 0) {
       tl.to(
         pieces,
         {
-          opacity: 0,
           y: 12,
-          duration: 0.18,
+          duration: 0.24,
           ease: "power2.in",
           stagger: { amount: 0.07, from: "end" },
         },
@@ -984,7 +999,7 @@ function ProjectGrid({ projects, threeContainerRef, onProjectActiveChange }) {
       );
     }
 
-    tl.to(detail, { opacity: 0, duration: 0.2, ease: "power2.in" }, 0.06);
+    tl.to(detail, { opacity: 0, duration: 0.24, ease: "power2.in" }, 0.03);
 
     if (threeContainer) {
       // The scene still outlives the panel, but only just -- the whole exit is
