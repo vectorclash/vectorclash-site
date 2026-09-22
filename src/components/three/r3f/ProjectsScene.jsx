@@ -113,27 +113,65 @@ function useLingering(on, ms) {
   return on || lingering;
 }
 
-// Where the video sits along the camera's axis. It is nearer than the box's far
-// wall, so the frame is smaller where it stands and it has to be placed against
-// that frame rather than against the wall's.
-const VIDEO_DEPTH = -20;
+// Where the video shapes stand, and how big each one is.
+//
+// One shape had to be small enough for the frame to hold it whole, which left
+// it reading as an ornament. Three of them can divide that job: a large one set
+// back near the box's far wall carries the video, a middle one holds the lower
+// left where the single shape used to sit, and a small one near the camera
+// gives the other two something to be behind. They are all fed by one video
+// element, so this is a composition rather than three players.
+//
+// `depth` is a world z, inside the 300 unit backdrop box. `radius` is a
+// fraction of the shorter half of the frame *at that depth*, and `bias` places
+// the centre within what is left of that frame once the radius and a margin are
+// taken out -- so every shape stays whole at any aspect, and the arrangement
+// keeps its proportions instead of its pixel positions. `spin` scales the idle
+// tumble: the nearer and smaller the shape, the faster it turns, which is the
+// same cue the depth is already giving.
+//
+// The far shape is set deep enough that the backdrop's wall cuts through it as
+// the box tumbles, and it is meant to: at this size there is no depth inside a
+// 300 unit box that clears the wall, so the choice is a small shape that floats
+// or a large one the backdrop keeps taking bites out of. The second is the more
+// interesting object, and the tumble means it is never cut the same way twice.
+const VIDEO_PLACEMENTS = [
+  { id: 'far', depth: -142, radius: 0.82, bias: [0.34, 0.26], spin: 0.4 },
+  { id: 'mid', depth: -20, radius: 0.42, bias: [-0.78, -0.62], spin: 1 },
+  { id: 'near', depth: 70, radius: 0.36, bias: [0.72, 0.64], spin: 1.7 },
+];
+
+// Clearance between a shape's widest reach and the frame's edge, as a fraction
+// of the frame's half height at that shape's depth.
+const VIDEO_MARGIN = 0.08;
 
 function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
   const projectGroupRef = useRef();
-  const videoGroupRef = useRef();
   const scrollGroupRef = useRef();
   // Narrow selectors so a canvas resize doesn't re-render the whole scene.
   const gl = useThree((state) => state.gl);
   const frame = useFramedCamera();
 
-  // Hung off the lower left corner of the frame rather than parked at a fixed
-  // y. At the old fov that fixed y happened to fall just inside the bottom
-  // edge; at any tighter framing it falls straight out of shot.
-  const videoPosition = useMemo(() => {
-    const halfHeight = (CAMERA_Z - VIDEO_DEPTH) * frame.tanHalfV;
-    const halfWidth = halfHeight * frame.aspect;
-    return [-halfWidth * 0.5, -halfHeight * 0.5, VIDEO_DEPTH];
-  }, [frame.tanHalfV, frame.aspect]);
+  // The sizes and the offsets come out of one measurement, because the two
+  // cannot be decided apart: an offset only reads as placement if the shape it
+  // moves is small enough for the frame to hold all of it.
+  const videoPlacements = useMemo(
+    () =>
+      VIDEO_PLACEMENTS.map(({ id, depth, radius, bias, spin }) => {
+        const halfHeight = (CAMERA_Z - depth) * frame.tanHalfV;
+        const halfWidth = halfHeight * frame.aspect;
+
+        const size = Math.min(halfHeight, halfWidth) * radius;
+        const margin = halfHeight * VIDEO_MARGIN;
+
+        // What the centre can travel before a vertex touches the edge.
+        const roomX = Math.max(0, halfWidth - size - margin);
+        const roomY = Math.max(0, halfHeight - size - margin);
+
+        return { id, size, spin, position: [roomX * bias[0], roomY * bias[1], depth] };
+      }),
+    [frame.tanHalfV, frame.aspect],
+  );
 
   const { settings } = useQuality();
   const grainOn = settings.grain > 0;
@@ -190,12 +228,6 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
       projectGroupRef.current.rotation.y += 0.0008;
       projectGroupRef.current.rotation.z -= 0.0009;
     }
-
-    if (videoGroupRef.current) {
-      videoGroupRef.current.rotation.x -= 0.001;
-      videoGroupRef.current.rotation.y -= 0.0008;
-      videoGroupRef.current.rotation.z += 0.0009;
-    }
   });
 
   return (
@@ -224,9 +256,9 @@ function Scene({ textureURL, videoURLs, fogColor, imageURLs }) {
         </group>
       </group>
 
-      <group ref={videoGroupRef} position={videoPosition}>
-        {videoURLs && videoURLs.length > 0 && <VideoShape urls={videoURLs} size={50} />}
-      </group>
+      {videoURLs && videoURLs.length > 0 && (
+        <VideoShape urls={videoURLs} placements={videoPlacements} />
+      )}
 
       <QualityGovernor />
 
