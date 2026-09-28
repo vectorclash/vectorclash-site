@@ -11,6 +11,15 @@ $my-color: #CCFF00;
 
   .column {
     position: relative;
+    // The space above and below every section, on a ramp rather than a step.
+    // It was 120px, dropping to 60px at the 600px breakpoint -- half the room
+    // gone in one pixel of width, and 60px against a 30px side gutter is where
+    // the page felt most cramped. It grows with the width now, from 80px on a
+    // phone to 160px from about 1200px up, and every width gets at least what
+    // it had except the tablets just past the old step, which had the full
+    // desktop figure for no better reason than landing on that side of it.
+    --section-space: clamp(80px, 10vw + 40px, 160px);
+
     // The horizontal safe area is added to the padding, because the page now
     // lays out across the whole screen -- see viewport-fit in index.html --
     // and in landscape the notch eats into the side the text starts at. The
@@ -18,9 +27,10 @@ $my-color: #CCFF00;
     // bottom of the screen is somewhere content passes rather than somewhere
     // it rests. The footer is the exception and handles its own. Without
     // insets every env() resolves to zero and this is the padding it was.
-    padding: 120px calc(40px + env(safe-area-inset-right)) 120px calc(40px + env(safe-area-inset-left));
+    padding: var(--section-space) calc(40px + env(safe-area-inset-right)) var(--section-space) calc(40px + env(safe-area-inset-left));
     @media only screen and (max-width: 600px) {
-      padding: 60px calc(30px + env(safe-area-inset-right)) 60px calc(30px + env(safe-area-inset-left));
+      padding-right: calc(30px + env(safe-area-inset-right));
+      padding-left: calc(30px + env(safe-area-inset-left));
     }
     width: 100%;
     max-width: 1080px;

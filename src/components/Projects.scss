@@ -48,6 +48,19 @@
     h3, h2 {
       color: #FAFAFA;
     }
+
+    // The only section heading set on a light ground: near-white on the grey
+    // gradient came to about 1.6:1, and it is the heading over the work
+    // itself. This is the hero's shadow, built for the same problem -- white
+    // type on a bright field -- and it holds over the scene once a study opens
+    // as well. The study's own 0 0 40px shadow was tried first and on flat grey
+    // it is a smudge that does nothing at the glyph edge.
+    .projects-intro h3 {
+      text-shadow:
+        0 0 0.25em rgba(0, 0, 0, 0.42),
+        0 0 0.06em rgba(0, 0, 0, 0.36),
+        0 0 1.1em rgba(0, 0, 0, 0.22);
+    }
   }
 
   // Full height on purpose: the scene inside is sticky, and this box is the

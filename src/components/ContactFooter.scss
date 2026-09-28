@@ -9,11 +9,7 @@
     // The last content on the page, so this is the one place the bottom of the
     // screen is somewhere content rests rather than passes -- it would sit
     // under the home indicator otherwise.
-    padding-bottom: calc(120px + env(safe-area-inset-bottom));
-
-    @media only screen and (max-width: 600px) {
-      padding-bottom: calc(60px + env(safe-area-inset-bottom));
-    }
+    padding-bottom: calc(var(--section-space) + env(safe-area-inset-bottom));
     position: relative;
     z-index: 1;
     display: flex;
@@ -83,7 +79,7 @@
   .footer-left {
     .copyright {
       margin-top: 90px;
-      font-size: 9px;
+      font-size: 12px;
 
       @media only screen and (max-width: 777px) {
         display: none;
@@ -95,7 +91,7 @@
     .copyright {
       display: none;
       margin-top: 90px;
-      font-size: 9px;
+      font-size: 12px;
 
       @media only screen and (max-width: 777px) {
         display: block;
