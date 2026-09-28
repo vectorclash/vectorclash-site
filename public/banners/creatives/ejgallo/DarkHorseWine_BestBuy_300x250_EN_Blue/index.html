@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="ad.size" content="width=300,height=250">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #4a5f65;
+        background-image: url('gradient-bg.png');
+        background-size: 300px 250px;
+        cursor: pointer;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #989898;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+      }
+
+      .bottle, .label {
+        position: absolute;
+        width: 115.5px;
+        height: 256px;
+        bottom: -5px;
+        left: 186px;
+        will-change: transform;
+      }
+
+      .bottle canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.darkhorsewine.com/'
+    </script>
+    <script src="cb_standard.js"></script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <div class="bottle"><canvas id="bottle"></canvas></div>
+      <div class="label"><img src="label.png"></div>
+      
+      <img src="t1-1.png" class="t1">
+      <img src="t1-2.png" class="t1">
+      <img src="t1-3.png" class="t1">
+      <img src="t1-4.png" class="t1">
+      <img src="t1-5.png" class="t1">
+      <img src="t2.png" class="t2">
+      
+      <img src="cta.png" class="cta">
+      <img src="cta-over.png" class="cta-over">
+    </div>
+    <script src="https://code.createjs.com/1.0.0/easeljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+    <script src="canvas.js"></script>
+    <script>
+      var banner
+      var tl = new gsap.timeline()
+
+      function init() {
+        startPreload(
+          'gradient-bg.png',
+          't1-1.png',
+          't1-2.png',
+          't1-3.png',
+          't1-4.png',
+          't1-5.png',
+          't2.png',
+          'cta.png',
+          'cta-over.png',
+          'bottle.png',
+          'light.png',
+          'label.png',
+          animate
+        )
+
+        banner = document.querySelector('.banner')
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        initCanvas()
+
+        gsap.set('.label img', {
+          opacity: 1
+        })
+
+        tl.add(bottleAnim)
+
+        tl.add('Scene1', '+=0.3')
+
+        tl.fromTo('.t1', {
+          alpha: 0,
+          y: 30
+        }, {
+          alpha: 1,
+          y: 0,
+          duration: 0.5,
+          ease: Power1.easeOut,
+          stagger: 0.2
+        }, 'Scene1')
+
+        tl.add('Scene2', '+=4')
+
+        tl.to('.t1', {
+          alpha: 0,
+          duration: 0.5
+        }, 'Scene2')
+
+
+        tl.fromTo('.t2, .cta', {
+          alpha: 0,
+        },{
+          alpha: 1,
+          duration: 0.5,
+          ease: Power1.easeOut,
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        }, 'Scene2+=0.5')
+      }
+
+      function bottleAnim() {
+        var bottleTl = new gsap.timeline()
+        bottleTl.from('.bottle, .label', { 
+          scale: 0.98, 
+          x: 5, 
+          ease: Power1.easeIn,
+          duration: 9
+        }, 'g')
+        bottleTl.to(light, { 
+          x: -320, 
+          duration: 9,
+          ease: Power1.easeIn
+        }, 'g')
+
+        return bottleTl
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        gsap.to('.cta-over', 0.4, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        gsap.to('.cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+    </script>
+  </body>
+</html>

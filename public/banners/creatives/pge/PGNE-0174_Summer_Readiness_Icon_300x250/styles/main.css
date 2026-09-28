@@ -1,0 +1,86 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.main-container {
+  position: absolute;
+  width: 300px;
+  height: 250px;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  overflow: hidden;
+  border: 1px solid grey;
+  cursor: pointer;
+}
+
+.full-frame-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: none;
+}
+
+.blue-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: #63c2d5;
+}
+
+.text-one {
+  background-image: url(../images/text-one.png);
+  z-index: 50;
+}
+
+.text-two {
+  background-image: url(../images/text-two.png);
+  z-index: 50;
+}
+
+.building {
+  background-image: url(../images/building.png);
+  z-index: 50;
+  display: block;
+}
+
+.sun-container {
+  z-index: 40;
+  display: block;
+  transform-origin: bottom right;
+  transform: rotate(-20deg);
+}
+
+.sun {
+  position: absolute;
+  top: 11px;
+  left: 110px;
+  width: 80px;
+  height: 80px;
+  background-image: url(../images/sun.png);
+}
+
+.cta {
+  background-image: url(../images/cta.png);
+  transform-origin: 290px 240px;
+  z-index: 100;
+}
+
+.disclaimer-text {
+  background-image: url(../images/disclaimer-text.png);
+  z-index: 100;
+  display: block;
+}
+
+.logo {
+  background-image: url(../images/logo.png);
+  z-index: 100;
+  display: block;
+}

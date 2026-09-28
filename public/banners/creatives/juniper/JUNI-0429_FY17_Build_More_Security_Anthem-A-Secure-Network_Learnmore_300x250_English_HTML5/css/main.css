@@ -1,0 +1,171 @@
+body {
+	font-family: 'Antenna', Helvetica, sans-serif;
+	font-weight: 100;
+	font-style: normal;
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.main-container {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	background-color: #507085;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+.cta-container {
+	position: absolute;
+	width: 110px;
+	height: 28px;
+	bottom: 20px;
+	right: 20px;
+	z-index: 200;
+	overflow: hidden;
+	border: 1px solid white;
+	box-sizing: border-box;
+}
+
+#cta {
+	position: absolute;
+	width: 110px;
+	height: 28px;
+	z-index: 1;
+}
+
+#cta-over {
+	position: absolute;
+	width: 110px;
+	height: 28px;
+	z-index: 2;
+	top: 28px;
+}
+
+#logo {
+	position: absolute;
+	top: -65px;
+	left: 10px;
+	width: 210px;
+	z-index: 200;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-size: 100%;
+}
+
+.frame1-text {
+	display: block;
+	background-image: url(../images/frame1-text.png);
+	z-index: 200;
+}
+
+.frame2-text {
+	display: none;
+	background-image: url(../images/frame2-text.png);
+	z-index: 200;
+}
+
+.frame3-text {
+	display: none;
+	background-image: url(../images/frame3-text.png);
+	z-index: 200;
+}
+
+.frame4-text {
+	display: none;
+	background-image: url(../images/frame4-text.png);
+	z-index: 200;
+}
+
+.buildmore-text {
+	background-image: url(../images/build-more-text.png);
+	z-index: 200;
+}
+
+.frame1-text {
+	display: block;
+}
+
+.frame1-background {
+	z-index: 0;
+}
+
+.frame1-foreground-image {
+	background-image: url(../images/frame1-foreground-image.png);
+	z-index: 150;
+}
+
+.frame1-background-image {
+	background-image: url(../images/frame1-background-image.jpg);
+	z-index: 0;
+}
+
+.bokeh-container {
+	z-index: 100;
+}
+
+.bokeh {
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	background-size: 100%;
+}
+
+.frame2-background {
+	z-index: 1;
+	display: none;
+}
+
+.frame2-foreground-image {
+	background-image: url(../images/frame2-foreground-image.png);
+	z-index: 150;
+}
+
+.frame2-background-image {
+	background-image: url(../images/frame2-background-image.jpg);
+	transform-origin: 50% 100%;
+	z-index: 0;
+}
+
+.frame3-background {
+	z-index: 2;
+	display: none;
+}
+
+.frame3-foreground-image {
+	background-image: url(../images/frame3-foreground-image.png);
+	z-index: 100;
+}
+
+.frame3-background-image {
+	background-image: url(../images/frame3-background-image.jpg);
+	z-index: 0;
+}
+
+.frame4-background {
+	z-index: 3;
+	display: none;
+}
+
+.frame4-foreground-image {
+	background-image: url(../images/frame4-foreground-image.png);
+	z-index: 100;
+}
+
+.frame4-background-image {
+	background-image: url(../images/frame4-background-image.jpg);
+	z-index: 0;
+}

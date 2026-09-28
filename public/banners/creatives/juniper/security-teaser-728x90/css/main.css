@@ -1,0 +1,51 @@
+
+* {
+	padding: 0;
+	margin: 0;
+	box-sizing: border-box;
+}
+
+main {
+	position: absolute;
+	width: 728px;
+	height: 90px;
+	cursor: pointer;
+	overflow: hidden;
+	border: 1px solid #70bf52;
+}
+
+.full-frame-object {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+	background-size: 100%;
+}
+
+.frame-one-image {
+	background-image: url(../img/frame-one.jpg);
+	opacity: 0;
+	z-index: 100;
+}
+
+.frame-two {
+	background-color: #70bf52;
+}
+
+.frame-two-image {
+	background-image: url(../img/frame-two.png);
+	z-index: 90;
+}
+
+.glitch-container {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
+}
+
+.pixel {
+	position: absolute;
+	top: 0;
+	left: 0;
+}

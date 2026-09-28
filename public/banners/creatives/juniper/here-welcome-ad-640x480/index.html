@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>
+  </head>
+  <body>
+    <div class="main-container">
+      <video autoplay playsinline>
+        <source type="video/mp4" src="video/JUNI-0416_FY17_Build_More_Security_15_Teaser_640x480.mp4" />
+      </video>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
+    <script type="text/javascript">
+  		// If true, start function. If false, listen for INIT.
+  		window.onload = function() {
+  			if (Enabler.isInitialized()) {
+  				enablerInitHandler();
+  			} else {
+  				Enabler.addEventListener(studio.events.StudioEvent.INIT, enablerInitHandler);
+  			}
+  		}
+  	</script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

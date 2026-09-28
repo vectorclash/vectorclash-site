@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="ad.size" content="width=300,height=600">
+  <style>
+    :root {
+      --primary-color: #F78614;
+      --secondary-color: #FFFFFF;
+    }
+
+    @font-face {
+      font-family: "TT Norms Pro";
+      src: url("assets/fonts/regular.woff2");
+      font-weight: 400;
+    }
+
+    @font-face {
+      font-family: "TT Norms Pro";
+      src: url("assets/fonts/bold.woff2");
+      font-weight: 700;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #banner-container {
+      position: relative;
+      width: 300px;
+      height: 600px;
+      background-color: #FFFFFF;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.5);
+    }
+
+    #banner-container * {
+      user-select: none;
+    }
+
+    /* bottom bar styles */
+
+    .bottom-bar {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 22px 0;
+      height: 142px;
+      bottom: 0;
+      left: 0;
+      background-color: white;
+      z-index: 10;
+    }
+
+    .bottom-bar .logo {
+      width: 208px;
+    }
+
+    .bottom-bar .cta {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "TT Norms Pro", sans-serif;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 16px;
+      letter-spacing: -0.16px;
+      color: var(--secondary-color);
+      padding: 12px 15px;
+      background-color: var(--primary-color);
+    }
+
+    .bottom-bar .cta svg {
+      width: 10px;
+      margin-left: 10px;
+    }
+
+    .bottom-bar .cta path {
+      fill: var(--secondary-color);
+    }
+
+    /* text and lambda styles */
+
+    .text-lambda {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 5;
+    }
+
+    .text-lambda .lambda {
+      position: absolute;
+      height: 600px;
+      /* right: 127px; */
+      top: 0;
+      right: -300px;
+      fill: var(--primary-color);
+      z-index: 0;
+    }
+    
+
+    .text-lambda .text-one {
+      position: absolute;
+      width: 300px;
+      top: 32px;
+      left: 24px;
+      font-family: "TT Norms Pro", sans-serif;
+      font-weight: 400;
+      font-size: 37px;
+      line-height: 48px;
+      letter-spacing: -0.37px;
+      color: #FFFFFF;
+      z-index: 1;
+      opacity: 0;
+    }
+
+    .text-lambda .text-two {
+      position: absolute;
+      width: 300px;
+      top: 32px;
+      left: 27px;
+      opacity: 0;
+      font-family: "TT Norms Pro", sans-serif;
+      font-weight: 400;
+      font-size: 37px;
+      letter-spacing: -0.7px;
+      color: #FFFFFF;
+      z-index: 1;
+    }
+
+    /* background image styles */
+
+    .background-image {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .background-image img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .background-image .foreground {
+      z-index: 3;
+    }
+
+    .background-image .grid-container {
+      position: absolute;
+      width: 100%;
+      height: 520px;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      opacity: 0;
+    }
+
+    .background-image .grid-container svg {
+      transform-origin: center center;
+    }
+
+    .background-image .grid-container svg line {
+      stroke-width: 0.25;
+      stroke: #FFFFFF;
+    }
+
+    .background-image .grid-background {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-color: var(--primary-color);
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .background-image .background {
+      z-index: 0;
+    }
+  </style>
+  <script>
+    // clicktag code
+    var clickTag = "https://www.google.com";
+  </script>
+</head>
+
+<body>
+  <div id="banner-container">
+    <div class="bottom-bar">
+      <img class="logo" src="assets/images/logo.svg">
+      <div class="cta">
+        Rethink Quality
+        <svg class="cta-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7.4 8.5">
+          <path d="M0,8.5V0l7.4,4.3L0,8.5z" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="text-lambda">
+      <div class="text-one">The
+        <strong><span>AI-</span><span>enhanced-</span><span>to-</span><span>increase-</span><span>diagnostic-</span><span>accuracy</span></strong>
+        diagnostics platform.</div>
+      <div class="text-two">Rethink<br/>Diagnostics</div>
+      <svg class="lambda" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 587.5 305">
+        <polygon points="587.5,0 411.8,305 299.1,305 299.1,0 " />
+        <rect width="305" height="305" />
+      </svg>
+    </div>
+
+    <div class="background-image">
+      <img class="foreground" src="assets/images/primary-foreground.png">
+      <div class="grid-container"></div>
+      <div class="grid-background"></div>
+      <img class="background" src="assets/images/primary-background.png">
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"
+    integrity="sha512-f8mwTB+Bs8a5c46DEm7HQLcJuHMBaH/UFlcgyetMqqkvTcYg4g5VXsYR71b3qC82lZytjNYvBj2pf0VekA9/FQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    !function (e, t) { "object" == typeof exports && "undefined" != typeof module ? t(exports) : "function" == typeof define && define.amd ? define(["exports"], t) : t((e = e || self).window = e.window || {}) }(this, function (e) { "use strict"; function l() { return "undefined" != typeof window } function m() { return t || l() && (t = window.gsap) && t.registerPlugin && t } function p(e) { return Math.round(1e4 * e) / 1e4 } function q(e) { return parseFloat(e) || 0 } function r(e, t) { var r = q(e); return ~e.indexOf("%") ? r / 100 * t : r } function s(e, t) { return q(e.getAttribute(t)) } function u(e, t, r, n, s, i) { return D(Math.pow((q(r) - q(e)) * s, 2) + Math.pow((q(n) - q(t)) * i, 2)) } function v(e) { return console.warn(e) } function w(e) { return "non-scaling-stroke" === e.getAttribute("vector-effect") } function z(e) { if (!(e = k(e)[0])) return 0; var t, r, n, i, o, a, f, h = e.tagName.toLowerCase(), l = e.style, d = 1, c = 1; w(e) && (c = e.getScreenCTM(), d = D(c.a * c.a + c.b * c.b), c = D(c.d * c.d + c.c * c.c)); try { r = e.getBBox() } catch (e) { v("Some browsers won't measure invisible elements (like display:none or masks inside defs).") } var g = r || { x: 0, y: 0, width: 0, height: 0 }, _ = g.x, y = g.y, x = g.width, m = g.height; if (r && (x || m) || !M[h] || (x = s(e, M[h][0]), m = s(e, M[h][1]), "rect" !== h && "line" !== h && (x *= 2, m *= 2), "line" === h && (_ = s(e, "x1"), y = s(e, "y1"), x = Math.abs(x - _), m = Math.abs(m - y))), "path" === h) i = l.strokeDasharray, l.strokeDasharray = "none", t = e.getTotalLength() || 0, p(d) !== p(c) && !b && (b = 1) && v("Warning: <path> length cannot be measured when vector-effect is non-scaling-stroke and the element isn't proportionally scaled."), t *= (d + c) / 2, l.strokeDasharray = i; else if ("rect" === h) t = 2 * x * d + 2 * m * c; else if ("line" === h) t = u(_, y, _ + x, y + m, d, c); else if ("polyline" === h || "polygon" === h) for (n = e.getAttribute("points").match(P) || [], "polygon" === h && n.push(n[0], n[1]), t = 0, o = 2; o < n.length; o += 2)t += u(n[o - 2], n[o - 1], n[o], n[o + 1], d, c) || 0; else "circle" !== h && "ellipse" !== h || (a = x / 2 * d, f = m / 2 * c, t = Math.PI * (3 * (a + f) - D((3 * a + f) * (a + 3 * f)))); return t || 0 } function A(e, t) { if (!(e = k(e)[0])) return [0, 0]; t = t || z(e) + 1; var r = f.getComputedStyle(e), n = r.strokeDasharray || "", s = q(r.strokeDashoffset), i = n.indexOf(","); return i < 0 && (i = n.indexOf(" ")), t < (n = i < 0 ? t : q(n.substr(0, i))) && (n = t), [-s || 0, n - s || 0] } function B() { l() && (f = window, d = t = m(), k = t.utils.toArray, c = t.core.getStyleSaver, g = t.core.reverting || function () { }, h = -1 !== ((f.navigator || {}).userAgent || "").indexOf("Edge")) } var t, k, f, h, d, b, c, g, P = /[-+=\.]*\d+[\.e\-\+]*\d*[e\-\+]*\d*/gi, M = { rect: ["width", "height"], circle: ["r", "r"], ellipse: ["rx", "ry"], line: ["x2", "y2"] }, D = Math.sqrt, n = { version: "3.11.3", name: "drawSVG", register: function register(e) { t = e, B() }, init: function init(e, t, n) { if (!e.getBBox) return !1; d || B(); var s, i, o, a = z(e); return this.styles = c && c(e, "strokeDashoffset,strokeDasharray,strokeMiterlimit"), this.tween = n, this._style = e.style, this._target = e, t + "" == "true" ? t = "0 100%" : t ? -1 === (t + "").indexOf(" ") && (t = "0 " + t) : t = "0 0", i = function _parse(e, t, n) { var s, i, o = e.indexOf(" "); return i = o < 0 ? (s = void 0 !== n ? n + "" : e, e) : (s = e.substr(0, o), e.substr(o + 1)), s = r(s, t), (i = r(i, t)) < s ? [i, s] : [s, i] }(t, a, (s = A(e, a))[0]), this._length = p(a), this._dash = p(s[1] - s[0]), this._offset = p(-s[0]), this._dashPT = this.add(this, "_dash", this._dash, p(i[1] - i[0]), 0, 0, 0, 0, 0, 1), this._offsetPT = this.add(this, "_offset", this._offset, p(-i[0]), 0, 0, 0, 0, 0, 1), h && (o = f.getComputedStyle(e)).strokeLinecap !== o.strokeLinejoin && (i = q(o.strokeMiterlimit), this.add(e.style, "strokeMiterlimit", i, i + .01)), this._live = w(e) || ~(t + "").indexOf("live"), this._nowrap = ~(t + "").indexOf("nowrap"), this._props.push("drawSVG"), 1 }, render: function render(e, t) { if (t.tween._time || !g()) { var r, n, s, i, o = t._pt, a = t._style; if (o) { for (t._live && (r = z(t._target)) !== t._length && (n = r / t._length, t._length = r, t._offsetPT && (t._offsetPT.s *= n, t._offsetPT.c *= n), t._dashPT ? (t._dashPT.s *= n, t._dashPT.c *= n) : t._dash *= n); o;)o.r(e, o.d), o = o._next; s = t._dash || e && 1 !== e && 1e-4 || 0, r = t._length - s + .1, i = t._offset, s && i && s + Math.abs(i % t._length) > t._length - .2 && (i += i < 0 ? .1 : -.1) && (r += .1), a.strokeDashoffset = s ? i : i + .001, a.strokeDasharray = r < .2 ? "none" : s ? s + "px," + (t._nowrap ? 999999 : r) + "px" : "0px, 999999px" } } else t.styles.revert() }, getLength: z, getPosition: A }; m() && t.registerPlugin(n), e.DrawSVGPlugin = n, e.default = n; if (typeof (window) === "undefined" || window !== e) { Object.defineProperty(e, "__esModule", { value: !0 }) } else { delete e.default } });
+  </script>
+  <script>
+    !function (D, u) { "object" == typeof exports && "undefined" != typeof module ? u(exports) : "function" == typeof define && define.amd ? define(["exports"], u) : u((D = D || self).window = D.window || {}) }(this, function (D) { "use strict"; var _ = /([\uD800-\uDBFF][\uDC00-\uDFFF](?:[\u200D\uFE0F][\uD800-\uDBFF][\uDC00-\uDFFF]){2,}|\uD83D\uDC69(?:\u200D(?:(?:\uD83D\uDC69\u200D)?\uD83D\uDC67|(?:\uD83D\uDC69\u200D)?\uD83D\uDC66)|\uD83C[\uDFFB-\uDFFF])|\uD83D\uDC69\u200D(?:\uD83D\uDC69\u200D)?\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC69\u200D(?:\uD83D\uDC69\u200D)?\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]\uFE0F|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC6F\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3C-\uDD3E\uDDD6-\uDDDF])\u200D[\u2640\u2642]\uFE0F|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF6\uD83C\uDDE6|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uFE0F\u200D[\u2640\u2642]|(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642])\uFE0F|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\uD83D\uDC69\u200D[\u2695\u2696\u2708]|\uD83D\uDC68(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708]))\uFE0F|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83D\uDC69\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69]))|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74|\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67)\uDB40\uDC7F|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC66\u200D\uD83D\uDC66|(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]))|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|\uD83D\uDC68(?:\u200D(?:(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC67|(?:(?:\uD83D[\uDC68\uDC69])\u200D)?\uD83D\uDC66)|\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDD1-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])?|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF8]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD4C\uDD50-\uDD6B\uDD80-\uDD97\uDDC0\uDDD0-\uDDE6])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u2660\u2663\u2665\u2666\u2668\u267B\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF8]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD4C\uDD50-\uDD6B\uDD80-\uDD97\uDDC0\uDDD0-\uDDE6])\uFE0F)/; function k(D) { return e.getComputedStyle(D) } function n(D, u) { var e; return i(D) ? D : "string" == (e = typeof D) && !u && D ? E.call(X.querySelectorAll(D), 0) : D && "object" == e && "length" in D ? E.call(D, 0) : D ? [D] : [] } function o(D) { return "absolute" === D.position || !0 === D.absolute } function p(D, u) { for (var e, t = u.length; -1 < --t;)if (e = u[t], D.substr(0, e.length) === e) return e.length } function r(D, u) { void 0 === D && (D = ""); var e = ~D.indexOf("++"), t = 1; return e && (D = D.split("++").join("")), function () { return "<" + u + " style='position:relative;display:inline-block;'" + (D ? " class='" + D + (e ? t++ : "") + "'>" : ">") } } function s(D, u, e) { var t = D.nodeType; if (1 === t || 9 === t || 11 === t) for (D = D.firstChild; D; D = D.nextSibling)s(D, u, e); else 3 !== t && 4 !== t || (D.nodeValue = D.nodeValue.split(u).join(e)) } function t(D, u) { for (var e = u.length; -1 < --e;)D.push(u[e]) } function u(D, u, e) { for (var t; D && D !== u;) { if (t = D._next || D.nextSibling) return t.textContent.charAt(0) === e; D = D.parentNode || D._parent } } function v(D) { var u, e, t = n(D.childNodes), F = t.length; for (u = 0; u < F; u++)(e = t[u])._isSplit ? v(e) : u && e.previousSibling && 3 === e.previousSibling.nodeType ? (e.previousSibling.nodeValue += 3 === e.nodeType ? e.nodeValue : e.firstChild.nodeValue, D.removeChild(e)) : 3 !== e.nodeType && (D.insertBefore(e.firstChild, e), D.removeChild(e)) } function w(D, u) { return parseFloat(u[D]) || 0 } function x(D, e, F, C, i, n, E) { var r, l, p, d, a, h, B, f, A, c, x, g, y = k(D), _ = w("paddingLeft", y), b = -999, S = w("borderBottomWidth", y) + w("borderTopWidth", y), T = w("borderLeftWidth", y) + w("borderRightWidth", y), m = w("paddingTop", y) + w("paddingBottom", y), N = w("paddingLeft", y) + w("paddingRight", y), L = w("fontSize", y) * (e.lineThreshold || .2), W = y.textAlign, H = [], O = [], V = [], j = e.wordDelimiter || " ", M = e.tag ? e.tag : e.span ? "span" : "div", R = e.type || e.split || "chars,words,lines", z = i && ~R.indexOf("lines") ? [] : null, P = ~R.indexOf("words"), q = ~R.indexOf("chars"), G = o(e), I = e.linesClass, J = ~(I || "").indexOf("++"), K = [], Q = "flex" === y.display, U = D.style.display; for (J && (I = I.split("++").join("")), Q && (D.style.display = "block"), p = (l = D.getElementsByTagName("*")).length, a = [], r = 0; r < p; r++)a[r] = l[r]; if (z || G) for (r = 0; r < p; r++)((h = (d = a[r]).parentNode === D) || G || q && !P) && (g = d.offsetTop, z && h && Math.abs(g - b) > L && ("BR" !== d.nodeName || 0 === r) && (B = [], z.push(B), b = g), G && (d._x = d.offsetLeft, d._y = g, d._w = d.offsetWidth, d._h = d.offsetHeight), z && ((d._isSplit && h || !q && h || P && h || !P && d.parentNode.parentNode === D && !d.parentNode._isSplit) && (B.push(d), d._x -= _, u(d, D, j) && (d._wordEnd = !0)), "BR" === d.nodeName && (d.nextSibling && "BR" === d.nextSibling.nodeName || 0 === r) && z.push([]))); for (r = 0; r < p; r++)if (h = (d = a[r]).parentNode === D, "BR" !== d.nodeName) if (G && (A = d.style, P || h || (d._x += d.parentNode._x, d._y += d.parentNode._y), A.left = d._x + "px", A.top = d._y + "px", A.position = "absolute", A.display = "block", A.width = d._w + 1 + "px", A.height = d._h + "px"), !P && q) if (d._isSplit) for (d._next = l = d.nextSibling, d.parentNode.appendChild(d); l && 3 === l.nodeType && " " === l.textContent;)d._next = l.nextSibling, d.parentNode.appendChild(l), l = l.nextSibling; else d.parentNode._isSplit ? (d._parent = d.parentNode, !d.previousSibling && d.firstChild && (d.firstChild._isFirst = !0), d.nextSibling && " " === d.nextSibling.textContent && !d.nextSibling.nextSibling && K.push(d.nextSibling), d._next = d.nextSibling && d.nextSibling._isFirst ? null : d.nextSibling, d.parentNode.removeChild(d), a.splice(r--, 1), p--) : h || (g = !d.nextSibling && u(d.parentNode, D, j), d.parentNode._parent && d.parentNode._parent.appendChild(d), g && d.parentNode.appendChild(X.createTextNode(" ")), "span" === M && (d.style.display = "inline"), H.push(d)); else d.parentNode._isSplit && !d._isSplit && "" !== d.innerHTML ? O.push(d) : q && !d._isSplit && ("span" === M && (d.style.display = "inline"), H.push(d)); else z || G ? (d.parentNode && d.parentNode.removeChild(d), a.splice(r--, 1), p--) : P || D.appendChild(d); for (r = K.length; -1 < --r;)K[r].parentNode.removeChild(K[r]); if (z) { for (G && (c = X.createElement(M), D.appendChild(c), x = c.offsetWidth + "px", g = c.offsetParent === D ? 0 : D.offsetLeft, D.removeChild(c)), A = D.style.cssText, D.style.cssText = "display:none;"; D.firstChild;)D.removeChild(D.firstChild); for (f = " " === j && (!G || !P && !q), r = 0; r < z.length; r++) { for (B = z[r], (c = X.createElement(M)).style.cssText = "display:block;text-align:" + W + ";position:" + (G ? "absolute;" : "relative;"), I && (c.className = I + (J ? r + 1 : "")), V.push(c), p = B.length, l = 0; l < p; l++)"BR" !== B[l].nodeName && (d = B[l], c.appendChild(d), f && d._wordEnd && c.appendChild(X.createTextNode(" ")), G && (0 === l && (c.style.top = d._y + "px", c.style.left = _ + g + "px"), d.style.top = "0px", g && (d.style.left = d._x - g + "px"))); 0 === p ? c.innerHTML = "&nbsp;" : P || q || (v(c), s(c, String.fromCharCode(160), " ")), G && (c.style.width = x, c.style.height = d._h + "px"), D.appendChild(c) } D.style.cssText = A } G && (E > D.clientHeight && (D.style.height = E - m + "px", D.clientHeight < E && (D.style.height = E + S + "px")), n > D.clientWidth && (D.style.width = n - N + "px", D.clientWidth < n && (D.style.width = n + T + "px"))), Q && (U ? D.style.display = U : D.style.removeProperty("display")), t(F, H), P && t(C, O), t(i, V) } function y(D, u, e, t) { var F, C, i, n, E, r, l, d, a = u.tag ? u.tag : u.span ? "span" : "div", h = ~(u.type || u.split || "chars,words,lines").indexOf("chars"), B = o(u), f = u.wordDelimiter || " ", A = " " !== f ? "" : B ? "&#173; " : " ", c = "</" + a + ">", x = 1, g = u.specialChars ? "function" == typeof u.specialChars ? u.specialChars : p : null, y = X.createElement("div"), v = D.parentNode; for (v.insertBefore(y, D), y.textContent = D.nodeValue, v.removeChild(D), l = -1 !== (F = function getText(D) { var u = D.nodeType, e = ""; if (1 === u || 9 === u || 11 === u) { if ("string" == typeof D.textContent) return D.textContent; for (D = D.firstChild; D; D = D.nextSibling)e += getText(D) } else if (3 === u || 4 === u) return D.nodeValue; return e }(D = y)).indexOf("<"), !1 !== u.reduceWhiteSpace && (F = F.replace(S, " ").replace(b, "")), l && (F = F.split("<").join("{{LT}}")), E = F.length, C = (" " === F.charAt(0) ? A : "") + e(), i = 0; i < E; i++)if (r = F.charAt(i), g && (d = g(F.substr(i), u.specialChars))) r = F.substr(i, d || 1), C += h && " " !== r ? t() + r + "</" + a + ">" : r, i += d - 1; else if (r === f && F.charAt(i - 1) !== f && i) { for (C += x ? c : "", x = 0; F.charAt(i + 1) === f;)C += A, i++; i === E - 1 ? C += A : ")" !== F.charAt(i + 1) && (C += A + e(), x = 1) } else "{" === r && "{{LT}}" === F.substr(i, 6) ? (C += h ? t() + "{{LT}}</" + a + ">" : "{{LT}}", i += 5) : 55296 <= r.charCodeAt(0) && r.charCodeAt(0) <= 56319 || 65024 <= F.charCodeAt(i + 1) && F.charCodeAt(i + 1) <= 65039 ? (n = ((F.substr(i, 12).split(_) || [])[1] || "").length || 2, C += h && " " !== r ? t() + F.substr(i, n) + "</" + a + ">" : F.substr(i, n), i += n - 1) : C += h && " " !== r ? t() + r + "</" + a + ">" : r; D.outerHTML = C + (x ? c : ""), l && s(v, "{{LT}}", "<") } function z(D, u, e, t) { var F, C, i = n(D.childNodes), E = i.length, s = o(u); if (3 !== D.nodeType || 1 < E) { for (u.absolute = !1, F = 0; F < E; F++)(C = i[F])._next = C._isFirst = C._parent = C._wordEnd = null, 3 === C.nodeType && !/\S+/.test(C.nodeValue) || (s && 3 !== C.nodeType && "inline" === k(C).display && (C.style.display = "inline-block", C.style.position = "relative"), C._isSplit = !0, z(C, u, e, t)); return u.absolute = s, void (D._isSplit = !0) } y(D, u, e, t) } var X, e, F, C, b = /(?:\r|\n|\t\t)/g, S = /(?:\s\s+)/g, i = Array.isArray, E = [].slice, l = ((C = SplitText.prototype).split = function split(D) { this.isSplit && this.revert(), this.vars = D = D || this.vars, this._originals.length = this.chars.length = this.words.length = this.lines.length = 0; for (var u, e, t, F = this.elements.length, C = D.tag ? D.tag : D.span ? "span" : "div", i = r(D.wordsClass, C), n = r(D.charsClass, C); -1 < --F;)t = this.elements[F], this._originals[F] = t.innerHTML, u = t.clientHeight, e = t.clientWidth, z(t, D, i, n), x(t, D, this.chars, this.words, this.lines, e, u); return this.chars.reverse(), this.words.reverse(), this.lines.reverse(), this.isSplit = !0, this }, C.revert = function revert() { var e = this._originals; if (!e) throw "revert() call wasn't scoped properly."; return this.elements.forEach(function (D, u) { return D.innerHTML = e[u] }), this.chars = [], this.words = [], this.lines = [], this.isSplit = !1, this }, SplitText.create = function create(D, u) { return new SplitText(D, u) }, SplitText); function SplitText(D, u) { F || function _initCore() { X = document, e = window, F = 1 }(), this.elements = n(D), this.chars = [], this.words = [], this.lines = [], this._originals = [], this.vars = u || {}, this.split(u) } l.version = "3.11.3", D.SplitText = l, D.default = l; if (typeof (window) === "undefined" || window !== D) { Object.defineProperty(D, "__esModule", { value: !0 }) } else { delete D.default } });
+  </script>
+  <script>
+    //main code here
+    const nsURI = "http://www.w3.org/2000/svg";
+    const dotWidth = 42;
+    const dotHeightAdjust = 0.865;
+    const dotOffset = -14;
+    const mainContainer = document.querySelector("#banner-container");
+    let arrowAnimating = false;
+    let mainTL = new gsap.timeline();
+
+    function init() {
+      gsap.registerPlugin(DrawSVGPlugin);
+      gsap.registerPlugin(SplitText);
+      let container = document.querySelector(".grid-container");
+      buildSVGGrid(container);
+
+      mainContainer.addEventListener('click', () => {
+        window.open(clickTag);
+      });
+
+      animate();
+    }
+
+    function animate() {
+      // animate frame 1
+      let textOneSplit = new SplitText(".text-one", {type: "words"});
+
+      for (let i = 0; i < textOneSplit.words.length; i++) {
+        let word = textOneSplit.words[i];
+        word.style.transformOrigin = "bottom middle";
+      }
+
+      mainTL.from(textOneSplit.words, {
+        duration: 0.35, 
+        alpha: 0,
+        scale: 0.9,
+        y: 15,
+        stagger: 0.25,
+        ease: "quad.inOut",
+        onStart: () => {
+          gsap.set(".text-one", {
+            alpha: 1
+          })
+        }
+      });
+
+      mainTL.to(".text-one", {
+        duration: 1,
+        x: -320,
+        alpha: 0,
+        ease: "quad.inOut"
+      }, "+=1.5")
+
+      mainTL.to(".lambda", {
+        duration: 1,
+        right: "-2px",
+        ease: "quad.inOut"
+      }, "-=1");
+
+      // animate frame 2
+
+      mainTL.to(".text-two", {
+        duration: 1,
+        alpha: 1,
+        ease: "quad.inOut"
+      });
+
+      mainTL.to(".grid-background", {
+        duration: 1,
+        alpha: 0.25,
+        ease: "quad.inOut"
+      }, "+=0.5");
+
+      let lineTl = new gsap.timeline();
+      lineTl.from("line", {
+        drawSVG: 0,
+        duration: 0.2,
+        ease: "quad.out",
+        stagger: 0.05,
+        onStart: ()=> {
+          gsap.set(".grid-container", {
+            alpha: 1
+          })
+        }
+      });
+      lineTl.totalDuration(2);
+      mainTL.add(lineTl, "-=1");
+
+      mainTL.to(".cta-arrow", {
+        duration: 0.15,
+        x: 5,
+        ease: "quad.inOut",
+        repeat: 3,
+        yoyo: true,
+        onComplete: () => {
+          mainContainer.addEventListener("mouseenter", onMouseEnter);
+          mainContainer.addEventListener("mouseleave", onMouseLeave);
+        }
+      }, "+=1");
+    }
+
+    function buildSVGGrid(container) {
+      const width = container.getBoundingClientRect().width;
+      const height = container.getBoundingClientRect().height;
+      const dotAmount = Math.ceil(width / dotWidth);
+      const lineAmount = Math.ceil(height / dotWidth);
+
+      let svg = document.createElementNS(nsURI, "svg");
+      svg.setAttribute('viewBox', "0 0 " + width + " " + height)
+      container.appendChild(svg);
+
+      let dots = [];
+
+      for (let i = 0; i <= lineAmount; i++) {
+        let offset = 0;
+        if(i % 2 === 0) {
+          offset = dotWidth / 2;
+        }
+
+        for (let j = 0; j <= dotAmount; j++) {
+          dots.push({ x: ((j * dotWidth) + offset) + dotOffset, y: -2 + i * (dotWidth * dotHeightAdjust) });
+        }
+      }
+
+      buildConnectors(svg, dots);
+    }
+
+    function buildConnectors(container, dots) {
+      for (let i = 0; i < dots.length; i++) {
+        const dot = dots[i];
+
+        for (let j = 0; j < dots.length; j++) {
+          if(getDistance(dot.x, dot.y, dots[j].x, dots[j].y) < (dotWidth + (dotWidth * 0.2)) && dot.y <= dots[j].y) {
+            const line = document.createElementNS(nsURI, "line");
+            line.setAttribute("x1", dot.x);
+            line.setAttribute("y1", dot.y);
+            line.setAttribute("x2", dots[j].x);
+            line.setAttribute("y2", dots[j].y);
+            container.appendChild(line);
+          }
+        }
+      }
+    }
+
+    function getDistance(x1, y1, x2, y2) {
+      let y = x2 - x1;
+      let x = y2 - y1;
+
+      return Math.sqrt(x * x + y * y);
+    }
+
+    // event handlers
+
+    function onMouseEnter(event) {
+      if(!arrowAnimating) {
+        arrowAnimating = true;
+        gsap.fromTo(".cta-arrow", {
+          x: 0
+        }, {
+          duration: 0.15,
+          x: 5,
+          ease: "quad.inOut",
+          repeat: 3,
+          yoyo: true
+        });
+      }
+    }
+
+    function onMouseLeave(event) {
+      arrowAnimating = false;
+    }
+
+    // begin the show
+    
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+
+</html>

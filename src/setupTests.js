@@ -27,9 +27,14 @@ global.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
-// GSAP and font-dependent components use document.fonts
+// GSAP and font-dependent components use document.fonts. SplitText also
+// listens on it for late-loading faces, and unlistens when it is reverted.
 if (!document.fonts) {
   Object.defineProperty(document, 'fonts', {
-    value: { ready: Promise.resolve() },
+    value: {
+      ready: Promise.resolve(),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    },
   });
 }

@@ -1,0 +1,402 @@
+// The banner portfolio is put together from the site's own rules -- the hero,
+// .container and .column, the section headings -- so what is here is only what
+// the home page has no equivalent for: a hero that gives the screen back, the
+// wall of banners, and the live preview.
+
+.banners-hero {
+  // The home page's hero is a whole screen of scene, because it is the whole
+  // point of arriving. Here it heads a gallery, so it is as tall as what is in
+  // it and the first row of work starts inside the first screen.
+  height: auto;
+  min-height: 0;
+
+  @media only screen and (max-width: 600px) {
+    height: auto;
+    min-height: 0;
+  }
+
+  .column {
+    padding-top: calc(var(--section-space) * 0.75);
+    padding-bottom: calc(var(--section-space) * 0.75);
+  }
+
+  article {
+    .logo {
+      margin-bottom: 48px;
+
+      @media only screen and (max-width: 600px) {
+        margin-bottom: 40px;
+      }
+    }
+
+    // A title rather than a name, and longer than one, so it comes down a
+    // step from the home page's 5rem to hold a single line on a laptop.
+    // Phones keep Hero.scss's own sizes.
+    h1 {
+      @media only screen and (min-width: 601px) {
+        font-size: 4rem;
+      }
+    }
+
+    p {
+      @media only screen and (min-width: 601px) {
+        font-size: 22px;
+        margin-bottom: 56px;
+      }
+
+      @media only screen and (max-width: 600px) {
+        margin-bottom: 40px;
+      }
+    }
+
+    // The home page's button carries its icon after the label; a way back
+    // reads with the arrow first.
+    .hero-buttons svg {
+      margin: 0 8px 0 0;
+      vertical-align: -1px;
+    }
+  }
+}
+
+@mixin tile-rollover {
+  border-bottom-right-radius: 24px;
+
+  img {
+    transform: scale(1.03);
+  }
+
+  .banner-tile-play,
+  .banner-tile-caption {
+    opacity: 1;
+  }
+
+  .banner-tile-caption {
+    transform: none;
+  }
+}
+
+.banner-wall {
+  background-color: #333333;
+
+  // Starts hidden for the scrubbed reveal, like every section's content.
+  .banner-wall-intro {
+    max-width: 62ch;
+    margin-bottom: 72px;
+    opacity: 0;
+
+    @media only screen and (max-width: 600px) {
+      margin-bottom: 56px;
+    }
+
+    // About's measure for running prose, so the two read as the same voice.
+    p {
+      line-height: 1.7;
+      margin-bottom: 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .banner-client {
+    opacity: 0;
+    // The shelf inside is laid out against the width it actually has, not the
+    // window's, so its column count is a container query.
+    container-type: inline-size;
+
+    // The rule the skills column uses between its groups, for the same job:
+    // it says where one client ends more plainly than space alone can.
+    & + .banner-client {
+      margin-top: 48px;
+      padding-top: 40px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  // The skills column's category label.
+  .banner-client-name {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #CCFF00;
+    margin-bottom: 20px;
+  }
+
+  // A packed wall rather than rows that wrap. Banner formats are different
+  // shapes by definition, and wrapped rows left a hole under every rectangle
+  // that happened to share a row with a skyscraper.
+  //
+  // One column stands for 300px of banner, the gap is a sixth of a column and
+  // the row unit a twelfth, so a rectangle, a skyscraper and a 640x480 across
+  // two columns keep their true sizes relative to one another. Each tile spans
+  // the rows its own height comes to (worked out in BannerPortfolio.jsx) and
+  // dense flow lets later tiles fill in beside the tall ones.
+  .banner-shelf {
+    --cols: 5;
+    // n columns and n - 1 gaps of a sixth of a column fill the container.
+    --col: calc(100cqi * 6 / (7 * var(--cols) - 1));
+
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-auto-rows: calc(var(--col) / 12);
+    grid-auto-flow: row dense;
+    column-gap: calc(var(--col) / 6);
+
+    @container (max-width: 880px) {
+      --cols: 4;
+    }
+
+    @container (max-width: 680px) {
+      --cols: 3;
+    }
+
+    @container (max-width: 480px) {
+      --cols: 2;
+    }
+  }
+
+  .banner-tile {
+    grid-column: span var(--span);
+    grid-row: span var(--rows);
+    align-self: start;
+
+    &.is-wide {
+      @container (max-width: 480px) {
+        grid-column: span 2;
+        grid-row: span var(--rows-narrow);
+      }
+
+      // A leaderboard is too short for the full scrim.
+      .banner-tile-caption {
+        padding-top: 14px;
+        padding-bottom: 6px;
+      }
+    }
+  }
+
+  .banner-tile-frame {
+    appearance: none;
+    position: relative;
+    display: block;
+    width: calc(var(--fill, 1) * 100%);
+    padding: 0;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    cursor: pointer;
+    // The project grid's rollover: the tile's last corner rounds off. Scaled
+    // down from the grid's 50px to suit tiles a fraction of the size.
+    transition: border-bottom-right-radius 0.2s cubic-bezier(0.76, 0, 0.24, 1);
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: transform 0.4s ease;
+    }
+
+    // The rollover, for a pointer that can roll over and for keyboard focus.
+    // Left to plain :hover, a touchscreen held it on the last tile tapped --
+    // the one a preview had just been opened from -- so that tile kept its
+    // caption and its rounded corner behind the preview and after it closed.
+    @media (hover: hover) {
+      &:hover {
+        @include tile-rollover;
+      }
+    }
+
+    &:focus-visible {
+      @include tile-rollover;
+      outline: 2px solid #ffffff;
+      outline-offset: 4px;
+    }
+  }
+
+  // The case study's magnify badge, with a play glyph: these open live.
+  .banner-tile-play {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+
+    // Nothing to roll over on a touchscreen, so the badge is simply there.
+    @media (hover: none) {
+      opacity: 1;
+    }
+
+    // A leaderboard on a phone is barely 40px tall.
+    @media only screen and (max-width: 600px) {
+      top: 6px;
+      right: 6px;
+      width: 28px;
+      height: 28px;
+    }
+
+    svg {
+      width: 45%;
+      height: 45%;
+      margin-left: 8%;
+      fill: #ffffff;
+    }
+  }
+
+  // On the tile and on rollover, as the project grid carries its titles. The
+  // preview repeats all of it, which is where a touchscreen reads it.
+  .banner-tile-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 32px 12px 10px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
+    opacity: 0;
+    transform: translateY(6px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+    pointer-events: none;
+
+    .banner-tile-title {
+      font-size: 13px;
+      font-weight: bold;
+      line-height: 1.3;
+      color: #fafafa;
+    }
+
+    // Set like the tool list under a case study's title.
+    .banner-tile-size {
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      color: #d4ff00;
+    }
+  }
+}
+
+// Rendered through a portal on document.body, for the reason the case study's
+// lightbox is: fixed positioning only means the viewport from the root
+// stacking context.
+.banner-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.88);
+  cursor: pointer;
+  animation: banner-preview-veil 0.3s ease both;
+
+  // Sized to the banner as scaled, so the glow and the chrome sit against
+  // what is actually on screen. The frame inside keeps the real dimensions
+  // and is scaled down into it: the creative lays itself out at the size it
+  // was built for, and only the result is shrunk.
+  .banner-preview-stage {
+    position: relative;
+    cursor: default;
+    box-shadow:
+      0 0 50px var(--preview-glow, rgba(204, 255, 0, 0.45)),
+      0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: banner-preview-in 0.4s ease 0.05s both;
+  }
+
+  .banner-preview-frame {
+    transform-origin: 0 0;
+
+    iframe {
+      display: block;
+      border: 0;
+      overflow: hidden;
+    }
+  }
+
+  // The lightbox's close, where the lightbox puts it.
+  .banner-preview-close {
+    appearance: none;
+    position: absolute;
+    top: -52px;
+    right: -4px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    img {
+      width: 100%;
+      height: 100%;
+      filter: brightness(0) invert(1);
+    }
+
+    &:hover {
+      transform: scale(1.2) rotate(90deg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #ffffff;
+      outline-offset: 4px;
+    }
+  }
+
+  .banner-preview-caption {
+    position: absolute;
+    top: calc(100% + 18px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100vw - 48px);
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #cccccc;
+
+    > span:first-child {
+      margin-right: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #d4ff00;
+    }
+
+    .banner-preview-size {
+      margin-left: 8px;
+      color: #888888;
+    }
+  }
+}
+
+@keyframes banner-preview-veil {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes banner-preview-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}

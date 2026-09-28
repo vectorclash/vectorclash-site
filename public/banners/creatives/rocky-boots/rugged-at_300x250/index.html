@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #b0c6c2;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #logo-cta {
+        z-index: 6;
+      }
+
+      #person-foreground {
+        z-index: 5;
+      }
+
+      #tree {
+        z-index: 4;
+      }
+
+      #front-clouds {
+        z-index: 3;
+      }
+
+      #river-trees {
+        z-index: 2;
+      }
+
+      #mountain {
+        z-index: 1;
+      }
+
+      #back-clouds {
+        z-index: 0;
+      }
+    </style>
+    <script>
+      let clickTag = 'https://www.rockyboots.com/rugged-at/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <img id="logo-cta" src="images/logo-cta.png" />
+      <img id="person-foreground" src="images/person-foreground.png" />
+      <img id="tree" src="images/tree.png" />
+      <img id="front-clouds" src="images/front-clouds.png" />
+      <img id="river-trees" src="images/river-trees.png" />
+      <img id="mountain" src="images/mountain.png" />
+      <img id="back-clouds" src="images/back-clouds.png" />
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.6/gsap.min.js"></script>
+    <script>
+      let banner
+      let tl = new gsap.timeline()
+      let animationTime = 15
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+        gsap.set('img', {display: 'block'})
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        gsap.from('#logo-cta', {
+          duration: 1,
+          alpha: 0,
+          delay: 1
+        })
+
+        gsap.to('#person-foreground', {
+          duration: animationTime,
+          scale: 1.2,
+          y: -10,
+          x: -20,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#tree', {
+          duration: animationTime,
+          scale: 1.3,
+          x: -30,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#front-clouds', {
+          duration: animationTime,
+          scale: 1.2,
+          x: 60,
+          y: 20,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#river-trees', {
+          duration: animationTime,
+          scale: 1.2,
+          y: 20,
+          x:10,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#mountain', {
+          duration: animationTime,
+          scale: 1.3,
+          y: 30,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#back-clouds', {
+          duration: animationTime,
+          scale: 1.3,
+          x: 30,
+          ease: Quad.easeInOut
+        })
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

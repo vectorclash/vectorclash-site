@@ -1,0 +1,64 @@
+.main-container {
+	position: absolute;
+	width: 160px;
+	height: 600px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+.full-frame-object {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+.logo {
+	background-image: url(../images/logo.png);
+	z-index: 1000;
+}
+
+.magnolia {
+	background-image: url(../images/magnolia.png);
+	z-index: 1000;
+}
+
+.cta {
+	background-image: url(../images/cta.png);
+	z-index: 1000;
+	display: none;
+}
+
+.text-frame1 {
+	background-image: url(../images/text-frame1.png);
+	z-index: 1000;
+	display: none;
+}
+
+.text-frame2 {
+	background-image: url(../images/text-frame2.png);
+	z-index: 1000;
+	display: none;
+}
+
+.text-frame3 {
+	background-image: url(../images/text-frame3.png);
+	z-index: 1000;
+	display: none;
+}
+
+.background {
+	position: absolute;
+	width: 200px;
+	height: 100%;
+	right: 0;
+	top: 0;
+	background-image: url(../images/background.jpg);
+	z-index: 0;
+}

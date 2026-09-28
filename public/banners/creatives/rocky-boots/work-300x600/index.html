@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 600px;
+        overflow: hidden;
+        background-color: #000000;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      .shoe-bg {
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 735px;
+        background-image: url(images/bg.jpg);
+        z-index: 0;
+      }
+
+      .text-one {
+        background-image: url(images/text-one.png);
+        mix-blend-mode: multiply;
+        opacity: 0.9;
+        z-index: 2;
+      }
+
+      .text-two {
+        background-image: url(images/text-two.png);
+        mix-blend-mode: multiply;
+        opacity: 0.9;
+        z-index: 2;
+      }
+
+      .text-three {
+        background-image: url(images/text-three.png);
+        mix-blend-mode: multiply;
+        opacity: 0.9;
+        z-index: 2;
+      }
+
+      .sparks-one {
+        background-image: url(images/sparks-one.png);
+        z-index: 6;
+      }
+
+      .sparks-two {
+        background-image: url(images/sparks-two.png);
+        z-index: 6;
+      }
+
+      .sparks-three {
+        background-image: url(images/sparks-three.png);
+        z-index: 6;
+      }
+
+      .end-frame {
+        z-index: 10;
+      }
+
+      .logo {
+        background-image: url(images/logo.png);
+        z-index: 1;
+      }
+
+      .cta {
+        background-image: url(images/cta.png);
+        z-index: 1;
+      }
+
+      .cta-over {
+        display: block;
+        opacity: 0;
+        background-image: url(images/cta-over.png);
+        z-index: 2;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.rockyboots.com/rocky-xo-toe/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <div class="end-frame frame">
+        <div class="logo full-frame-element"></div>
+        <div class="cta-over full-frame-element"></div>
+        <div class="cta full-frame-element"></div>
+      </div>
+      <div class="sparks-one full-frame-element"></div>
+      <div class="sparks-two full-frame-element"></div>
+      <div class="sparks-three full-frame-element"></div>
+      <div class="text-one full-frame-element"></div>
+      <div class="text-two full-frame-element"></div>
+      <div class="text-three full-frame-element"></div>
+      <div class="shoe-bg"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+
+        TweenMax.to('.shoe-bg', 15, {
+          y: 135,
+          ease: Quad.easeInOut
+        })
+
+        // animate text
+
+        // text one
+
+        TweenMax.from('.text-one', 1, {
+          y: -20,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['.text-one']
+        })
+
+        TweenMax.from('.sparks-one', 2, {
+          y: -30,
+          alpha: 0,
+          ease: Linear.easeNone,
+          onStart: enableElement,
+          onStartParams: ['.sparks-one']
+        })
+
+        TweenMax.to('.sparks-one', 2, {
+          y: 30,
+          alpha: 0,
+          ease: Linear.easeNone,
+          delay: 2
+        })
+
+        TweenMax.to('.text-one', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 3
+        })
+
+        // text two
+
+        TweenMax.from('.text-two', 1, {
+          y: -20,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 3,
+          onStart: enableElement,
+          onStartParams: ['.text-two']
+        })
+
+        TweenMax.from('.sparks-two', 2, {
+          y: -30,
+          alpha: 0,
+          ease: Linear.easeNone,
+          delay: 3,
+          onStart: enableElement,
+          onStartParams: ['.sparks-two']
+        })
+
+        TweenMax.to('.sparks-two', 2, {
+          y: 30,
+          alpha: 0,
+          ease: Linear.easeNone,
+          delay: 5
+        })
+
+        TweenMax.to('.text-two', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 6
+        })
+
+        // text three
+
+        TweenMax.from('.text-three', 1, {
+          y: -20,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 6,
+          onStart: enableElement,
+          onStartParams: ['.text-three']
+        })
+
+        TweenMax.from('.sparks-three', 2, {
+          y: -30,
+          alpha: 0,
+          ease: Linear.easeNone,
+          delay: 6,
+          onStart: enableElement,
+          onStartParams: ['.sparks-three']
+        })
+
+        TweenMax.to('.sparks-three', 2, {
+          y: 30,
+          alpha: 0,
+          ease: Linear.easeNone,
+          delay: 8
+        })
+
+        TweenMax.to('.text-three', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 9
+        })
+
+        // animate end frame
+
+        TweenMax.from('.logo', 1, {
+          y: 20,
+          alpha: 0,
+          delay: 10,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['.logo']
+        })
+
+        TweenMax.from('.cta', 1, {
+          y: 20,
+          alpha: 0,
+          delay: 11.5,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['.cta'],
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        })
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('.cta-over', 0.3, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('.cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

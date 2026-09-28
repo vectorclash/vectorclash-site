@@ -1,0 +1,124 @@
+#main {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0px;
+	top: 0px;
+	overflow: hidden;
+	z-index: 10000;
+	background: #FFF;
+	border: 1px solid #333;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    cursor: pointer;
+}
+
+#logo {
+	position: absolute;
+	background-image: url(../images/logo.png);
+	z-index: 200;
+}
+
+#step1 {
+	background-image: url(../images/step1.png);
+}
+
+#text1 {
+	background-image: url(../images/text1.png);
+	opacity: 0;
+}
+
+#square {
+	background-image: url(../images/square.png);
+}
+
+#icon {
+	background-image: url(../images/icon.png);
+	opacity: 0;
+}
+
+#building_mask {
+	position: absolute;
+	width: 300px;
+	height: 240px;
+	left: 0px;
+	top: 0px;
+	overflow: hidden;
+}
+
+#right_building {
+	background-image: url(../images/right_building.png);
+	opacity: 0;
+}
+
+#middle_building {
+	background-image: url(../images/middle_building.png);
+	opacity: 0;
+}
+
+#left_building {
+	background-image: url(../images/left_building.png);
+	opacity: 0;
+}
+
+#step2 {
+	background-image: url(../images/step2.png);
+	opacity: 0;
+}
+
+#text2 {
+	background-image: url(../images/text2.png);
+	opacity: 0;
+}
+
+#step3 {
+	background-image: url(../images/step3.png);
+	opacity: 0;
+}
+
+#text3 {
+	background-image: url(../images/text3.png);
+	opacity: 0;
+}
+
+#sun {
+	background-image: url(../images/sun.png);
+	opacity: 0;
+}
+
+#sun_icon {
+	background-image: url(../images/sun_icon.png);
+	opacity: 0;
+}
+
+#end_footer {
+	background-image: url(../images/end_footer.png);
+	opacity: 0;
+}
+
+#end_text {
+	background-image: url(../images/end_text.png);
+	opacity: 0;
+}
+
+#cta {
+	background-image: url(../images/cta_back.png);
+	opacity: 0;
+}
+
+#cta_arrow {
+	background-image: url(../images/cta_arrow.png);
+}
+
+#cta_text {
+	background-image: url(../images/cta_text.png);
+}
+
+.fullsizeImage {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0px;
+	top: 0px;
+}

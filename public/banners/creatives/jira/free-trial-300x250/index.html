@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+    @font-face {
+        font-family: 'charliedisplay_regular';
+        src: url('CharlieDisplay-Regular.woff2') format('woff2'),
+             url('CharlieDisplay-Regular.woff') format('woff');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      .banner {
+        position: absolute;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        z-index: 9999;
+        border: 1px solid #999;
+        box-sizing: border-box;
+        cursor: pointer;
+      }
+
+      .logo {
+        position: absolute;
+        width: 92px;
+        right: 13px;
+        bottom: 5px;
+        z-index: 200;
+      }
+
+      .title-text {
+        position: absolute;
+        top: 17px;
+        width: 100%;
+        text-align: center;
+        z-index: 100;
+        font-family: Helvetica, sans-serif;
+        font-family: "charliedisplay_regular", sans-serif;
+        font-size: 23px;
+        color: #ffffff;
+        text-shadow: 3px 3px 50px #040605;
+      }
+
+      .cursor {
+        position: absolute;
+        top: 79px;
+        left: 57px;
+        z-index: 100;
+        font-family: Helvetica, sans-serif;
+        font-weight: 700;
+        font-size: 10.5px;
+        color: #000000;
+      }
+
+      .animated-text {
+        position: absolute;
+        top: 79px;
+        left: 57px;
+        width: 80px;
+        overflow: hidden;
+        white-space: nowrap;
+        padding-right: 3px;
+        border-right: 2px solid rgba(0,0,0,0.75);
+        z-index: 100;
+        font-family: Helvetica, sans-serif;
+        font-weight: 700;
+        font-size: 10.5px;
+        color: #000000;
+      }
+
+      .cta {
+        position: absolute;
+        bottom: 20px;
+        left: 19px;
+        font-family: "charliedisplay_regular", sans-serif;
+        font-size: 17px;
+        line-height: 17px;
+        color: white;
+        background-color: #ff5630;
+        padding: 6px 12px;
+        border-radius: 4px;
+        z-index: 100;
+      }
+
+      .bg {
+        position: absolute;
+        width: 300px;
+        height: 250px;
+        background-image: url(bg.png);
+        z-index: 0;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/TweenMax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.0.2/plugins/TextPlugin.min.js"></script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="logo">
+        <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 86.37 38.98"><defs><style>.cls-1{clip-path:url(#clip-path);}.cls-2{fill:none;}.cls-3{fill:url(#linear-gradient);}.cls-4{clip-path:url(#clip-path-2);}.cls-5{fill:url(#linear-gradient-2);}.cls-6{clip-path:url(#clip-path-3);}.cls-7{fill:#fff;}.cls-8{clip-path:url(#clip-path-4);}.cls-9{mask:url(#mask);}.cls-10{fill:url(#linear-gradient-3);}.cls-11{clip-path:url(#clip-path-5);}.cls-12{mask:url(#mask-2);}.cls-13{fill:url(#linear-gradient-4);}</style><clipPath id="clip-path"><rect class="cls-2" x="7.48" y="17.38" width="17.71" height="17.72" transform="translate(-13.88 19.7) rotate(-45.88)"/></clipPath><linearGradient id="linear-gradient" y1="49.09" x2="1" y2="49.09" gradientTransform="translate(25.01 373.09) rotate(180) scale(7.06)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#666"/><stop offset="0.18" stop-color="#666"/><stop offset="1" stop-color="#fff"/></linearGradient><clipPath id="clip-path-2"><rect class="cls-2" x="1.59" y="23.31" width="17.72" height="17.71" transform="translate(-19.47 16.39) rotate(-44.2)"/></clipPath><linearGradient id="linear-gradient-2" y1="49.09" y2="49.09" gradientTransform="translate(19.33 421.61) rotate(180) scale(7.93)" xlink:href="#linear-gradient"/><clipPath id="clip-path-3" transform="translate(2.08 -5.71)"><rect class="cls-2" x="4.16" y="5.7" width="80.13" height="32.71"/></clipPath><clipPath id="clip-path-4" transform="translate(2.08 -5.71)"><path class="cls-2" d="M10.06,20a5.21,5.21,0,0,0,5.21,5.21H17.4v2.06a5.22,5.22,0,0,0,5.22,5.22h0V21a1,1,0,0,0-1-1Z"/></clipPath><mask id="mask" x="-6.63" y="-4.51" width="50.09" height="50.09" maskUnits="userSpaceOnUse"><g transform="translate(2.08 -5.71)"><g class="cls-1"><rect class="cls-3" x="-1.37" y="8.53" width="35.42" height="35.42" transform="translate(-13.87 19.7) rotate(-45.88)"/></g></g></mask><linearGradient id="linear-gradient-3" y1="49.09" x2="1" y2="49.09" gradientTransform="translate(25.01 373.09) rotate(180) scale(7.06)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset="0.18" stop-color="#fff"/><stop offset="1" stop-color="#fff"/></linearGradient><clipPath id="clip-path-5" transform="translate(2.08 -5.71)"><path class="cls-2" d="M4.16,25.92h0a5.22,5.22,0,0,0,5.22,5.21h2.14V33.2a5.22,5.22,0,0,0,5.21,5.22V26.93a1,1,0,0,0-1-1Z"/></clipPath><mask id="mask-2" x="-12.52" y="1.41" width="50.09" height="50.09" maskUnits="userSpaceOnUse"><g transform="translate(2.08 -5.71)"><g class="cls-4"><rect class="cls-5" x="-7.26" y="14.46" width="35.42" height="35.42" transform="translate(-19.47 16.39) rotate(-44.2)"/></g></g></mask><linearGradient id="linear-gradient-4" y1="49.09" y2="49.09" gradientTransform="translate(19.33 421.61) rotate(180) scale(7.93)" xlink:href="#linear-gradient-3"/></defs><title>Vector Smart Object1</title><g class="cls-6"><path class="cls-7" d="M60.07,7.32c0,.8.37,1.44,1.82,1.72.86.18,1,.32,1,.61s-.19.46-.8.46A4.44,4.44,0,0,1,60,9.54v1.3a4.26,4.26,0,0,0,2.09.46c1.52,0,2.12-.68,2.12-1.68m0,0c0-.95-.51-1.4-1.92-1.7-.79-.18-1-.35-1-.6s.28-.44.8-.44A4.53,4.53,0,0,1,64,7.33V6.09a4.09,4.09,0,0,0-1.79-.38c-1.4,0-2.12.61-2.12,1.61" transform="translate(2.08 -5.71)"/><polygon class="cls-7" points="81.64 0.08 81.64 5.5 82.8 5.5 82.8 1.37 83.28 2.47 84.92 5.5 86.37 5.5 86.37 0.08 85.21 0.08 85.21 3.58 84.78 2.57 83.47 0.08 81.64 0.08"/><rect class="cls-7" x="73.04" y="0.08" width="1.26" height="5.42"/><path class="cls-7" d="M69.5,9.62c0-.95-.5-1.4-1.92-1.7-.78-.18-1-.35-1-.6s.28-.44.8-.44a4.61,4.61,0,0,1,1.83.45V6.09a4.12,4.12,0,0,0-1.79-.38c-1.41,0-2.13.61-2.13,1.61,0,.8.37,1.44,1.82,1.72.87.18,1,.32,1,.61s-.18.46-.79.46a4.47,4.47,0,0,1-2.11-.57v1.3a4.26,4.26,0,0,0,2.09.46c1.52,0,2.12-.68,2.12-1.68" transform="translate(2.08 -5.71)"/><polygon class="cls-7" points="52.34 0.08 52.34 5.5 54.93 5.5 55.34 4.33 53.61 4.33 53.61 0.08 52.34 0.08"/><polygon class="cls-7" points="47.22 0.08 47.22 1.25 48.62 1.25 48.62 5.5 49.89 5.5 49.89 1.25 51.39 1.25 51.39 0.08 47.22 0.08"/><path class="cls-7" d="M43.29,5.8H41.63l-1.89,5.42h1.44l.27-.92a3.48,3.48,0,0,0,2,0l.27.92h1.44Zm-.83,3.53a2.68,2.68,0,0,1-.69-.1l.69-2.37.7,2.37a2.75,2.75,0,0,1-.7.1" transform="translate(2.08 -5.71)"/><path class="cls-7" d="M57.33,5.8H55.66l-1.89,5.42h1.45l.26-.92a3.48,3.48,0,0,0,2,0l.27.92h1.45Zm-.84,3.53a2.74,2.74,0,0,1-.69-.1l.69-2.37.7,2.37a2.75,2.75,0,0,1-.7.1" transform="translate(2.08 -5.71)"/><path class="cls-7" d="M76.77,5.8H75.1l-1.89,5.42h1.45l.26-.92a3.48,3.48,0,0,0,2,0l.27.92h1.45Zm-.84,3.53a2.68,2.68,0,0,1-.69-.1l.69-2.37.7,2.37a2.75,2.75,0,0,1-.7.1" transform="translate(2.08 -5.71)"/><path class="cls-7" d="M27.51,14.07H15.94a5.22,5.22,0,0,0,5.22,5.22h2.13v2.05a5.22,5.22,0,0,0,5.22,5.22V15.07a1,1,0,0,0-1-1" transform="translate(2.08 -5.71)"/></g><g class="cls-8"><g class="cls-9"><rect class="cls-10" x="7.48" y="17.38" width="17.71" height="17.72" transform="translate(-11.8 13.99) rotate(-45.88)"/></g></g><g class="cls-11"><g class="cls-12"><rect class="cls-13" x="1.59" y="23.31" width="17.72" height="17.72" transform="translate(-17.39 10.68) rotate(-44.2)"/></g></g><g class="cls-6"><path class="cls-7" d="M40.61,16.58h2.67V30c0,3.56-1.55,6-5.21,6a9.48,9.48,0,0,1-3.17-.5V33a7.3,7.3,0,0,0,2.73.5c2.24,0,3-1.33,3-3.26Z" transform="translate(2.08 -5.71)"/><path class="cls-7" d="M48.1,15.55a1.64,1.64,0,0,1,1.76,1.53.88.88,0,0,1,0,.23,1.77,1.77,0,0,1-3.53,0h0a1.65,1.65,0,0,1,1.53-1.76,1,1,0,0,1,.24,0M46.8,21.2h2.53V35.91H46.8Z" transform="translate(2.08 -5.71)"/><path class="cls-7" d="M53.16,21.19h2.47v2.59c.85-1.73,2.34-3,5.21-2.79v2.47c-3.24-.34-5.21.65-5.21,3.76v8.7H53.16Z" transform="translate(2.08 -5.71)"/><path class="cls-7" d="M72.7,33.26a5.17,5.17,0,0,1-5,2.94c-3.91,0-5.88-3.32-5.88-7.65,0-4.15,2.06-7.65,6.18-7.65a4.84,4.84,0,0,1,4.68,2.88V21.19h2.53V35.91H72.7Zm-4.29.59c2.27,0,4.29-1.45,4.29-4.71V28c0-3.27-1.85-4.71-4-4.71-2.85,0-4.32,1.89-4.32,5.3s1.41,5.3,4,5.3Z" transform="translate(2.08 -5.71)"/></g></svg>
+      </div>
+      <div class="title-text">
+        7-Day Free Trial
+      </div>
+      <!-- <div class="cursor">
+        |
+      </div> -->
+      <div class="animated-text">
+        New starts here
+      </div>
+      <div class="cta">
+        Try it free
+      </div>
+      <div class="bg"></div>
+    </div>
+    <script>
+        var clickTag = 'http://www.atlassian.com/jira'
+
+        function init() {
+          var banner = document.querySelector('.banner')
+
+          banner.addEventListener('mouseover', onBannerOver)
+          banner.addEventListener('mouseout', onBannerOut)
+          banner.addEventListener('click', onBannerClick)
+
+          animate()
+        }
+
+        function animate() {
+          var tl = new TimelineMax({
+            paused:true
+          })
+          // letter animation
+          tl.fromTo(".animated-text", 3, {
+            width: "0",
+          }, {
+            width: "80px",
+            ease:  SteppedEase.config(16)
+          }, 0)
+          // text cursor animation
+          tl.fromTo(".animated-text", 0.3, {
+            "border-right-color": "rgba(0,0,0,0.75)"
+          }, {
+            "border-right-color": "rgba(255,255,255,0)",
+            repeat: 10,
+            ease:  SteppedEase.config(37)
+          }, 0)
+
+          tl.play()
+        }
+
+        function onBannerOver(event) {
+          TweenMax.to('.cta', 0.3, {
+            backgroundColor: 0xDE350B
+          })
+        }
+
+        function onBannerOut(event) {
+          TweenMax.to('.cta', 0.2, {
+            backgroundColor: 0xFF5630
+          })
+        }
+
+        function onBannerClick(event) {
+          window.open(window.clickTag)
+        }
+
+        window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

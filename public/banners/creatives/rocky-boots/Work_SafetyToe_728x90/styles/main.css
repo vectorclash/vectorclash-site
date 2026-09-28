@@ -1,0 +1,124 @@
+.main-container {
+	position: absolute;
+	width: 728px;
+	height: 90px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  background-color: #ed3737;
+  cursor: pointer;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 728px;
+	height: 90px;
+	background-size: 100%;
+	background-repeat: no-repeat;
+  display: none;
+}
+
+.frame1 {
+	position: absolute;
+	z-index: 10;
+}
+
+.frame2 {
+	position: absolute;
+	z-index: 20;
+}
+
+.red-bar {
+	background-image: url(../images/red-bar.png);
+	z-index: 2;
+	mix-blend-mode: hard-light;
+	opacity: 0.5;
+	transform-origin: left;
+}
+
+.vignette {
+	background-image: url(../images/vignette.png);
+	z-index: 1;
+	opacity: 0.5;
+	display: block;
+}
+
+.background {
+  background-image: url(../images/background.jpg);
+  display: block;
+  z-index: 0;
+	transform-origin: right;
+}
+
+.introducing {
+	background-image: url(../images/introducing.png);
+}
+
+.bar-left {
+	background-image: url(../images/bar-left.png);
+}
+
+.bar-right {
+	background-image: url(../images/bar-right.png);
+}
+
+.the-worlds {
+	background-image: url(../images/the-worlds.png);
+}
+
+.most-comfortable {
+	background-image: url(../images/most-comfortable.png);
+}
+
+.safety-toe {
+	background-image: url(../images/safety-toe.png);
+}
+
+.xo-toe {
+	background-image: url(../images/xo-toe.png);
+	z-index: 0;
+}
+
+.xtreme-comfort {
+	background-image: url(../images/xtreme-comfort.png);
+	z-index: 0;
+}
+
+.xtreme-safety {
+	background-image: url(../images/xtreme-safety.png);
+	z-index: 0;
+}
+
+.logo {
+	background-image: url(../images/logo.png);
+	z-index: 100;
+}
+
+.boot-one {
+	background-image: url(../images/boot-one.png);
+	z-index: 10;
+}
+
+.boot-two {
+	background-image: url(../images/boot-two.png);
+	z-index: 9;
+}
+
+.cta {
+	background-image: url(../images/cta.png);
+	z-index: 10;
+}
+
+.cta-over {
+	background-image: url(../images/cta-over.png);
+	display: block;
+	opacity: 0;
+	z-index: 20;
+}

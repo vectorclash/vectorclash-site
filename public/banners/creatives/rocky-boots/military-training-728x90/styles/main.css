@@ -1,0 +1,192 @@
+.main-container {
+	position: absolute;
+	width: 728px;
+	height: 90px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  background-color: #ad0406;
+  cursor: pointer;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 728px;
+	height: 90px;
+	background-size: 100%;
+	background-repeat: no-repeat;
+  display: none;
+}
+
+.background-one {
+  background-image: url(../images/background-one.jpg);
+  display: block;
+  z-index: 0;
+}
+
+.background-two {
+  background-image: url(../images/background-two.jpg);
+  z-index: 1;
+}
+
+.shadows {
+  background-image: url(../images/shadows.png);
+  z-index: 2;
+}
+
+.red-bar {
+  background-image: url(../images/red-bar.png);
+  z-index: 3;
+  mix-blend-mode: multiply;
+}
+
+.built-for-text-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.end-text-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+}
+
+.product-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 80;
+}
+
+.vignette {
+  background-image: url(../images/vignette.png);
+}
+
+.built-text {
+  background-image: url(../images/built.png);
+}
+
+.bar-left {
+  background-image: url(../images/bar-left.png);
+}
+
+.for-text {
+  background-image: url(../images/for.png);
+}
+
+.bar-right {
+  background-image: url(../images/bar-right.png);
+}
+
+.performance-text {
+  background-image: url(../images/performance.png);
+}
+
+.combat-text {
+  background-image: url(../images/combat.png);
+}
+
+.logo {
+  background-image: url(../images/logo.png);
+  z-index: 10;
+}
+
+.cta {
+  background-image: url(../images/cta.png);
+  z-index: 0;
+}
+
+.cta-over {
+  background-image: url(../images/cta-over.png);
+  z-index: 1;
+  display: block;
+  opacity: 0;
+}
+
+.end-text {
+  background-image: url(../images/end-text.png);
+  z-index: 2;
+}
+
+.boot-one-a {
+  background-image: url(../images/boot-one-a.png);
+  z-index: 3;
+}
+
+.boot-one-b {
+  background-image: url(../images/boot-one-b.png);
+  z-index: 2;
+}
+
+.boot-one-tag {
+  background-image: url(../images/boot-one-tag.png);
+  z-index: 1;
+}
+
+.boot-two-a {
+  background-image: url(../images/boot-two-a.png);
+  z-index: 3;
+}
+
+.boot-two-b {
+  background-image: url(../images/boot-two-b.png);
+  z-index: 2;
+}
+
+.boot-two-tag {
+  background-image: url(../images/boot-two-tag.png);
+  z-index: 1;
+}
+
+.legal-button {
+	position: absolute;
+	left: 302px;
+	bottom: 5px;
+	z-index: 1000;
+	color: white;
+	font-family: sans-serif;
+	font-size: 10px;
+	text-decoration: underline;
+	display: none;
+}
+
+.legal-hit-area {
+	position: absolute;
+	left: 290px;
+	bottom: 0px;
+	width: 90px;
+	height: 30px;
+	background-color: transparent;
+	z-index: 100000;
+}
+
+.legal-overlay {
+	position: absolute;
+	width: 500px;
+	height: 100%;
+	bottom: 0;
+	right: 0;
+	opacity: 0;
+	z-index: 1000;
+	background-color: #701400;
+	box-shadow: 0px -5px 20px rgba(50, 50, 50, 0.6);
+}
+
+.legal-overlay p {
+	color: white;
+	font-family: sans-serif;
+	font-size: 10px;
+	padding: 12px;
+	line-height: 12px;
+	letter-spacing: 0.2px;
+}

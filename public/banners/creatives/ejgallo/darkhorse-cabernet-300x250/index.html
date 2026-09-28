@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<meta charset="UTF-8">
+	<title>Dark_Horse_Wine-Taste_of_Victory</title>
+	<meta name="ad.size" content="width=300,height=250">
+	<link rel="stylesheet" href="style.css">
+	<script> var clickTag = "https://www.google.com"; </script>
+	<script src="https://s0.2mdn.net/ads/studio/cached_libs/tweenmax_1.20.0_d360d9a082ccc13b1a1a9b153f86b378_min.js"></script>
+	<script src="cb_standard.js"></script>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+</head>
+<body>
+	<div id="container">
+		<!-- ~~~~~~~~~~~~~~ INSERT DIVS ~~~~~~~~~~~~~~ -->
+
+        <!-- ADD 'imgfix' CLASS ON ALL IMG TAGS DIVS -->
+
+		<div class='bg imgfix'></div>
+        <div class='bottle'><canvas id="bottle"></canvas></div>
+        <div class='label'><img src=label.png></div>
+
+        <div class='sprite t1'></div>
+        <div class='sprite t2'></div>
+
+        <div class='cta'>
+            <div class='sprite cta-text'></div>
+            <div class='sprite cta-hover'></div>
+        </div>
+
+        <div id='clickthru'></div>
+
+		<!-- ~~~~~~~~~~~~~~ INSERT DIVS ~~~~~~~~~~~~~~ -->
+        <!-- <img src="guide/1.png" style="display:block; opacity: 0.5;width: 300px;height: 250px; z-index:20;position:absolute;top:-1px;left:-1px;pointer-events:none;"> -->
+	</div>
+    <script src="https://s0.2mdn.net/ads/studio/cached_libs/easeljs_0.8.2_937c3ec68021211c056f61c9ceaccffd_min.js"></script>
+    <script src="canvas.js"></script>
+	<script>
+		var tl = new TimelineMax();
+		function initAd() {
+			//--------- PRE-LOAD IMAGE ------------
+			startPreload('sprite.png', 'bottle.png', 'light.png','label.png', startAnim);
+			//-------------------------------------
+			function startAnim() {
+				//--------------- SET -----------------
+				TweenMax.set('#container', {display: 'block'});
+                TweenMax.set('.sprite', { rotation:0.001});
+                TweenMax.set('.imgfix', { rotation:0.001});
+
+				//------------ ADD EVENT --------------
+				addEvent();
+                hoverFunction();
+                initCanvas();
+				//---------- ADD ANIMATION ------------
+				tl
+                    //=========================
+                    .add(bottleAnim)
+
+                    //=========================
+                    .add('Scene1',"+=0.3")
+                    .from('.t1', 0.8, { opacity: 0, y:30, ease: Power1.easeOut},'Scene1')
+
+                // .addPause()
+                    //=========================
+                    .add('Scene2','+=5')
+                    .to('.t1', 0.5, { opacity: 0,ease: Power1.easeOut},'Scene2')
+                    .from('.t2,.cta', 0.8, { opacity: 0, ease: Power1.easeOut},'Scene2+=0.5')
+
+                    // //=========================
+                    // .add('Scene3','+=0.5')
+                    // // .from('.cta', 0.5, { opacity: 0, ease: Power1.easeOut},'Scene3')
+
+
+
+				//-------------------------------------
+			};
+			function bottleAnim() {
+
+                var bottleTl = new TimelineMax();
+                bottleTl
+               .from('.bottle,.label', 9, {scale:0.98,x:5,  ease:Power1.easeIn},'g')
+                .to(light, 9, {x:-320,  ease:Power1.easeIn},'g')
+
+            }
+			function addEvent() {
+				//--------------- SET -----------------
+				//To add:		_(object).on(events,  function);
+				//To remove:	_(object).off(events, function);
+				//-------------------------------------
+				_('#clickthru').on('click', exit);
+			};
+
+			function exit() {
+				window.open(clickTag); /*Standard Exit*/
+				console.log('Exit')
+			}
+
+            function hoverFunction() {
+                _('#clickthru').on('mouseenter', function() {
+                    TweenMax.to('.cta', 		0.6, {backgroundColor:'#fff'});
+                    TweenMax.to('.cta-text', 	0.6, {opacity:0});
+                    TweenMax.to('.cta-hover', 	0.6, { opacity:1 });
+                });
+                _('#clickthru').on('mouseleave', function() {
+                    TweenMax.to('.cta', 		0.6, {backgroundColor:'#21211f'});
+                    TweenMax.to('.cta-text', 	0.6, {opacity:1});
+                    TweenMax.to('.cta-hover', 	0.6, {opacity:0});
+                });
+            }
+            //-------------------------------------
+
+		};
+	</script>
+</body>
+</html>
+
+<!--1018V2-->

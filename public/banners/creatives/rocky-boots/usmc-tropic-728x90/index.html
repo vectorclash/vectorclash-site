@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        overflow: hidden;
+        background-color: #afb7c8;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #background {
+        z-index: 0;
+      }
+
+      #boot {
+        left: -30px;
+        top: -142px;
+        transform: scale(0.5);
+        width: 330px;
+        height: 314px;
+        z-index: 1;
+      }
+
+      #name {
+        z-index: 2;
+      }
+
+      #logo {
+        z-index: 3;
+      }
+
+      #cta {
+        z-index: 4;
+      }
+
+      #cta-over {
+        opacity: 0;
+        z-index: 5;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.rockyboots.com/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <img src="images/background.jpg" id="background">
+      <img src="images/boot.png" id="boot">
+      <img src="images/logo.png" id="logo">
+      <img src="images/name.png" id="name">
+      <img src="images/cta.png" id="cta">
+      <img src="images/cta-over.png" id="cta-over">
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.6/gsap.min.js"></script>
+    <script>
+      var banner
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+        gsap.set('img', {display: 'block'})
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        gsap.from('#boot', {
+          alpha: 0,
+          duration: 1,
+          ease: Quad.easeOut
+        })
+
+        gsap.fromTo('#boot', {
+          y: -5
+        }, {
+          duration: 1.5,
+          y: 5,
+          ease: Quad.easeInOut,
+          yoyo: true,
+          repeat: 3,
+          onComplete: function() {
+            gsap.to('#boot', {
+              duration: 1.5,
+              y: 0,
+              ease: Quad.easeInOut
+            })
+          }
+        })
+
+        // animate in other elements
+
+        gsap.from('#logo', {
+          duration: 0.5,
+          alpha: 0,
+          x: 5,
+          delay: 1
+        })
+
+        gsap.from('#name', {
+          duration: 0.5,
+          alpha: 0,
+          x: -5,
+          delay: 1
+        })
+
+        gsap.from('#cta', {
+          duration: 0.5,
+          alpha: 0,
+          x: 5,
+          delay: 1,
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        })
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('#cta-over', 0.4, {
+          alpha: 1
+        })
+
+        TweenMax.to('#cta', 0.4, {
+          alpha: 0
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('#cta-over', 0.2, {
+          alpha: 0
+        })
+
+        TweenMax.to('#cta', 0.2, {
+          alpha: 1
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

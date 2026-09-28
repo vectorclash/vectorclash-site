@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #1c1c1c;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        background-size: 300px 250px;
+        z-index: 10;
+        display: none;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        display: none;
+      }
+
+      #your-room, #the-lounge, #the-fitness-center, #the-pool, #your-stay {
+        transform-origin: 87px 131px;
+      }
+
+      #logo-end-one {
+        z-index: 10;
+      }
+
+      #line-one {
+        z-index: 10;
+      }
+
+      #logo-end-two {
+        z-index: 10;
+      }
+
+      #line-two {
+        z-index: 10;
+      }
+
+      #logo-end-three {
+        z-index: 10;
+      }
+
+      #line-three {
+        z-index: 10;
+      }
+
+      #logo-end-four {
+        z-index: 10;
+      }
+
+      #line-four {
+        z-index: 10;
+      }
+
+      #line-five {
+        z-index: 10;
+      }
+
+      .text-upper {
+        height: 114px;
+      }
+
+      .text-lower {
+        height: 135px;
+        bottom: 0;
+        top: auto;
+      }
+
+      .text-lower img {
+        top: auto;
+        bottom: 0;
+      }
+
+      #cta {
+        z-index: 10;
+        transform-origin: 95px 188px;
+      }
+
+      #cta-over {
+        display: block;
+        z-index: 11;
+        opacity: 0;
+        transform-origin: 95px 188px;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.marriott.com'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+
+      <div class="frame" id="frame-one">
+        <div class="frame" id="device-one">
+          <img src="images/device-screen-one.png" id="device-screen-one">
+          <img src="images/device-frame.png" id="device-frame-one">
+        </div>
+        <div class="frame text-upper">
+          <img src="images/open.png" id="open-one">
+        </div>
+        <div class="frame text-lower">
+          <img src="images/your-room.png" id="your-room">
+        </div>
+        <img src="images/line-one.png" id="line-one">
+        <img src="images/logo-end.png" id="logo-end-one">
+      </div>
+
+      <div class="frame" id="frame-two">
+        <img src="images/bg-one.jpg" id="bg-one">
+        <img src="images/logo.png" id="logo-one">
+      </div>
+
+      <div class="frame" id="frame-three">
+        <div class="frame" id="device-two">
+          <img src="images/device-screen-two.png" id="device-screen-two">
+          <img src="images/device-frame.png" id="device-frame-two">
+        </div>
+        <div class="frame text-upper">
+          <img src="images/open.png" id="open-two">
+        </div>
+        <div class="frame text-lower">
+          <img src="images/the-lounge.png" id="the-lounge">
+        </div>
+        <img src="images/line-one.png" id="line-two">
+        <img src="images/logo-end.png" id="logo-end-two">
+      </div>
+
+      <div class="frame" id="frame-four">
+        <img src="images/bg-two.jpg" id="bg-two">
+        <img src="images/logo.png" id="logo-two">
+      </div>
+
+      <div class="frame" id="frame-five">
+        <div class="frame" id="device-three">
+          <img src="images/device-screen-three.png" id="device-screen-three">
+          <img src="images/device-frame.png" id="device-frame-three">
+        </div>
+        <div class="frame text-upper">
+          <img src="images/open.png" id="open-three">
+        </div>
+        <div class="frame text-lower">
+          <img src="images/the-fitness-center.png" id="the-fitness-center">
+        </div>
+        <img src="images/line-one.png" id="line-three">
+        <img src="images/logo-end.png" id="logo-end-three">
+      </div>
+
+      <div class="frame" id="frame-six">
+        <img src="images/bg-three.jpg" id="bg-three">
+        <img src="images/logo.png" id="logo-three">
+      </div>
+
+      <div class="frame" id="frame-seven">
+        <div class="frame" id="device-four">
+          <img src="images/device-screen-four.png" id="device-screen-four">
+          <img src="images/device-frame.png" id="device-frame-four">
+        </div>
+        <div class="frame text-upper">
+          <img src="images/open.png" id="open-four">
+        </div>
+        <div class="frame text-lower">
+          <img src="images/the-pool.png" id="the-pool">
+        </div>
+        <img src="images/line-one.png" id="line-four">
+      </div>
+
+      <div class="frame" id="frame-eight">
+        <img src="images/bg-four.jpg" id="bg-four">
+        <img src="images/logo.png" id="logo-four">
+      </div>
+
+      <div class="frame" id="frame-nine">
+        <div class="frame" id="device-five">
+          <img src="images/device-screen-five.png" id="device-screen-five">
+          <img src="images/device-frame.png" id="device-frame-five">
+        </div>
+        <div class="frame text-upper">
+          <img src="images/unlock.png" id="unlock">
+        </div>
+        <div class="frame text-lower">
+          <img src="images/your-stay.png" id="your-stay">
+        </div>
+        <img src="images/line-two.png" id="line-five">
+        <img src="images/logo-end.png" id="logo-end-four">
+        <img src="images/cta-over.png" id="cta-over">
+        <img src="images/cta.png" id="cta">
+      </div>
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+      var tl = new TimelineMax()
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        tl.from('#frame-one', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end-one, #device-frame-one, #device-screen-one, #open-one, #line-one, #your-room']
+        })
+
+        tl.from('#your-room', 1, {
+          scale: 0.5,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#frame-one', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        tl.from('#frame-two', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#bg-one, #logo-one']
+        }, '-=0.5')
+
+        tl.to('#frame-two', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        //
+
+        tl.from('#frame-three', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end-two, #device-frame-two, #device-screen-two, #open-two, #line-two, #the-lounge']
+        }, '-=0.5')
+
+        tl.from('#the-lounge', 1, {
+          scale: 0.5,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#frame-three', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        tl.from('#frame-four', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#bg-two, #logo-two']
+        }, '-=0.5')
+
+        tl.to('#frame-four', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        //
+
+        tl.from('#frame-five', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end-three, #device-frame-three, #device-screen-three, #open-three, #line-three, #the-fitness-center']
+        }, '-=0.5')
+
+        tl.from('#the-fitness-center', 1, {
+          scale: 0.5,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#frame-five', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        tl.from('#frame-six', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#bg-three, #logo-three']
+        }, '-=0.5')
+
+        tl.to('#frame-six', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        //
+
+        tl.from('#frame-seven', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end-four, #device-frame-four, #device-screen-four, #open-four, #line-four, #the-pool']
+        }, '-=0.5')
+
+        tl.from('#the-pool', 1, {
+          scale: 0.5,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#frame-seven', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        tl.from('#frame-eight', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#bg-four, #logo-four']
+        }, '-=0.5')
+
+        tl.to('#frame-eight', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '+=1.2')
+
+        //
+
+        tl.from('#frame-nine', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end-five, #device-frame-five, #device-screen-five, #unlock, #line-five, #your-stay']
+        }, '-=0.5')
+
+        tl.from('#your-stay', 1, {
+          scale: 0.5,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.from('#cta', 0.5, {
+          scale: 0,
+          ease: Back.easeOut,
+          onStart: enableElement,
+          onStartParams: ['#cta, #cta-over'],
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        }, '+=0.5')
+
+        tl.duration(15)
+        // console.log(tl.duration())
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('#cta-over', 0.4, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('#cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

@@ -1,0 +1,161 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.main-container {
+  position: relative;
+  width: 300px;
+  height: 250px;
+  overflow: hidden;
+  z-index: 9999;
+  border: 1px solid #432973;
+  background-color: #fff;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.frame {
+  background-color: #fff;
+  display: none;
+}
+
+.full-frame-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 250px;
+  overflow: hidden;
+}
+
+/*set background images and z-indexes*/
+
+/*generic*/
+
+.logo {
+  background-image: url(../images/logo.png);
+  z-index: 10000;
+}
+
+.logo-white {
+  opacity: 0;
+  background-image: url(../images/logo-white.png);
+  z-index: 10001;
+}
+
+.color-bar {
+  background-image: url(../images/color-bar.png);
+  z-index: 10000;
+}
+
+.frame-text {
+  z-index: 100;
+}
+
+.frame-bg {
+  z-index: 0;
+}
+
+/*frame 1*/
+
+#frame-1 {
+  z-index: 0;
+}
+
+.frame-1-text-1 {
+  background-image: url(../images/frame-1-text-1.png);
+}
+
+.frame-1-text-2 {
+  background-image: url(../images/frame-1-text-2.png);
+}
+
+.frame-1-text-3 {
+  background-image: url(../images/frame-1-text-3.png);
+}
+
+.frame-1-text-4 {
+  background-image: url(../images/frame-1-text-4.png);
+}
+
+/*frame 2*/
+
+#frame-2 {
+  z-index: 2;
+}
+
+.frame-2-text-1 {
+  background-image: url(../images/frame-2-text-1.png);
+}
+
+.frame-2-text-2 {
+  background-image: url(../images/frame-2-text-2.png);
+}
+
+.frame-2-text-3 {
+  background-image: url(../images/frame-2-text-3.png);
+}
+
+.frame-2-bg {
+  background-image: url(../images/frame-2-bg.jpg);
+}
+
+/*frame 3*/
+
+#frame-3 {
+  z-index: 3;
+}
+
+.frame-3-text-1 {
+  background-image: url(../images/frame-3-text-1.png);
+}
+
+.frame-3-text-2 {
+  background-image: url(../images/frame-3-text-2.png);
+}
+
+.frame-3-text-3 {
+  background-image: url(../images/frame-3-text-3.png);
+}
+
+.frame-3-bg {
+  background-image: url(../images/frame-3-bg.jpg);
+}
+
+/*frame 4*/
+
+#frame-4 {
+  z-index: 4;
+}
+
+.frame-4-text-1 {
+  background-image: url(../images/frame-4-text-1.png);
+}
+
+.frame-4-text-2 {
+  background-image: url(../images/frame-4-text-2.png);
+}
+
+.frame-4-text-3 {
+  background-image: url(../images/frame-4-text-3.png);
+}
+
+.frame-4-bg {
+  background-image: url(../images/frame-4-bg.jpg);
+}
+
+/*frame 5*/
+
+#frame-5 {
+  z-index: 5;
+}
+
+.frame-5-text-1 {
+  background-image: url(../images/frame-5-text-1.png);
+}
+
+.frame-5-arrow {
+  background-image: url(../images/frame-5-arrow.png);
+}

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="ad.size" content="width=300,height=250">
+  <style media="screen">
+    .banner {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 300px;
+      height: 250px;
+      overflow: hidden;
+      background-color: #FFFFFF;
+      cursor: pointer;
+    }
+
+    .full-frame-element {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      background-size: 100%;
+      z-index: 10;
+    }
+
+    .frame {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .border {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #333;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      z-index: 100;
+    }
+
+    img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+
+    #frame-one {
+      background-image: radial-gradient(circle at 300px 100px, #00dbd7, #055290);
+      background-color: #055290;
+      z-index: 0;
+    }
+
+    #gradient {
+      top: 80px;
+      width: 300px;
+      height: 50px;
+      background-image: radial-gradient(circle at 300px 0px, #00dbd7, #055290);
+      background-color: #055290;
+      opacity: 0;
+    }
+
+    #text-three-quotes {
+      transform-origin: 30px 30px;
+    }
+
+    #frame-start {
+      background-color: #FFFFFF;
+      z-index: 2;
+    }
+
+    #frame-end {
+      background-color: #FFFFFF;
+    }
+
+    #cta-over {
+      opacity: 0;
+    }
+  </style>
+  <script>
+    var clickTag = 'https://www.intuit.com/company/corporate-responsibility/financial-empowerment/'
+  </script>
+</head>
+
+<body>
+  <div class="banner">
+    <div id="frame-start" class="frame">
+      <img src="images/logos-one.png">
+    </div>
+
+    <div id="frame-one" class="frame">
+      <img src="images/image-one.png" id="image-one">
+      <img src="images/text-one-line-one.png" id="text-one-line-one">
+      <img src="images/text-one-line-two.png" id="text-one-line-two">
+      <img src="images/text-two-line-one.png" id="text-two-line-one">
+      <img src="images/text-two-line-two.png" id="text-two-line-two">
+      <img src="images/text-three-line-one.png" id="text-three-line-one">
+      <img src="images/text-three-line-two.png" id="text-three-line-two">
+      <img src="images/text-three-quote.png" id="text-three-quote">
+    </div>
+
+    <div id="frame-end" class='frame'>
+      <div id="gradient" class="frame"></div>
+      <img src="images/text-end-cutout.png" id="text-end-cutout">
+      <img src="images/logos-end.png" id="logos-end">
+      <img src="images/text-end-line-one.png" id="text-end-line-one">
+      <img src="images/text-end-line-two.png" id="text-end-line-two">
+      <img src="images/text-end-line-four.png" id="text-end-line-four">
+      <img src="images/cta.png" id="cta">
+      <img src="images/cta-over.png" id="cta-over">
+    </div>
+
+    <div class="border"></div>
+
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+  <script>
+    var banner
+    var tl = new gsap.timeline()
+
+    function init() {
+      banner = document.querySelector('.banner')
+      gsap.set('img', { display: 'block' })
+      animate()
+
+      banner.addEventListener('click', onBannerClick)
+    }
+
+    function animate() {
+      tl.to('#frame-start', {
+        duration: 1,
+        x: -(banner.clientWidth),
+        ease: 'quad.inOut'
+      }, 1)
+
+      var coordinatesOne = [
+        { x: '0px', y: '150px' },
+        { x: '300px', y: '50px' }
+      ]
+      tl.add(gradientAnimation(banner.querySelector('#frame-one'), 5.5, coordinatesOne), 2)
+
+      tl.from('#text-one-line-one', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 2)
+
+      tl.from('#text-one-line-two', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 2.25)
+
+      tl.to('#text-one-line-one, #text-one-line-two', {
+        duration: 0.5,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 5)
+
+      tl.from('#text-two-line-one', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 5.5)
+
+      tl.from('#text-two-line-two', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 5.75)
+
+      tl.to('#image-one, #text-two-line-one, #text-two-line-two', {
+        duration: 1,
+        y: -93,
+        ease: 'quad.inOut'
+      }, 8)
+
+      tl.from('#text-three-quote', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 8.5)
+
+      tl.from('#text-three-line-one', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 8.75)
+
+      tl.from('#text-three-line-two', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 9)
+
+      // begin end frame
+
+      var coordinatesTwo = [
+        { x: '0px', y: '0px' },
+        { x: '250px', y: '200px' },
+        { x: '0px', y: '0px' }
+      ]
+      tl.add(gradientAnimation(banner.querySelector('#gradient'), 2, coordinatesTwo), 12)
+
+      tl.fromTo('#frame-end', {
+        x: banner.clientWidth,
+      }, {
+        duration: 1,
+        x: 0,
+        ease: 'quad.inOut'
+      }, 12)
+
+      tl.from('#text-end-line-one', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 13)
+
+      tl.from('#text-end-line-two', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 13.25)
+
+      tl.from('#text-end-cutout, #gradient', {
+        duration: 0.5,
+        y: 30,
+        ease: 'power1.out'
+      }, 13.5)
+
+      tl.to('#gradient', {
+        duration: 0.5,
+        alpha: 1,
+        ease: 'power1.out'
+      }, 13.5)
+
+      tl.from('#text-end-line-four', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out'
+      }, 13.75)
+
+      tl.from('#cta', {
+        duration: 0.5,
+        y: 30,
+        alpha: 0,
+        ease: 'power1.out',
+        onComplete: enableRollover
+      }, 14.75)
+    }
+
+    function gradientAnimation(element, speed, coordinates) {
+      var color1 = '#00dbd7'
+      var color2 = '#055290'
+      var gradientTimeline = new gsap.timeline()
+
+      for (var i = 0; i < coordinates.length; i++) {
+        var gradientString = 'radial-gradient(circle at ' + coordinates[i].x + ' ' + coordinates[i].y + ', ' + color1 + ', ' + color2 + ')'
+        gradientTimeline.to(element, {
+          duration: speed,
+          backgroundImage: gradientString,
+          ease: 'power1.out',
+        })
+      }
+
+      return gradientTimeline
+    }
+
+    function enableRollover() {
+      banner.addEventListener('mouseover', onBannerOver)
+      banner.addEventListener('mouseout', onBannerOut)
+    }
+
+    function onBannerClick(event) {
+      window.open(clickTag)
+    }
+
+    function onBannerOver(event) {
+      TweenMax.to('#cta-over', 0.3, {
+        alpha: 1
+      })
+    }
+
+    function onBannerOut(event) {
+      TweenMax.to('#cta-over', 0.15, {
+        alpha: 0
+      })
+    }
+
+    window.addEventListener('load', init)
+  </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+#main {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0px;
+	top: 0px;
+	overflow: hidden;
+	z-index: 10000;
+	background-image: url(../images/background.png);
+	border: 1px solid #333;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    cursor: pointer;
+}
+
+#building_mask {
+	position: absolute;
+	width: 300px;
+	height: 239px;
+	left: 0px;
+	top: 0px;
+	overflow: hidden;
+}
+
+#logo {
+	position: absolute;
+	width: 42px;
+	height: 44px;
+	left: 21px;
+	bottom: 12px;
+	background-image: url(../images/logo.png);
+	z-index: 200;
+}
+
+#cta {
+	position: absolute;
+	width: 113px;
+	height: 31px;
+	right: 11px;
+	top: 192px;
+	background-image: url(../images/cta_background.png);
+	z-index: 190;
+	opacity: 0;
+}
+
+#cta_arrow {
+	position: absolute;
+	width: 113px;
+	height: 31px;
+	background-image: url(../images/cta_arrow.png);
+}
+
+#cta_text {
+	position: absolute;
+	width: 113px;
+	height: 31px;
+	background-image: url(../images/cta_text.png);
+}
+
+#buildings {
+	background-image: url(../images/buildings.png);
+	z-index: 150;
+}
+
+#background_offpeak {
+	background-image: url(../images/frame1_background_offpeak.png);
+	z-index: 100;
+	opacity: 0;
+}
+
+#background_partialpeak {
+	background-image: url(../images/frame1_background_partialpeak.png);
+	z-index: 100;
+	opacity: 0;
+}
+
+#frame1_text1 {
+	background-image: url(../images/frame1_text1.png);
+	z-index: 120;
+}
+
+#frame1_text_offpeak {
+	background-image: url(../images/frame1_text_offpeak.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+#frame1_text_partialpeak {
+	background-image: url(../images/frame1_text_partialpeak.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+#frame1_text_peak {
+	background-image: url(../images/frame1_text_peak.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+#frame5_text {
+	background-image: url(../images/frame5_text.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+#frame6_text {
+	background-image: url(../images/frame6_text.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+#frame6_footer {
+	background-image: url(../images/frame6_footer.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+#moon {
+	background-image: url(../images/moon.png);
+	z-index: 110;
+	opacity: 0;
+}
+
+#cloud {
+	position: absolute;
+	width: 56px;
+	height: 28px;
+	left: 150px;
+	bottom: 72px;
+	background-image: url(../images/cloud.png);
+	z-index: 110;
+	opacity: 0;
+}
+
+#sun {
+	position: absolute;
+	width: 138px;
+	height: 136px;
+	left: 80px;
+	top: 90px;
+	background-image: url(../images/sun.png);
+	z-index: 110;
+	opacity: 0;
+}
+
+#icon {
+	position: absolute;
+	width: 138px;
+	height: 136px;
+	background-image: url(../images/sun_icon.png);
+	z-index: 120;
+	opacity: 0;
+}
+
+.fullsizeImage {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0px;
+	top: 0px;
+}

@@ -1,0 +1,857 @@
+[
+  {
+    "client": "Atlassian",
+    "banners": [
+      {
+        "title": "Jira",
+        "width": 300,
+        "height": 250,
+        "path": "jira/jira-300x250"
+      },
+      {
+        "title": "Jira",
+        "width": 300,
+        "height": 600,
+        "path": "jira/jira-300x600"
+      },
+      {
+        "title": "Jira",
+        "width": 728,
+        "height": 90,
+        "path": "jira/jira-728x90"
+      },
+      {
+        "title": "Jira Free Trial",
+        "width": 300,
+        "height": 250,
+        "path": "jira/free-trial-300x250"
+      },
+      {
+        "title": "New Jira",
+        "width": 300,
+        "height": 250,
+        "path": "jira/new-jira-300x250"
+      }
+    ]
+  },
+  {
+    "client": "Bowers & Wilkins",
+    "banners": [
+      {
+        "title": "700 Series",
+        "width": 160,
+        "height": 600,
+        "path": "bowers-wilkins/700-series-160x600"
+      },
+      {
+        "title": "700 Series",
+        "width": 300,
+        "height": 250,
+        "path": "bowers-wilkins/700-series-300x250"
+      },
+      {
+        "title": "700 Series",
+        "width": 728,
+        "height": 90,
+        "path": "bowers-wilkins/700-series-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Cool Effect",
+    "banners": [
+      {
+        "title": "Earth Day",
+        "width": 300,
+        "height": 250,
+        "path": "COOL-0134_EarthDay/COOL-0134_EarthDay_300x250"
+      },
+      {
+        "title": "Earth Day",
+        "width": 300,
+        "height": 600,
+        "path": "COOL-0134_EarthDay/COOL-0134_EarthDay_300x600"
+      },
+      {
+        "title": "Earth Day",
+        "width": 728,
+        "height": 90,
+        "path": "COOL-0134_EarthDay/COOL-0134_EarthDay_728x90"
+      }
+    ]
+  },
+  {
+    "client": "Delta Dental AARP",
+    "banners": [
+      {
+        "title": "Prospecting Blue",
+        "width": 300,
+        "height": 250,
+        "path": "DDAA-0094/blue/DDAA-0094-Pros-Blue-GetYourGuide-300x250"
+      },
+      {
+        "title": "Retention Blue",
+        "width": 728,
+        "height": 90,
+        "path": "DDAA-0094/blue/DDAA-0094-Ret-Blue-EnrollNow-728x90"
+      },
+      {
+        "title": "Prospecting Green",
+        "width": 300,
+        "height": 600,
+        "path": "DDAA-0094/green/DDAA-0094-Pros-Green-GetYourGuide-300x600"
+      },
+      {
+        "title": "Prospecting Green",
+        "width": 728,
+        "height": 90,
+        "path": "DDAA-0094/green/DDAA-0094-Pros-Green-LearnMore-728x90"
+      },
+      {
+        "title": "Retention Orange",
+        "width": 300,
+        "height": 250,
+        "path": "DDAA-0094/orange/DDAA-0094-Ret-Orange-EnrollNow-300x250"
+      },
+      {
+        "title": "Prospecting Purple",
+        "width": 300,
+        "height": 600,
+        "path": "DDAA-0094/purple/DDAA-0094-Pros-Purple-LearnMore-300x600"
+      },
+      {
+        "title": "Information Guide",
+        "width": 300,
+        "height": 250,
+        "path": "delta-dental/information-guide-300x250"
+      },
+      {
+        "title": "Information Guide",
+        "width": 300,
+        "height": 600,
+        "path": "delta-dental/information-guide-300x600"
+      },
+      {
+        "title": "Information Guide",
+        "width": 728,
+        "height": 90,
+        "path": "delta-dental/information-guide-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Dole",
+    "banners": [
+      {
+        "title": "Lion King",
+        "width": 300,
+        "height": 250,
+        "path": "DOLE-0036_LionKing/300x250"
+      }
+    ]
+  },
+  {
+    "client": "Durango",
+    "banners": [
+      {
+        "title": "American Classic",
+        "width": 300,
+        "height": 250,
+        "path": "durango/american-classic-300x250"
+      },
+      {
+        "title": "American Classic",
+        "width": 300,
+        "height": 600,
+        "path": "durango/american-classic-300x600"
+      },
+      {
+        "title": "American Classic",
+        "width": 728,
+        "height": 90,
+        "path": "durango/american-classic-728x90"
+      }
+    ]
+  },
+  {
+    "client": "E&J Gallo",
+    "banners": [
+      {
+        "title": "DarkHorse Pinot",
+        "width": 300,
+        "height": 250,
+        "path": "ejgallo/DarkHorseWine_BestBuy_300x250_EN_Blue"
+      },
+      {
+        "title": "DarkHorse Pinot",
+        "width": 300,
+        "height": 600,
+        "path": "ejgallo/DarkHorseWine_BestBuy_300x600_EN_Blue"
+      },
+      {
+        "title": "DarkHorse Cabernet",
+        "width": 300,
+        "height": 250,
+        "path": "ejgallo/darkhorse-cabernet-300x250"
+      },
+      {
+        "title": "DarkHorse Cabernet",
+        "width": 300,
+        "height": 600,
+        "path": "ejgallo/darkhorse-cabernet-300x600"
+      },
+      {
+        "title": "DarkHorse Cabernet",
+        "width": 728,
+        "height": 90,
+        "path": "ejgallo/darkhorse-cabernet-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Edwards Lifesciences",
+    "banners": [
+      {
+        "title": "SAPIEN 3 Ultra",
+        "width": 300,
+        "height": 250,
+        "path": "edwards/sapien-3-ultra-300x250"
+      },
+      {
+        "title": "SAPIEN 3 Ultra",
+        "width": 728,
+        "height": 90,
+        "path": "edwards/sapien-3-ultra-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Georgia Boot",
+    "banners": [
+      {
+        "title": "Carbo-Tec LTX",
+        "width": 300,
+        "height": 250,
+        "path": "georgia-boot/carbo-tec-ltx-300x250"
+      },
+      {
+        "title": "Carbo-Tec LTX",
+        "width": 300,
+        "height": 600,
+        "path": "georgia-boot/carbo-tec-ltx-300x600"
+      },
+      {
+        "title": "Carbo-Tec LTX",
+        "width": 728,
+        "height": 90,
+        "path": "georgia-boot/carbo-tec-ltx-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Imagen",
+    "banners": [
+      {
+        "title": "Rethink Quality",
+        "width": 300,
+        "height": 250,
+        "path": "imagen/rethink-quality-300x250"
+      },
+      {
+        "title": "Rethink Quality",
+        "width": 300,
+        "height": 600,
+        "path": "imagen/rethink-quality-300x600"
+      },
+      {
+        "title": "Rethink Quality",
+        "width": 728,
+        "height": 90,
+        "path": "imagen/rethink-quality-728x90"
+      },
+      {
+        "title": "Rethink Quality",
+        "width": 970,
+        "height": 250,
+        "path": "imagen/rethink-quality-970x250"
+      }
+    ]
+  },
+  {
+    "client": "Intuit",
+    "banners": [
+      {
+        "title": "Tax Philanthropy",
+        "width": 300,
+        "height": 250,
+        "path": "intuit/tax-philanthropy-300x250"
+      },
+      {
+        "title": "Tax Philanthropy",
+        "width": 728,
+        "height": 90,
+        "path": "intuit/tax-philanthropy-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Juniper Networks",
+    "banners": [
+      {
+        "title": "Security EX1",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/FY17_Security_Rich_JUNI-0347_EX1_300x250"
+      },
+      {
+        "title": "Security EX1",
+        "width": 300,
+        "height": 600,
+        "path": "juniper/FY17_Security_Rich_JUNI-0347_EX1_300x600"
+      },
+      {
+        "title": "Security EX2",
+        "width": 640,
+        "height": 480,
+        "path": "juniper/FY17_Security_Rich_JUNI-0347_EX2_640x480"
+      },
+      {
+        "title": "Security EX2",
+        "width": 728,
+        "height": 90,
+        "path": "juniper/FY17_Security_Rich_JUNI-0347_EX2_728x90"
+      },
+      {
+        "title": "Anthem EX1",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/JUNI-0429_FY17_Build_More_Security_Anthem-A-Secure-Enterprise_Learnmore_300x250_English_HTML5"
+      },
+      {
+        "title": "Anthem EX2",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/JUNI-0429_FY17_Build_More_Security_Anthem-A-Secure-Network_Learnmore_300x250_English_HTML5"
+      },
+      {
+        "title": "Anthem EX3",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/JUNI-0429_FY17_Build_More_Security_Anthem-Secure-Your-Workforce_Learnmore_300x250_English_HTML5"
+      },
+      {
+        "title": "Business Builder",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/JUNI-0491_300x250"
+      },
+      {
+        "title": "Security Q1 Bridge",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/JUNI-0566_Security_Q1Bridge_Getthereport_300x250_English"
+      },
+      {
+        "title": "Security Teaser",
+        "width": 300,
+        "height": 250,
+        "path": "juniper/security-teaser-300x250"
+      },
+      {
+        "title": "Security Teaser",
+        "width": 300,
+        "height": 600,
+        "path": "juniper/security-teaser-300x600"
+      },
+      {
+        "title": "Security Teaser",
+        "width": 728,
+        "height": 90,
+        "path": "juniper/security-teaser-728x90"
+      },
+      {
+        "title": "Security Teaser",
+        "width": 640,
+        "height": 480,
+        "path": "juniper/security-teaser-640x480"
+      },
+      {
+        "title": "Here Welcome Ad",
+        "width": 640,
+        "height": 480,
+        "path": "juniper/here-welcome-ad-640x480"
+      },
+      {
+        "title": "Anthem Billboard",
+        "width": 970,
+        "height": 250,
+        "path": "juniper/anthem-billboard-970x250"
+      },
+      {
+        "title": "Anthem Welcome Ad",
+        "width": 640,
+        "height": 480,
+        "path": "juniper/anthem-welcome-ad-640x480"
+      },
+      {
+        "title": "SD-WAN EX1",
+        "width": 336,
+        "height": 228,
+        "path": "juniper/sd-wan-ex1-336x228"
+      },
+      {
+        "title": "SD-WAN EX2",
+        "width": 336,
+        "height": 228,
+        "path": "juniper/sd-wan-ex2-336x228"
+      }
+    ]
+  },
+  {
+    "client": "Litmus",
+    "banners": [
+      {
+        "title": "Email Hustle",
+        "width": 300,
+        "height": 250,
+        "path": "litmus/email-hustle-300x250"
+      },
+      {
+        "title": "Email Hustle",
+        "width": 300,
+        "height": 600,
+        "path": "litmus/email-hustle-300x600"
+      },
+      {
+        "title": "Email Hustle",
+        "width": 728,
+        "height": 90,
+        "path": "litmus/email-hustle-728x90"
+      }
+    ]
+  },
+  {
+    "client": "Marriott Bonvoy",
+    "banners": [
+      {
+        "title": "Shuttle Tracker",
+        "width": 300,
+        "height": 250,
+        "path": "marriott-bonvoy/shuttle-tracker-300x250"
+      },
+      {
+        "title": "Shuttle Tracker",
+        "width": 300,
+        "height": 600,
+        "path": "marriott-bonvoy/shuttle-tracker-300x600"
+      },
+      {
+        "title": "Shuttle Tracker",
+        "width": 728,
+        "height": 90,
+        "path": "marriott-bonvoy/shuttle-tracker-728x90"
+      },
+      {
+        "title": "Shuttle Tracker",
+        "width": 970,
+        "height": 250,
+        "path": "marriott-bonvoy/shuttle-tracker-970x250"
+      },
+      {
+        "title": "Unlock Your Stay",
+        "width": 300,
+        "height": 250,
+        "path": "marriott-bonvoy/unlock-your-stay-300x250"
+      },
+      {
+        "title": "Unlock Your Stay",
+        "width": 320,
+        "height": 480,
+        "path": "marriott-bonvoy/unlock-your-stay-320x480"
+      }
+    ]
+  },
+  {
+    "client": "Microsoft Stores",
+    "banners": [
+      {
+        "title": "Lenovo",
+        "width": 300,
+        "height": 250,
+        "path": "microsoft/MSFT1658_WMR_Lenovo_300x250"
+      },
+      {
+        "title": "Lenovo",
+        "width": 300,
+        "height": 600,
+        "path": "microsoft/MSFT1658_WMR_Lenovo_300x600"
+      }
+    ]
+  },
+  {
+    "client": "Monrovia",
+    "banners": [
+      {
+        "title": "Annuals",
+        "width": 300,
+        "height": 250,
+        "path": "monrovia/Annuals/300x250"
+      },
+      {
+        "title": "Annuals",
+        "width": 728,
+        "height": 90,
+        "path": "monrovia/Annuals/728x90"
+      },
+      {
+        "title": "Blueberries",
+        "width": 300,
+        "height": 250,
+        "path": "monrovia/Blueberries/300x250"
+      },
+      {
+        "title": "Blueberries",
+        "width": 640,
+        "height": 480,
+        "path": "monrovia/Blueberries/640x480"
+      },
+      {
+        "title": "Container",
+        "width": 300,
+        "height": 250,
+        "path": "monrovia/Container/300x250"
+      },
+      {
+        "title": "Perennials",
+        "width": 300,
+        "height": 250,
+        "path": "monrovia/Perennials/300x250"
+      },
+      {
+        "title": "Perennials",
+        "width": 300,
+        "height": 600,
+        "path": "monrovia/Perennials/300x600"
+      },
+      {
+        "title": "Perennials",
+        "width": 640,
+        "height": 480,
+        "path": "monrovia/Perennials/640x480"
+      },
+      {
+        "title": "Shrubs",
+        "width": 300,
+        "height": 250,
+        "path": "monrovia/Shrubs/300x250"
+      },
+      {
+        "title": "Succulents",
+        "width": 300,
+        "height": 250,
+        "path": "monrovia/Succulents/300x250"
+      }
+    ]
+  },
+  {
+    "client": "PG&E",
+    "banners": [
+      {
+        "title": "Summer Readiness Peak",
+        "width": 300,
+        "height": 250,
+        "path": "pge/PGNE-0153_SummerReadiness_PEAK_BEC_300x250"
+      },
+      {
+        "title": "Summer Readiness Steps",
+        "width": 300,
+        "height": 250,
+        "path": "pge/PGNE-0153_SummerReadiness_STEPS_MU_300x250"
+      },
+      {
+        "title": "Summer Readiness Icon",
+        "width": 300,
+        "height": 250,
+        "path": "pge/PGNE-0174_Summer_Readiness_Icon_300x250"
+      },
+      {
+        "title": "Summer Readiness Lifestyle",
+        "width": 300,
+        "height": 250,
+        "path": "pge/PGNE-0174_Summer_Readiness_Lifestyle_300x250"
+      }
+    ]
+  },
+  {
+    "client": "Rocky Boots",
+    "banners": [
+      {
+        "title": "National Park Legacy 32",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/legacy32_300x250"
+      },
+      {
+        "title": "National Park Rugged AT",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/rugged-at_300x250"
+      },
+      {
+        "title": "Outdoor Heritage",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/Outdoor_Heritage_300x250"
+      },
+      {
+        "title": "Outdoor Rubber Boots",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/Outdoor_RubberBoots_300x250"
+      },
+      {
+        "title": "Outdoor Rubber Boots",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/Outdoor_RubberBoots_300x600"
+      },
+      {
+        "title": "Outdoor Venator",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/Outdoor_Venator_300x250"
+      },
+      {
+        "title": "Work Safety Toe",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/Work_SafetyToe_300x250"
+      },
+      {
+        "title": "Work Safety Toe",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/Work_SafetyToe_728x90"
+      },
+      {
+        "title": "Military Training",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/military-training-300x250"
+      },
+      {
+        "title": "Military Training",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/military-training-300x600"
+      },
+      {
+        "title": "Military Training",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/military-training-728x90"
+      },
+      {
+        "title": "Long Range",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/long-range-300x250"
+      },
+      {
+        "title": "Long Range",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/long-range-300x600"
+      },
+      {
+        "title": "Long Range",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/long-range-728x90"
+      },
+      {
+        "title": "Work",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/work-300x250"
+      },
+      {
+        "title": "Work",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/work-300x600"
+      },
+      {
+        "title": "Work",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/work-728x90"
+      },
+      {
+        "title": "USMC Tropic",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/usmc-tropic-300x250"
+      },
+      {
+        "title": "USMC Tropic",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/usmc-tropic-300x600"
+      },
+      {
+        "title": "USMC Tropic",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/usmc-tropic-728x90"
+      },
+      {
+        "title": "Rugged Performance",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/rugged-performance-300x250"
+      },
+      {
+        "title": "Rugged Performance",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/rugged-performance-300x600"
+      },
+      {
+        "title": "Rugged Performance",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/rugged-performance-728x90"
+      },
+      {
+        "title": "National Park Outback",
+        "width": 300,
+        "height": 250,
+        "path": "rocky-boots/national-park-outback-300x250"
+      },
+      {
+        "title": "National Park Outback",
+        "width": 300,
+        "height": 600,
+        "path": "rocky-boots/national-park-outback-300x600"
+      },
+      {
+        "title": "National Park Outback",
+        "width": 728,
+        "height": 90,
+        "path": "rocky-boots/national-park-outback-728x90"
+      }
+    ]
+  },
+  {
+    "client": "San Francisco General Hospital Foundation",
+    "banners": [
+      {
+        "title": "150 Years of Care",
+        "width": 300,
+        "height": 250,
+        "path": "sfghf/150-years-of-care-300x250"
+      },
+      {
+        "title": "150 Years of Care",
+        "width": 300,
+        "height": 600,
+        "path": "sfghf/150-years-of-care-300x600"
+      },
+      {
+        "title": "150 Years of Care",
+        "width": 728,
+        "height": 90,
+        "path": "sfghf/150-years-of-care-728x90"
+      },
+      {
+        "title": "150 Years of Care",
+        "width": 970,
+        "height": 250,
+        "path": "sfghf/150-years-of-care-970x250"
+      }
+    ]
+  },
+  {
+    "client": "Subway",
+    "banners": [
+      {
+        "title": "Club Collection",
+        "width": 300,
+        "height": 250,
+        "path": "subway/club/300x250"
+      },
+      {
+        "title": "Club Collection",
+        "width": 300,
+        "height": 600,
+        "path": "subway/club/300x600"
+      },
+      {
+        "title": "Mini Collection",
+        "width": 300,
+        "height": 250,
+        "path": "subway/mini/300x250"
+      }
+    ]
+  },
+  {
+    "client": "TE Connectivity",
+    "banners": [
+      {
+        "title": "rFlight",
+        "width": 300,
+        "height": 250,
+        "path": "te-connectivity/rflight-300x250"
+      },
+      {
+        "title": "rFlight",
+        "width": 300,
+        "height": 600,
+        "path": "te-connectivity/rflight-300x600"
+      },
+      {
+        "title": "rFlight",
+        "width": 728,
+        "height": 90,
+        "path": "te-connectivity/rflight-728x90"
+      },
+      {
+        "title": "Every Connection Counts",
+        "width": 300,
+        "height": 250,
+        "path": "te-connectivity/every-connection-counts-300x250"
+      },
+      {
+        "title": "Every Connection Counts",
+        "width": 300,
+        "height": 600,
+        "path": "te-connectivity/every-connection-counts-300x600"
+      },
+      {
+        "title": "Every Connection Counts",
+        "width": 728,
+        "height": 90,
+        "path": "te-connectivity/every-connection-counts-728x90"
+      },
+      {
+        "title": "See the Stories",
+        "width": 300,
+        "height": 250,
+        "path": "te-connectivity/see-the-stories-300x250"
+      },
+      {
+        "title": "See the Stories",
+        "width": 300,
+        "height": 600,
+        "path": "te-connectivity/see-the-stories-300x600"
+      },
+      {
+        "title": "See the Stories",
+        "width": 728,
+        "height": 90,
+        "path": "te-connectivity/see-the-stories-728x90"
+      }
+    ]
+  }
+]

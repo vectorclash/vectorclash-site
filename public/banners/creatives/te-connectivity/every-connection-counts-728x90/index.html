@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        overflow: hidden;
+        background-color: #FFFFFF;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        display: none;
+        background-size: 728px 90px;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      .bg {
+        display: block;
+        background-image: url(images/bg.jpg);
+        left: 150px;
+        z-index: 0;
+      }
+
+      .bg-mask {
+        display: block;
+        background-image: url(images/bg-mask.png);
+        z-index: 1;
+      }
+
+      .product {
+        position: absolute;
+        display: none;
+        width: 340px;
+        height: 192px;
+        right: 80px;
+        top: -45px;
+        transform: scale(0.2);
+        background-image: url(images/product.png);
+        z-index: 60;
+      }
+
+      .end-frame-text {
+        background-image: url(images/end-frame-text.png);
+      }
+
+      .logo {
+        display: block;
+        background-image: url(images/logo.png);
+        z-index: 50;
+      }
+
+      .cta {
+        display: block;
+        background-image: url(images/cta.png);
+        z-index: 50;
+      }
+
+      .cta-over {
+        display: block;
+        background-image: url(images/cta-over.png);
+        z-index: 51;
+        opacity: 0;
+      }
+
+      .text-one {
+        background-image: url(images/text-one.png);
+        z-index: 10;
+      }
+
+      .text-two {
+        background-image: url(images/text-two.png);
+        z-index: 10;
+      }
+
+      .text-three {
+        background-image: url(images/text-three.png);
+        z-index: 10;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.te.com'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <div class="logo full-frame-element"></div>
+      <div class="cta-over full-frame-element"></div>
+      <div class="cta full-frame-element"></div>
+      <div class="product"></div>
+      <div class="end-frame-text full-frame-element"></div>
+      <div class="text-one full-frame-element"></div>
+      <div class="text-two full-frame-element"></div>
+      <div class="text-three full-frame-element"></div>
+      <div class="bg-mask full-frame-element"></div>
+      <div class="bg full-frame-element"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+        banner.addEventListener('mouseover', onBannerOver)
+        banner.addEventListener('mouseout', onBannerOut)
+      }
+
+      function animate() {
+        // frame 1
+
+        TweenMax.to('.bg', 7.5, {
+          x: -405,
+          ease: Quad.easeInOut
+        })
+
+        TweenMax.from('.text-one', 4, {
+          width: 0,
+          ease: Quad.easeIn,
+          onStart: enableElement,
+          onStartParams: ['.text-one']
+        })
+
+        TweenMax.to('.bg', 5, {
+          scale: 1.7,
+          ease: Quad.easeInOut,
+          delay: 1
+        })
+
+        TweenMax.to('.bg', 3, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 5
+        })
+
+        TweenMax.to('.text-one', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 4
+        })
+
+        // frame 2
+
+        TweenMax.from('.product', 3, {
+          alpha: 0,
+          x: 80,
+          scale: 0,
+          ease: Quad.easeInOut,
+          delay: 5,
+          onStart: enableElement,
+          onStartParams: ['.product']
+        })
+
+        TweenMax.from('.text-two', 4, {
+          width: 0,
+          ease: Quad.easeIn,
+          delay: 4.5,
+          onStart: enableElement,
+          onStartParams: ['.text-two']
+        })
+
+        TweenMax.to('.product', 4, {
+          x: -95,
+          y: 5,
+          scale: 0.5,
+          ease: Quad.easeInOut,
+          delay: 8.5
+        })
+
+        TweenMax.to('.text-two', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay: 9
+        })
+
+        // frame 3
+
+        TweenMax.from('.text-three', 4, {
+          width: 0,
+          ease: Quad.easeIn,
+          delay: 9.5,
+          onStart: enableElement,
+          onStartParams: ['.text-three']
+        })
+
+        TweenMax.from('.end-frame-text', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          delay:12,
+          onStart: enableElement,
+          onStartParams: ['.end-frame-text']
+        })
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('.cta-over', 0.4, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('.cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

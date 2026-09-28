@@ -1,0 +1,89 @@
+.main-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 250px;
+  background-color: #F38B00;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* The frame is drawn over the artwork rather than around it. Every layer here
+   is a full-frame image scaled to fit the container, so a border on the
+   container either spills past the right and bottom edges of the frame or,
+   with border-box, shrinks the whole piece to make room for itself. */
+.main-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid #000000;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.full-frame-object {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.logo-header {
+  background-image: url(../images/logo-header.png);
+  z-index: 1000;
+}
+
+.legal {
+  opacity: 0;
+  background-image: url(../images/legal.png);
+  z-index: 2000;
+}
+
+.legal-button-hit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 60px;
+  height: 30px;
+  z-index: 2500;
+}
+
+.legal-button {
+  background-image: url(../images/legal-button.png);
+  z-index: 500;
+}
+
+.form-number {
+  background-image: url(../images/form-number.png);
+  z-index: 500;
+}
+
+.cta-red {
+  display: none;
+  background-image: url(../images/cta-red.png);
+  z-index: 600;
+  opacity: 0;
+}
+
+.cta {
+  display: none;
+  background-image: url(../images/cta.png);
+  z-index: 500;
+}
+
+.text-frame1 {
+  display: none;
+  background-image: url(../images/text-frame1.png);
+  z-index: 500;
+}
+
+.background-shape {
+  background-image: url(../images/shape.svg);
+  z-index: 0;
+}

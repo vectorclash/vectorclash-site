@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The head repeats index.html wherever the page depends on it, and the
+         reasons are written up there rather than twice: viewport-fit for the
+         notch, the brand colour for Safari's toolbars, and the load gradient,
+         which index.css and the hero both paint from. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#CCFF00" />
+
+    <style>
+      :root {
+        --load-gradient: linear-gradient(42deg, #0f1405 0%, #1d2a08 55%, #33470b 100%);
+      }
+
+      html {
+        background-color: #CCFF00;
+        background-image: var(--load-gradient);
+        background-attachment: fixed;
+      }
+    </style>
+
+    <title>HTML5 Banner Portfolio | VECTORCLASH</title>
+    <meta
+      name="description"
+      content="Animated HTML5 display advertising by Aaron Ezra Sterczewski for Atlassian, Intuit, Marriott Bonvoy, Microsoft, Juniper Networks and others, playable live at actual size."
+    />
+    <meta name="author" content="Aaron Ezra Sterczewski" />
+    <link rel="canonical" href="https://vectorclash.com/banners/" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap"
+    />
+
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="VECTORCLASH" />
+    <meta property="og:url" content="https://vectorclash.com/banners/" />
+    <meta property="og:title" content="HTML5 Banner Portfolio | VECTORCLASH" />
+    <meta
+      property="og:description"
+      content="Animated HTML5 display advertising by Aaron Ezra Sterczewski, playable live at actual size."
+    />
+    <meta property="og:image" content="https://vectorclash.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <noscript>
+      The HTML5 banner portfolio of Aaron Ezra Sterczewski, a design engineer.
+      This page needs JavaScript enabled to run.
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/banners/main.jsx"></script>
+  </body>
+</html>

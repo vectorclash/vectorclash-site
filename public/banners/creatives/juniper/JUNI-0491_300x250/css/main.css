@@ -1,0 +1,79 @@
+body {
+	font-family: 'Antenna', Helvetica, sans-serif;
+	font-weight: 100;
+	font-style: normal;
+	font-size: 24px;
+	line-height: 30px;
+}
+
+.main-container {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	background-color: #507085;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+.logo {
+	background-image: url(../images/logo.png);
+	z-index: 200;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-size: 100%;
+}
+
+.cta-standard {
+	background-image: url(../images/cta-standard.png);
+	z-index: 100;
+}
+
+.cta-over {
+	opacity: 0;
+	background-image: url(../images/cta-over.png);
+	z-index: 120;
+}
+
+.frame1-text {
+	display: block;
+	background-image: url(../images/frame1-text.png);
+	z-index: 200;
+}
+
+.frame2-text {
+	display: none;
+	background-image: url(../images/frame2-text.png);
+	z-index: 200;
+}
+
+.buildmore-text {
+	background-image: url(../images/build-more-text.png);
+	z-index: 200;
+}
+
+.frame1-text {
+	display: block;
+}
+
+.frame1-background-image {
+	background-image: url(../images/frame1-background-image.jpg);
+	z-index: 1;
+}
+
+.frame2-background-image {
+	background-image: url(../images/frame2-background-image.jpg);
+	z-index: 0;
+}

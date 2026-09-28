@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #ed6349;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid darkgrey;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      .logo {
+        background-image: url(images/logo.png);
+        z-index: 5;
+      }
+
+      .text {
+        display: block;
+        background-image: url(images/text.png);
+        z-index: 4;
+      }
+
+      .cta-container {
+        display: block;
+        transform-origin: center 200px;
+        z-index: 6;
+      }
+
+      .cta {
+        display: block;
+        background-image: url(images/cta.png);
+        z-index: 1;
+      }
+
+      .cta-glow {
+        position: absolute;
+        width: 107px;
+        height: 30px;
+        bottom: 29px;
+        left: 97px;
+        border-radius: 4px;
+        background-color: transparent;
+        box-shadow: 0 4px 10px #983428;
+        z-index: 0;
+      }
+
+      .cta-over {
+        display: block;
+        opacity: 0;
+        background-image: url(images/cta-over.png);
+        z-index: 2;
+      }
+    </style>
+    <script>
+      var clickTag = 'http://www.litmus.com'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <div class="logo full-frame-element"></div>
+      <div class="text full-frame-element"></div>
+      <div class="cta-container full-frame-element">
+        <div class="cta-over full-frame-element"></div>
+        <div class="cta full-frame-element"></div>
+        <div class="cta-glow"></div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+      var colors = [
+        '#983428',
+        '#d65742',
+        '#e9703c',
+        '#f4a838',
+        '#e4b23a',
+        '#b4af4a',
+        '#9f9640',
+        '#6a7c53',
+        '#4e5d5a',
+        '#47555c'
+      ]
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+        banner.addEventListener('mouseover', onBannerOver)
+        banner.addEventListener('mouseout', onBannerOut)
+      }
+
+      function animate() {
+        TweenMax.from('.logo', 1, {
+          y: -banner.clientHeight,
+          ease: Expo.easeOut,
+          onStart: enableElement,
+          onStartParams: ['.logo']
+        })
+
+        TweenMax.delayedCall(0.5, pulseCta)
+        TweenMax.delayedCall(6, pulseCta)
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function pulseCta() {
+        TweenMax.to('.cta-container', 0.5, {
+          scale: 1.1,
+          ease: Quad.easeInOut
+        })
+
+        TweenMax.to('.cta-glow', 0.5, {
+          boxShadow: '0 6px 20px #983428',
+          ease: Quad.easeInOut
+        })
+
+        TweenMax.to('.cta-container', 0.5, {
+          scale: 1,
+          ease: Back.easeOut,
+          delay: 0.6
+        })
+
+        TweenMax.to('.cta-glow', 0.5, {
+          boxShadow: '0 4px 10px #983428',
+          ease: Back.easeOut,
+          delay: 0.6
+        })
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('.cta', 0.3, {
+          alpha: 0
+        })
+
+        TweenMax.to('.cta-over', 0.3, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('.cta', 0.2, {
+          alpha: 1
+        })
+
+        TweenMax.to('.cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

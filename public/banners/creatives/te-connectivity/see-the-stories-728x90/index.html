@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        overflow: hidden;
+        background-color: #ea8523;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        display: none;
+        background-size: 728px 90px;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #777;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 1000;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        display: none;
+      }
+
+      #background {
+        display: block;
+        z-index: 0;
+      }
+
+      #text-one {
+        z-index: 10;
+      }
+
+      #background-upper {
+        display: block;
+        z-index: 100;
+      }
+
+      #logo {
+        display: block;
+        z-index: 100;
+      }
+
+      #cta {
+        display: block;
+        z-index: 100;
+      }
+
+      #cta-over {
+        display: block;
+        z-index: 200;
+        opacity: 0;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.te.com/usa-en/about-te/ecc.html'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+
+      <img src="images/background.jpg" id="background">
+
+      <div class="frame" id="text-one">
+        <img src="images/line-upper-one.png" id="line-upper-one">
+        <img src="images/text-one-line-one.png" id="text-one-line-one">
+        <img src="images/text-one-line-two.png" id="text-one-line-two">
+        <img src="images/line-lower-one.png" id="line-lower-one">
+      </div>
+
+      <div class="frame" id="text-two">
+        <img src="images/line-upper-two.png" id="line-upper-two">
+        <img src="images/text-two-line-one.png" id="text-two-line-one">
+        <img src="images/text-two-line-two.png" id="text-two-line-two">
+        <img src="images/line-lower-two.png" id="line-lower-two">
+      </div>
+
+      <div class="frame" id="text-three">
+        <img src="images/line-upper-three.png" id="line-upper-three">
+        <img src="images/text-three-line-one.png" id="text-three-line-one">
+        <img src="images/text-three-line-two.png" id="text-three-line-two">
+        <img src="images/line-lower-three.png" id="line-lower-three">
+      </div>
+
+      <img src="images/background-upper.png" id="background-upper">
+
+      <img src="images/logo.png" id="logo">
+      <img src="images/cta.png" id="cta">
+      <img src="images/cta-over.png" id="cta-over">
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+      var tl = new TimelineMax()
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+        banner.addEventListener('mouseover', onBannerOver)
+        banner.addEventListener('mouseout', onBannerOut)
+      }
+
+      function animate() {
+        // begin animation in to frame 1
+
+        tl.from('#line-upper-one', 1.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-upper-one']
+        })
+
+        tl.from('#line-lower-one', 1.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-lower-one']
+        }, '-=1.5')
+
+        tl.from('#text-one-line-one', 0.75, {
+          x: -25,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#text-one-line-one']
+        }, '-=0.75')
+
+        tl.from('#text-one-line-two', 0.75, {
+          x: 25,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#text-one-line-two']
+        }, '-=0.75')
+
+        // begin transition to frame 2
+
+        tl.to('#text-one-line-one, #text-one-line-two', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=1.5')
+
+        tl.to('#line-upper-one', 1, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#line-lower-one', 1, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '-=1')
+
+        // begin animation in to frame 2
+
+        tl.from('#line-upper-two', 1.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-upper-two']
+        })
+
+        tl.from('#line-lower-two', 1.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-lower-two']
+        }, '-=1.5')
+
+        tl.from('#text-two-line-one', 0.75, {
+          x: -25,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#text-two-line-one']
+        }, '-=0.75')
+
+        tl.from('#text-two-line-two', 0.75, {
+          x: 25,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#text-two-line-two']
+        }, '-=0.75')
+
+        // begin transition to frame 3
+
+        tl.to('#background, #background-upper', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=2')
+
+        tl.to('#text-two-line-one, #text-two-line-two', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#line-upper-two', 1, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#line-lower-two', 1, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut
+        }, '-=1')
+
+        // begin animation in to frame 3
+
+        tl.from('#line-upper-three', 1.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-upper-three']
+        })
+
+        tl.from('#line-lower-three', 1.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-lower-three']
+        }, '-=1.5')
+
+        tl.from('#text-three-line-one', 0.75, {
+          x: -25,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#text-three-line-one']
+        }, '-=0.75')
+
+        tl.from('#text-three-line-two', 0.75, {
+          x: 25,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#text-three-line-two']
+        }, '-=0.75')
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('#cta-over', 0.4, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('#cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

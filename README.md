@@ -91,6 +91,11 @@ The site uses local JSON files for content management:
   flagged `"secondary": true` renders in a lower-contrast style below a divider,
   for adjacent familiarity rather than core competency.
 - `src/data/profile.json` - Personal information and resume link
+- `src/data/banners.json` - The HTML5 banner portfolio at `/banners/`, grouped by
+  client. Each banner's `path` points at its delivered creative under
+  `public/banners/creatives/` and at its poster, `public/banners/posters/<path>.webp`:
+  the banner's resting frame, captured at 1.5x once its animation has finished.
+  A banner without a poster fails the test suite.
 
 ## License
 

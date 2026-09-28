@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #130f0d;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #bg {
+        z-index: 0;
+      }
+
+      #bg-shadow {
+        z-index: 1;
+        mix-blend-mode: multiply;
+        opacity: 0.8;
+      }
+
+      #boot {
+        z-index: 2;
+      }
+
+      #logo {
+        z-index: 3;
+      }
+
+      #cta {
+        z-index: 4;
+      }
+
+      #cta-over {
+        z-index: 5;
+        opacity: 0;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.rockyboots.com/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <img src="images/cta-over.png" id="cta-over">
+      <img src="images/cta.png" id="cta">
+      <img src="images/logo.png" id="logo">
+      <img src="images/boot.png" id="boot">
+      <img src="images/bg-shadow.png" id="bg-shadow">
+      <img src="images/bg.jpg" id="bg">
+      <div class="border"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.4/gsap.min.js"></script>
+    <script>
+      var banner
+      let tl = new gsap.timeline()
+
+      function init() {
+        banner = document.querySelector('.banner')
+        animate()
+        gsap.set('img', {display: 'block'})
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        tl.from('#bg-shadow', {
+          duration: 3,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+
+        tl.from('#logo', {
+          duration: 2,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=3')
+
+        tl.from('#boot', {
+          duration: 2,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=2')
+
+        tl.from('#cta', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onComplete: enableRollover
+        })
+      }
+
+      function enableRollover() {
+        banner.addEventListener('mouseover', onBannerOver)
+        banner.addEventListener('mouseout', onBannerOut)
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('#cta-over', {
+          duration: 0.4,
+          alpha: 1
+        })
+
+        TweenMax.to('#cta', {
+          duration: 0.4,
+          alpha: 0
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('#cta-over', {
+          duration: 0.2,
+          alpha: 0
+        })
+
+        TweenMax.to('#cta', {
+          duration: 0.2,
+          alpha: 1
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

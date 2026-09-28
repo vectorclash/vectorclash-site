@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #FFFFFF;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        display: none;
+        background-size: 300px 250px;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #background {
+        display: block;
+        width: 350px;
+        z-index: 0;
+      }
+
+      #background-end {
+        z-index: 1;
+      }
+
+      #shadow-end {
+        opacity: 0.7;
+        z-index: 2;
+      }
+
+      #red-overlay {
+        position: absolute;
+        top: 30px;
+        left: 0;
+        width: 100%;
+        height: 70px;
+        background-color: #ba0e12;
+        opacity: 0;
+        z-index: 50;
+      }
+
+      #built-for, #comfort, #work {
+        z-index: 60;
+      }
+
+      #comfort, #work {
+        opacity: 0.9;
+      }
+
+      #logo, #logo-end {
+        z-index: 100;
+      }
+
+      #logo {
+        display: block;
+      }
+
+      #boot {
+        z-index: 120;
+      }
+
+      #cta {
+        z-index: 50;
+      }
+
+      #cta-over {
+        display: block;
+        z-index: 51;
+        opacity: 0;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.rockyboots.com/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <img src="images/logo.png" id="logo">
+      <img src="images/logo-end.png" id="logo-end">
+
+      <img src="images/cta.png" id="cta">
+      <img src="images/cta-over.png" id="cta-over">
+
+      <img src="images/boot.png" id="boot">
+
+      <img src="images/built-for.png" id="built-for">
+      <img src="images/comfort.png" id="comfort">
+      <img src="images/work.png" id="work">
+
+      <div id="red-overlay"></div>
+
+      <img src="images/background.jpg" id="background">
+      <img src="images/background-end.jpg" id="background-end">
+      <img src="images/shadow-end.png" id="shadow-end">
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+      var tl = new TimelineMax()
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        TweenMax.to('#background', 8, {
+          x: -50,
+          ease: Quad.easeInOut
+        })
+
+        tl.from('#red-overlay', 0.5, {
+          width: 0,
+          ease: Quad.easeInOut
+        }, '+=0.5')
+
+        tl.to('#red-overlay', 0.5, {
+          alpha: 0.8,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.from('#built-for', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#built-for']
+        }, '-=0.2')
+
+        tl.from('#work', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#work']
+        }, '+=0.5')
+
+        tl.to('#work', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=2')
+
+        tl.from('#background-end', 1.5, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#background-end']
+        })
+
+        tl.from('#comfort', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#comfort']
+        }, '-=0.5')
+
+        tl.to('#comfort, #built-for, #logo', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=2.5')
+
+        tl.to('#red-overlay', 0.5, {
+          top: 0,
+          height: 109,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.from('#shadow-end', 0.5, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#shadow-end']
+        }, '-=0.5')
+
+        tl.from('#logo-end', 1, {
+          alpha: 0,
+          y: -20,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end']
+        }, '-=0.5')
+
+        tl.from('#boot', 1, {
+          alpha: 0,
+          x: -20,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#boot']
+        })
+
+        tl.from('#cta', 1, {
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#cta'],
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        }, '-=0.5')
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('#cta-over', 0.4, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('#cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

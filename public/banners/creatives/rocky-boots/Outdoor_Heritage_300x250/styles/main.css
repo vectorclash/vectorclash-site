@@ -1,0 +1,105 @@
+.main-container {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  background-color: #004867;
+  cursor: pointer;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 250px;
+	background-size: 100%;
+	background-repeat: no-repeat;
+  display: none;
+}
+
+.background-one {
+	position: absolute;
+	top: 0;
+	left: 0;
+  background-image: url(../images/background-one.jpg);
+	width: 532px;
+	height: 250px;
+  display: block;
+  z-index: 0;
+}
+
+.background-two {
+  background-image: url(../images/background-two.jpg);
+  z-index: 1;
+}
+
+.red-bar {
+  background-image: url(../images/red-bar.png);
+  z-index: 3;
+  mix-blend-mode: hard-light;
+	opacity: 0.6;
+	transform-origin: bottom;
+}
+
+.frame-one-content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.frame-two-content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+}
+
+.this-is-our-text {
+  background-image: url(../images/this-is-our.png);
+}
+
+.heritage-text {
+  background-image: url(../images/heritage.png);
+}
+
+.this-is-text {
+  background-image: url(../images/this-is.png);
+}
+
+.bar-left {
+  background-image: url(../images/bar-left.png);
+}
+
+.bar-right {
+  background-image: url(../images/bar-right.png);
+}
+
+.rocky-text {
+  background-image: url(../images/rocky.png);
+}
+
+.logo {
+  background-image: url(../images/logo.png);
+  z-index: 10;
+}
+
+.cta {
+  background-image: url(../images/cta.png);
+  z-index: 0;
+}
+
+.cta-over {
+  background-image: url(../images/cta-over.png);
+  z-index: 1;
+  display: block;
+  opacity: 0;
+}

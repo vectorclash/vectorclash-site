@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        overflow: hidden;
+        background-color: #130f0d;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #boot-bg {
+        z-index: 0;
+      }
+
+      #boot-small {
+        z-index: 1;
+      }
+
+      #logo {
+        z-index: 2;
+      }
+
+      #txt-americanclassic {
+        z-index: 3;
+      }
+
+      #txt-20off {
+        z-index: 4;
+      }
+
+      #txt-date {
+        z-index: 5;
+      }
+
+      #txt-bootbarn {
+        z-index: 6;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.bootbarn.com/brands/durango/durango/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <img src="images/boot-bg.jpg" id="boot-bg">
+      <img src="images/txt-bootbarn.png" id="txt-bootbarn">
+      <img src="images/txt-date.png" id="txt-date">
+      <img src="images/txt-20off.png" id="txt-20off">
+      <img src="images/txt-americanclassic.png" id="txt-americanclassic">
+      <img src="images/logo.png" id="logo">
+      <img src="images/boot-small.png" id="boot-small">
+      <div class="border"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.3.4/gsap.min.js"></script>
+    <script>
+      var banner
+      let tl = new gsap.timeline()
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+        gsap.set('img', {display: 'block'})
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        tl.from('#txt-americanclassic, #logo, #boot-small', {
+          duration: 2,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          stagger: {
+            amount: 0.6
+          }
+        })
+
+        tl.from('#txt-20off', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+
+        tl.from('#txt-date', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+
+        tl.from('#txt-bootbarn', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

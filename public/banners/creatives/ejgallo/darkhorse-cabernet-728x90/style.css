@@ -1,0 +1,122 @@
+body {margin: 0px;}
+
+#container {
+	background-color: #8e2d2d;
+	background-image: url('gradient-bg.png');
+	border: 1px solid gray;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: none;
+	overflow: hidden;
+	position: absolute;
+	width: 728px;
+	height: 90px;
+	pointer-events: none;
+}
+
+#container * {
+	position: absolute;
+}
+
+#clickthru{
+	width: 100%;
+	height: 100%;
+	pointer-events: auto;
+}
+
+/*-------------- SPRITE -------------*/
+.sprite { background: url('sprite.png') no-repeat top left; width: 226px; height: 435px; background-size: 226px 435px;  }
+.sprite.cta-hover { background-position: 0 0; width: 158px; height: 45px; }
+.sprite.cta-text { background-position: 0 -50px; width: 158px; height: 45px; }
+.sprite.t1-1 { background-position: 0 -100px; width: 92px; height: 21px; }
+.sprite.t1-2 { background-position: 0 -126px; width: 109px; height: 21px; }
+.sprite.t1-3 { background-position: 0 -152px; width: 205px; height: 53px; }
+.sprite.t2-1 { background-position: 0 -210px; width: 34px; height: 20px; }
+.sprite.t2-2 { background-position: 0 -235px; width: 226px; height: 73px; }
+.sprite.t2-3 { background-position: 0 -313px; width: 166px; height: 20px; }
+.sprite.t2-4 { background-position: 0 -338px; width: 226px; height: 53px; }
+.sprite.t3-1 { background-position: 0 -396px; width: 206px; height: 50px; }
+
+/*--------- SPRITE POSITION ---------*/
+.cta-hover,
+.cta-text {
+	top: -1px;
+	left: -1px;
+}
+
+.cta-hover {
+	opacity: 0;
+}
+
+.t1-1 {
+	top: 8px;
+	left: 49px;
+}
+
+.t1-2 {
+	top: 8px;
+	left: 144px;
+}
+
+.t1-3 {
+	top: 28px;
+	left: 48px;
+}
+
+.t2-1 {
+	top: 8px;
+	left: 455px;
+}
+
+.t2-2 {
+	top: 8px;
+	left: 455px;
+}
+
+.t2-3 {
+	top: 8px;
+	left: 514px;
+}
+
+.t2-4 {
+	top: 27px;
+	left: 455px;
+}
+
+.t3-1 {
+	top: 25px;
+	left: 47px;
+}
+
+/*-------- IMAGES | POSITION --------*/
+img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+.bg{
+	width: 300px;
+	height: 600px;
+}
+
+.bottle, .label{
+	width: 86px;
+	height: 266.5px;
+	bottom: -64px;
+	left: 320px;
+    will-change: transform;
+}
+.bottle canvas{
+	width:100%;
+	height:100%;
+}
+
+.cta{
+    background-color:#21211f;
+    border: 1px solid #21211f;
+    width: 156px;
+    height: 43px;
+    left: 489px;
+    top: 22px;
+}

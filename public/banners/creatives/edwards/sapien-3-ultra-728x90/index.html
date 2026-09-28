@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      @font-face {
+        font-family: 'VestaRegular';
+        src: url('fonts/vestastd_regular.woff') format('woff')
+      }
+
+      @font-face {
+        font-family: 'VestaBold';
+        src: url('fonts/vestastd_bold.woff') format('woff')
+      }
+
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 728px;
+        height: 90px;
+        overflow: hidden;
+        background-color: #FFFFFF;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid #333;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .fullframe-img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        z-index: 100;
+      }
+
+      .legal-text {
+        max-width: 570px;
+      }
+
+      .scroll-text {
+        position: absolute;
+        bottom: 0;
+        left: 50px;
+        height: 28px;
+        width: 580px;
+        padding-right: 10px;
+        background: transparent;
+        box-sizing: border-box;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        font-family: 'VestaRegular', sans-serif;
+        font-size: 8px;
+        line-height: 10px;
+        z-index: 2000;
+      }
+
+      .scroll-text p b {
+        font-family: 'VestaBold', sans-serif;
+      }
+
+      .scroll-text-line {
+        position: absolute;
+        bottom: 0px;
+        left: 627px;
+        width: 1px;
+        height: 20px;
+        background-color: #333333;
+        opacity: 0.7;
+      }
+
+      .scroll-text::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .scroll-text::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .scroll-text::-webkit-scrollbar-thumb {
+        background-color: #333333;
+        outline: 1px solid #333333;
+        height: 6px;
+      }
+
+      .red-square {
+        position: absolute;
+        top: 62px;
+        left: 18px;
+        width: 17px;
+        height: 17px;
+        z-index: 100;
+        background-color: #c8102e;
+      }
+
+      .imagery {
+        position: absolute;
+        width: 603px;
+        height: 62px;
+        top: 0;
+        left: 35px;
+        background-color: #f4f4e6;
+        z-index: 0;
+        overflow: hidden;
+      }
+
+      .imagery img {
+        position: absolute;
+        right: 0;
+        top: 0;
+        display: none;
+      }
+
+      .s3u {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 100;
+      }
+
+      .s3u img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+      }
+
+      .s3u-shadow {
+        opacity: 0.9;
+        z-index: 99;
+      }
+
+      .lion {
+        width: 603px;
+        height: 62px;
+        mix-blend-mode: multiply;
+      }
+
+      .lion-mane {
+        width: 603px;
+        height: 62px;
+        mix-blend-mode: multiply;
+        transform-origin: 429px 15px;
+      }
+
+      .sky {
+        width: 638px;
+        height: 90px;
+        mix-blend-mode: multiply;
+      }
+
+      .text-one {
+        top: 12px;
+      }
+
+      .text-three {
+        top: 12px;
+      }
+
+      .cta-over {
+        z-index: 300;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <img src="images/cta-over.png" class="fullframe-img cta-over">
+      <img src="images/cta.png" class="fullframe-img cta">
+      <img src="images/logo.png" class="fullframe-img logo">
+      <div class="red-square"></div>
+
+      <img src="images/text-five.png" class="fullframe-img text-five">
+      <img src="images/text-four.png" class="fullframe-img text-four">
+      <img src="images/text-three.png" class="fullframe-img text-three">
+      <img src="images/text-one.png" class="fullframe-img text-one">
+      <img src="images/text-two.png" class="fullframe-img text-two">
+      
+      <div class="s3u">
+        <img src="./images/s3u-1.png">
+        <img src="./images/s3u-2.png">
+        <img src="./images/s3u-3.png">
+        <img src="./images/s3u-4.png">
+        <img src="./images/s3u-5.png">
+        <img src="./images/s3u-6.png">
+        <img src="./images/s3u-7.png">
+        <img src="./images/s3u-8.png">
+        <img src="./images/s3u-9.png">
+        <img src="./images/s3u-10.png">
+      </div>
+      <img src="images/s3u-shadow.png" class="fullframe-img s3u-shadow">
+      
+      <div class="imagery">
+        <img src="./images/lion.png" class="lion">
+        <img src="./images/lion-mane.png" class="lion-mane">
+        <img src="./images/sky.png" class="sky">
+      </div>
+
+      <div class="scroll-text-line"></div>
+      <div class="scroll-text">
+        <p>
+          <h3>Important Safety Information:</h3>
+        </p>
+
+        <p>
+          <b>Edwards SAPIEN 3 THV System and Edwards SAPIEN 3 Ultra THV System</b>
+        </p>
+
+        <p>
+          <b>Indications:</b> The Edwards SAPIEN 3 Transcatheter Heart Valve System and Edwards SAPIEN 3 Ultra Transcatheter Heart Valve System are indicated for relief of aortic stenosis in patients with symptomatic heart disease due to severe native calcific aortic stenosis who are judged by a Heart Team, including a cardiac surgeon, to be appropriate for the transcatheter heart valve replacement therapy.
+        </p>
+
+        <p>
+          The Edwards SAPIEN 3 Transcatheter Heart Valve System and Edwards SAPIEN 3 Ultra Transcatheter Heart Valve System are indicated for patients with symptomatic heart disease due to failure (stenosed, insufficient, or combined) of a surgical bioprosthetic aortic or mitral valve who are judged by a heart team, including a cardiac surgeon, to be at high or greater risk for open surgical therapy (i.e., predicted risk of surgical mortality ≥ 8% at 30 days, based on the STS risk score and other clinical co-morbidities unmeasured by the STS risk calculator).
+        </p>
+
+        <p>
+          <b>Contraindications:</b> The valves and delivery systems are contraindicated in patients who cannot tolerate an anticoagulation/antiplatelet regimen or who have active bacterial endocarditis or other active infections.
+        </p>
+
+        <p>
+          <b>Warnings:</b> Observation of the pacing lead throughout the procedure is essential to avoid the potential risk of pacing lead perforation. There may be an increased risk of stroke in transcatheter aortic valve replacement procedures, as compared to balloon aortic valvuloplasty or other standard treatments in high or greater risk patients. Incorrect sizing of the valve may lead to paravalvular leak, migration, embolization, residual gradient (patient-prosthesis mismatch), and/or annular rupture. Accelerated deterioration of the valve due to calcific degeneration may occur in children, adolescents, or young adults and in patients with an altered calcium metabolism. Prior to delivery, the valve must remain hydrated at all times and cannot be exposed to solutions other than its shipping storage solution and sterile physiologic rinsing solution. Valve leaflets mishandled or damaged during any part of the procedure will require replacement of the valve. Caution should be exercised in implanting a valve in patients with clinically significant coronary artery disease. Patients with pre-existing bioprostheses should be carefully assessed prior to implantation of the valve to ensure proper valve positioning and deployment. Do not use the valve if the tamper-evident seal is broken, the storage solution does not completely cover the valve, the temperature indicator has been activated, the valve is damaged, or the expiration date has elapsed. Do not mishandle the delivery system or use it if the packaging or any components are not sterile, have been opened or are damaged (e.g., kinked or stretched), or if the expiration date has elapsed. Use of excessive contrast media may lead to renal failure. Measure the patient’s creatinine level prior to the procedure. Contrast media usage should be monitored. Patient injury could occur if the delivery system is not un-flexed prior to removal. Care should be exercised in patients with hypersensitivities to cobalt, nickel, chromium, molybdenum, titanium, manganese, silicon, and/or polymeric materials. The procedure should be conducted under fluoroscopic guidance. Some fluoroscopically guided procedures are associated with a risk of radiation injury to the skin. These injuries may be painful, disfiguring, and long-lasting. Valve recipients should be maintained on anticoagulant/antiplatelet therapy, except when contraindicated, as determined by their physician. This device has not been tested for use without anticoagulation. Do not add or apply antibiotics to the storage solution, rinse solution, or to the valve. Balloon valvuloplasty should be avoided in the treatment of failing bioprostheses as this may result in embolization of bioprosthesis material and mechanical disruption of the valve leaflets. Failure to use slow, controlled inflation and prescribed nominal inflation volumes may result in balloon rupture, and lead to patient death or serious injuries associated with difficulty retrieving the delivery system and surgical intervention.
+        </p>
+
+        <p>
+          <b>Precautions:</b> Safety, effectiveness, and durability have not been established for THV-in-THV procedures. Long-term durability has not been established for the valve. Regular medical follow-up is advised to evaluate valve performance. Limited clinical data are available for transcatheter aortic valve replacement in patients with a congenital bicuspid aortic valve who are deemed to be at low surgical risk. Anatomical characteristics should be considered when using the valve in this population. In addition, patient age should be considered as long-term durability of the valve has not been established. Glutaraldehyde may cause irritation of the skin, eyes, nose, and throat. Avoid prolonged or repeated exposure to, or breathing of, the solution. Use only with adequate ventilation. If skin contact occurs, immediately flush the affected area with water; in the event of contact with eyes, seek immediate medical attention. For more information about glutaraldehyde exposure, refer to the Safety Data Sheet available from Edwards Lifesciences. To maintain proper valve leaflet coaptation, do not overinflate the deployment balloon. Appropriate antibiotic prophylaxis is recommended post-procedure in patients at risk for prosthetic valve infection and endocarditis. Additional precautions for transseptal replacement of a failed mitral valve bioprosthesis include, the presence of devices or thrombus or other abnormalities in the caval vein precluding safe transvenous femoral access for transseptal approach; and the presence of an Atrial Septal Occluder Device or calcium or abnormalities in the atrial septum preventing safe transseptal access. Special care must be exercised in mitral valve replacement if chordal preservation techniques were used in the primary implantation to avoid entrapment of the subvalvular apparatus. Safety and effectiveness have not been established for patients with the following characteristics/comorbidities: non-calcified aortic annulus; severe ventricular dysfunction with ejection fraction < 20%; congenital unicuspid aortic valve; pre-existing prosthetic ring in any position; severe mitral annular calcification (MAC); severe (> 3+) mitral insufficiency, or Gorlin syndrome; blood dyscrasias defined as leukopenia (WBC < 3000 cells/mL), acute anemia (Hb < 9 g/dL), thrombocytopenia (platelet count < 50,000 cells/mL), or history of bleeding diathesis or coagulopathy; hypertrophic cardiomyopathy with or without obstruction (HOCM); echocardiographic evidence of intracardiac mass, thrombus, or vegetation; a known hypersensitivity or contraindication to aspirin, heparin, ticlopidine (Ticlid), or clopidogrel (Plavix), or sensitivity to contrast media, which cannot be adequately premedicated; significant aortic disease, including abdominal aortic or thoracic aneurysm defined as maximal luminal diameter 5 cm or greater, marked tortuosity (hyperacute bend), aortic arch atheroma (especially if thick [> 5 mm], protruding, or ulcerated) or narrowing (especially with calcification and surface irregularities) of the abdominal or thoracic aorta, severe “unfolding” and tortuosity of the thoracic aorta; bulky calcified aortic valve leaflets in close proximity to coronary ostia; a concomitant paravalvular leak where the failing bioprosthesis is not securely fixed in the native annulus or is not structurally intact (e.g., wireform frame fracture); or a partially detached leaflet of the failing bioprosthesis that in the aortic position may obstruct a coronary ostium. For Left axillary approach, a left subclavian takeoff angle~ ≥ 90° from the aortic arch causes sharp angles, which may be responsible for potential sheath kinking, subclavian/axillary dissection and aortic arch damage. Ensure there is flow in Left Internal Mammary Artery (LIMA)/Right Internal Mammary Artery (RIMA) during procedure and monitor PA pressure in homolateral radial artery. Residual mean gradient may be higher in a “THV-in-failing bioprosthesis” configuration than that observed following implantation of the valve inside a native aortic annulus using the same size device. Patients with elevated mean gradient post procedure should be carefully followed. It is important that the manufacturer, model and size of the preexisting bioprosthetic valve be determined, so that the appropriate valve can be implanted and a prosthesis-patient mismatch be avoided. Additionally, pre-procedure imaging modalities must be employed to make as accurate a determination of the inner diameter as possible.
+        </p>
+
+        <p>
+          <b>Potential Adverse Events:</b> Potential risks associated with the overall procedure, including potential access complications associated with standard cardiac catheterization, balloon valvuloplasty, the potential risks of conscious sedation and/or general anesthesia, and the use of angiography: death; stroke/transient ischemic attack, clusters, or neurological deficit; paralysis; permanent disability; respiratory insufficiency or respiratory failure; hemorrhage requiring transfusion or intervention; cardiovascular injury including perforation or dissection of vessels, ventricle, atrium, septum, myocardium, or valvular structures that may require intervention; pericardial effusion or cardiac tamponade; thoracic bleeding; embolization including air, calcific valve material, or thrombus; infection including septicemia and endocarditis; heart failure; myocardial infarction; renal insufficiency or renal failure; conduction system defect which may require a permanent pacemaker; arrhythmia; retroperitoneal bleed; arteriovenous (AV) fistula or pseudoaneurysm; reoperation; ischemia or nerve injury or brachial plexus injury; restenosis; pulmonary edema; pleural effusion; bleeding; anemia; abnormal lab values (including electrolyte imbalance); hypertension or hypotension; allergic reaction to anesthesia, contrast media, or device materials; hematoma; syncope; pain or changes at the access site; exercise intolerance or weakness; inflammation; angina; heart murmur; and fever. Additional potential risks associated with the use of the valve, delivery system, and/or accessories include: cardiac arrest; cardiogenic shock; emergency cardiac surgery; cardiac failure or low cardiac output; coronary flow obstruction/transvalvular flow disturbance; device thrombosis requiring intervention; valve thrombosis; device embolization; device migration or malposition requiring intervention; left ventricular outflow tract obstruction; valve deployment in unintended location; valve stenosis; structural valve deterioration (wear, fracture, calcification, leaflet tear/tearing from the stent posts, leaflet retraction, suture line disruption of components of a prosthetic valve, thickening, stenosis); device degeneration; paravalvular or transvalvular leak; valve regurgitation; hemolysis; device explants; nonstructural dysfunction; mechanical failure of delivery system and/or accessories; and non-emergent reoperation.
+        </p>
+
+        <p>
+          <b>Edwards Axela Sheath</b>
+        </p>
+
+        <p>
+          <b>Indications:</b> The Edwards Axela sheath is indicated for the introduction and removal of devices used with the Edwards SAPIEN 3 Ultra delivery system.
+        </p>
+
+        <p>
+          <b>Contraindications:</b> There are no known contraindications.
+        </p>
+
+        <p>
+          <b>Warnings:</b> The devices are designed, intended, and distributed for single use only. Do not resterilize or reuse the devices. There are no data to support the sterility, nonpyrogenicity, and functionality of the devices after reprocessing.
+        </p>
+
+        <p>
+          <b>Precautions:</b> Caution should be used in vessels that have diameters less than 5.5 mm as it may preclude safe placement of the 14F Edwards Axela sheath. For subclavian/axillary vessels with the 29 mm Edwards SAPIEN 3 Ultra delivery system, caution should be used in vessels that have diameters less than 6.0 mm as it may preclude safe placement of the 14F Edwards Axela sheath. Use caution in tortuous or calcified vessels that would prevent safe entry of the sheath. Do not use the Edwards Axela sheath if the packaging sterile barriers and any components have been opened or damaged or the expiration date has elapsed. When inserting, manipulating or withdrawing a device through the sheath, always maintain sheath position. When puncturing, suturing or incising the tissue near the sheath, use caution to avoid damage to the sheath.
+        </p>
+
+        <p>
+          <b>Potential Adverse Events:</b> Complications associated with standard catheterization and use of angiography include, but are not limited to, injury including perforation or dissection of vessels, thrombosis and/or plaque dislodgement which may result in emboli formation, distal vessel obstruction, hemorrhage, infection, and/or death.
+        </p>
+
+        <p>
+          <b>Edwards Crimper</b>
+        </p>
+
+        <p>
+          <b>Indications:</b> The Edwards crimper is indicated for use in preparing the Edwards SAPIEN 3 Ultra transcatheter heart valve and the Edwards SAPIEN 3 transcatheter heart valve for implantation. Contraindications: There are no known contraindications.
+        </p>
+
+        <p>
+          <b>Warnings:</b> The devices are designed, intended, and distributed for single use only. Do not resterilize or reuse the devices. There are no data to support the sterility, nonpyrogenicity, and functionality of the devices after reprocessing.
+        </p>
+
+        <p>
+          <b>Precautions:</b> For special considerations associated with the use of the Edwards crimper prior to THV implantation, refer to the THV Instructions for Use. Potential Adverse Events: There are no known potential adverse events associated with the Edwards crimper.
+        </p>
+          
+        <p>
+          <b>CAUTION: Federal (United States) law restricts these devices to sale by or on the order of a physician.</b>
+        </p>
+
+        <p>
+          Edwards, Edwards Lifesciences, the stylized E logo, Axela, Edwards SAPIEN, Edwards SAPIEN 3, Edwards SAPIEN 3 Ultra, SAPIEN, SAPIEN 3, and SAPIEN 3 Ultra are trademarks of Edwards Lifesciences Corporation or its affiliates. All other trademarks are the property of their respective owners.
+        </p>
+
+        <p>
+          © 2020 Edwards Lifesciences Corporation.<br />
+          All rights reserved. PP--US-5272 v1.0
+        </p>
+
+        <p>
+          <b>Edwards Lifesciences •</b> edwards.com<br />
+          One Edwards Way, Irvine CA 92614 USA
+        </p>
+      </div>
+    </div>
+    <script src="https://cdn.flashtalking.com/frameworks/js/api/2/10/html5API.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/ScrollToPlugin.min.js"></script>
+    <script>
+      var banner
+      var tl = new gsap.timeline()
+      var scrollText = document.querySelector('.scroll-text')
+      var activeS3U = 0
+      var s3uRound = 0
+
+      function init() {
+        banner = document.querySelector('.banner')
+        gsap.registerPlugin(ScrollToPlugin)
+        gsap.set('img', {display: 'block'})
+        animate()
+        myFT.applyClickTag(banner, 1)
+      }
+
+      function moveLionMane() {
+        var ranTime = 0.5 + Math.random() * 0.2
+        var ranSkew = -3 + Math.random() * 6
+        var ranRotation = -0.5 + Math.random()
+
+        gsap.to('.lion-mane', {
+          duration: ranTime,
+          rotation: ranRotation,
+          skewX: ranSkew,
+          yoyo: true,
+          ease: Quad.easeOut,
+          onComplete: function() {
+            if(s3uRound < 1) {
+              moveLionMane()
+            }
+          }
+        })
+      }
+
+      function rotateS3U() {
+        var images = document.querySelectorAll('.s3u img')
+
+        gsap.to(images[activeS3U], {
+          duration: 0.2,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+
+        activeS3U++
+
+        if(activeS3U > images.length - 1) {
+          activeS3U = 0
+          s3uRound++
+        }
+
+        gsap.to(images[activeS3U], {
+          duration: 0.1,
+          alpha: 1,
+          ease: Quad.easeInOut,
+          onComplete: function () {
+            if (s3uRound < 6) {
+              rotateS3U()
+            }
+          }
+        })
+      }
+
+      function animate() {
+        moveLionMane()
+
+        gsap.from('.sky', {
+          duration: 10,
+          x: -100,
+          scale: 1.5,
+          ease: Quad.easeInOut
+        })
+
+        tl.from('.text-one', {
+          duration: 1,
+          x: -10,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=0.5')
+
+        // tl.to('.red-square', {
+        //   duration: 1,
+        //   rotation: 90,
+        //   ease: Quad.easeInOut
+        // }, '-=1')
+
+        tl.to('.text-one', {
+          duration: 1,
+          top: 0,
+          ease: Quad.easeInOut
+        }, '+=1')
+
+        // tl.to('.red-square', {
+        //   duration: 1,
+        //   rotation: 180,
+        //   ease: Quad.easeInOut
+        // }, '-=1')
+
+        tl.from('.text-two', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('.text-one, .text-two', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=1')
+
+        tl.from('.text-three', {
+          duration: 1,
+          x: -10,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        // tl.to('.red-square', {
+        //   duration: 1,
+        //   rotation: 270,
+        //   ease: Quad.easeInOut
+        // }, '-=1')
+
+        tl.to('.text-three', {
+          duration: 1,
+          top: 0,
+          ease: Quad.easeInOut
+        }, '+=1')
+
+        // tl.to('.red-square', {
+        //   duration: 1,
+        //   rotation: 360,
+        //   ease: Quad.easeInOut
+        // }, '-=1')
+
+        tl.from('.text-four', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('.lion, .lion-mane, .sky', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: rotateS3U
+        }, '-=1')
+
+        tl.from('.s3u, .s3u-shadow', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        })
+
+        tl.from('.cta', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        })
+
+        tl.to('.text-three, .text-four', {
+          duration: 1,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '+=1')
+
+        tl.from('.text-five', {
+          duration: 1,
+          x: -10,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        // tl.to('.red-square', {
+        //   duration: 1,
+        //   rotation: 450,
+        //   ease: Quad.easeInOut
+        // }, '-=1')
+
+        gsap.to('.scroll-text', {
+          duration: 15,
+          scrollTo: (scrollText.scrollHeight - scrollText.offsetHeight) - 3,
+          ease: Quad.easeInOut
+        })
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('.cta-over', 0.3, {
+          alpha: 1
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('.cta-over', 0.2, {
+          alpha: 0
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

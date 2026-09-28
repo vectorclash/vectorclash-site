@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #130f0d;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #bg {
+        z-index: 0;
+      }
+
+      #gradient {
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        top: -50%;
+        left: -50%;
+        z-index: 1;
+        background-image: radial-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+      }
+
+      #title-one {
+        z-index: 2;
+      }
+
+      #title-two {
+        z-index: 3;
+      }
+
+      #title-three {
+        z-index: 4;
+      }
+
+      #boots {
+        z-index: 5;
+      }
+
+      #logo {
+        z-index: 6;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.georgiaboot.com/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <img src="images/bg.jpg" id="bg">
+      <img src="images/title-one.png" id="title-one">
+      <img src="images/title-two.png" id="title-two">
+      <img src="images/title-three.png" id="title-three">
+      <img src="images/boots.png" id="boots">
+      <img src="images/logo.png" id="logo">
+      <div id="gradient"></div>
+      <div class="border"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.4.0/gsap.min.js"></script>
+    <script>
+      var banner
+      let tl = new gsap.timeline()
+
+      function init() {
+        banner = document.querySelector('.banner')
+        animate()
+        gsap.set('img', {display: 'block'})
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        tl.to('#gradient', {
+          duration: 6,
+          alpha: 0
+        })
+
+        tl.from('#title-one, #title-two, #title-three', {
+          duration: 2,
+          alpha: 0,
+          stagger: 1
+        }, '-=5')
+
+        tl.from('#logo', {
+          duration: 2,
+          alpha: 0
+        }, '-=1')
+      }
+
+      function enableRollover() {
+        banner.addEventListener('mouseover', onBannerOver)
+        banner.addEventListener('mouseout', onBannerOut)
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

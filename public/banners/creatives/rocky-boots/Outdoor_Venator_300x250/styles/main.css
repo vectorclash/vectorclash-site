@@ -1,0 +1,119 @@
+.main-container {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  background-color: #ed3737;
+  cursor: pointer;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 250px;
+	background-size: 100%;
+	background-repeat: no-repeat;
+  display: none;
+}
+
+.text-frames {
+	position: absolute;
+	z-index: 5;
+}
+
+.end-frame {
+	position: absolute;
+	z-index: 10;
+}
+
+.backgrounds {
+	position: absolute;
+	z-index: 0;
+}
+
+.bg-01 {
+	display: block;
+	background-image: url(../images/bg-01.jpg);
+	z-index: 0;
+}
+
+.bg-02 {
+	background-image: url(../images/bg-02.jpg);
+	z-index: 1;
+}
+
+.bg-03 {
+	background-image: url(../images/bg-03.jpg);
+	z-index: 2;
+}
+
+.bg-04 {
+	background-image: url(../images/bg-04.jpg);
+	z-index: 3;
+}
+
+.red-bar {
+	background-image: url(../images/red-bar.png);
+	z-index: 2;
+	mix-blend-mode: hard-light;
+	opacity: 0.8;
+}
+
+.vignette {
+	background-image: url(../images/vignette.png);
+	z-index: 1;
+	opacity: 0.2;
+	display: block;
+}
+
+.end-shadow {
+	background-image: url(../images/end-shadow.png);
+	z-index: 3;
+}
+
+.any-season {
+	background-image: url(../images/any-season.png);
+}
+
+.anywhere {
+	background-image: url(../images/anywhere.png);
+}
+
+.rocky {
+	background-image: url(../images/rocky.png);
+}
+
+.venator {
+	background-image: url(../images/venator.png);
+}
+
+.logo {
+	background-image: url(../images/logo.png);
+	z-index: 100;
+}
+
+.venator-logo {
+	background-image: url(../images/venator-logo.png);
+	z-index: 100;
+}
+
+.cta {
+	background-image: url(../images/cta.png);
+	z-index: 10;
+}
+
+.cta-over {
+	background-image: url(../images/cta-over.png);
+	display: block;
+	opacity: 0;
+	z-index: 20;
+}

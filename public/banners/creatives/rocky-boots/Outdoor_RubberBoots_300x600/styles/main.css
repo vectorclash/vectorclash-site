@@ -1,0 +1,131 @@
+.main-container {
+	position: absolute;
+	width: 300px;
+	height: 600px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	z-index: 100;
+	box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #333;
+  background-color: #004867;
+  cursor: pointer;
+}
+
+.full-frame-element {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 600px;
+	background-size: 100%;
+	background-repeat: no-repeat;
+  display: none;
+}
+
+.background-one {
+  background-image: url(../images/background-one.jpg);
+  display: block;
+  z-index: 0;
+}
+
+.background-two {
+  background-image: url(../images/background-two.jpg);
+  z-index: 1;
+}
+
+.red-bar {
+  background-image: url(../images/red-bar.png);
+  z-index: 3;
+  mix-blend-mode: hard-light;
+	opacity: 0.6;
+	transform-origin: bottom;
+}
+
+.shadow {
+  background-image: url(../images/shadow.png);
+  z-index: 4;
+}
+
+.built-for-text-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+.end-text-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+}
+
+.product-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 80;
+}
+
+.built-text {
+  background-image: url(../images/built.png);
+}
+
+.bar-left {
+  background-image: url(../images/bar-left.png);
+}
+
+.for-text {
+  background-image: url(../images/for.png);
+}
+
+.bar-right {
+  background-image: url(../images/bar-right.png);
+}
+
+.performance-text {
+  background-image: url(../images/performance.png);
+}
+
+.comfort-text {
+  background-image: url(../images/comfort.png);
+}
+
+.ram {
+  background-image: url(../images/ram.png);
+}
+
+.logo {
+  background-image: url(../images/logo.png);
+  z-index: 10;
+}
+
+.cta {
+  background-image: url(../images/cta.png);
+  z-index: 0;
+}
+
+.cta-over {
+  background-image: url(../images/cta-over.png);
+  z-index: 1;
+  display: block;
+  opacity: 0;
+}
+
+.end-text {
+  background-image: url(../images/end-text.png);
+  z-index: 2;
+}
+
+.boot-two {
+  background-image: url(../images/boot-two.png);
+  z-index: 2;
+}
+
+.boot-one {
+  background-image: url(../images/boot-one.png);
+  z-index: 3;
+}

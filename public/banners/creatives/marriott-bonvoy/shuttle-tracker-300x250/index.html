@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        overflow: hidden;
+        background-color: #FFFFFF;
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        background-size: 300px 250px;
+        z-index: 10;
+        display: none;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 250px;
+        display: none;
+      }
+
+      #frame-One {
+        z-index: 1;
+      }
+
+      #frame-two {
+        z-index: 0;
+      }
+
+      #text-one-upper {
+        height: 134px;
+        z-index: 5;
+      }
+
+      #text-one-lower {
+        height: 114px;
+        bottom: 0;
+        top: auto;
+        z-index: 5;
+      }
+
+      #text-one-lower img {
+        top: auto;
+        bottom: 0;
+      }
+
+      #text-two-upper {
+        height: 152px;
+        z-index: 5;
+      }
+
+      #bg {
+        width: 450px;
+        z-index: 0;
+      }
+
+      #device-frame {
+        z-index: 1;
+      }
+
+      #device {
+        z-index: 0;
+      }
+
+      .device-icon {
+        top: 147px;
+        left: 45px;
+        width: 13px;
+        height: 13px;
+        z-index: 1;
+      }
+
+      #device-frame-end {
+        left: 166px;
+        z-index: 1;
+      }
+
+      #device-end {
+        z-index: 0;
+      }
+
+      #logo {
+        z-index: 50;
+      }
+
+      #logo-end {
+        z-index: 50;
+      }
+
+      #cta {
+        position: absolute;
+        left: 31px;
+        bottom: 30px;
+        width: 90px;
+        padding: 11px 11px 7px 11px;
+        background-color: #444054;
+        border: 1px solid #444054;
+        display: none;
+      }
+
+      #cta path {
+        fill: #ffffff;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.marriott.com'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <div class="frame" id="frame-one">
+        <img src="images/logo.png" id="logo">
+        <div class="frame" id="device-frame">
+          <img src="images/device-icon.png" id="device-icon" class="device-icon">
+          <img src="images/device.png" id="device">
+        </div>
+        <img src="images/bg.jpg" id="bg">
+      </div>
+      <div class="frame" id="frame-two">
+        <img src="images/logo-end.png" id="logo-end">
+        <img src="images/line.png" id="line">
+        <div class="frame" id="text-one-upper">
+          <img src="images/know-then-go.png" id="know-then-go">
+        </div>
+        <div class="frame" id="text-one-lower">
+          <img src="images/track-your-shuttle.png" id="track-your-shuttle">
+        </div>
+      </div>
+      <div class="frame" id="end-frame">
+        <div id="cta">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+          	 viewBox="0 0 111.9 17.2" style="enable-background:new 0 0 111.9 17.2;" xml:space="preserve">
+             <g>
+               <path d="M0.2,0.6h3v10.7c0,1.2,0.1,2.1,0.4,2.5c0.3,0.4,0.8,0.7,1.6,0.7c0.8,0,1.3-0.2,1.6-0.7
+                 c0.3-0.4,0.4-1.3,0.4-2.5V0.6h2.9v11c0,1.1-0.1,1.9-0.2,2.3c-0.1,0.5-0.3,0.9-0.6,1.3c-0.9,1.1-2.3,1.7-4.2,1.7
+                 c-1.8,0-3.1-0.4-3.9-1.2c-0.7-0.8-1.1-2.2-1.1-4.1V0.6z"/>
+               <path d="M12.5,10.9h3v1c0,1,0.1,1.6,0.4,2c0.2,0.4,0.7,0.5,1.3,0.5c0.6,0,1.1-0.2,1.4-0.5c0.3-0.3,0.5-0.8,0.5-1.4
+                 c0-0.5-0.1-0.9-0.3-1.2S18,10.6,17.2,10L15.7,9c-0.7-0.5-1.2-0.9-1.6-1.2c-0.4-0.4-0.7-0.7-0.9-1c-0.4-0.6-0.5-1.3-0.5-2.2
+                 c0-1.3,0.4-2.4,1.2-3.1c0.8-0.8,1.9-1.1,3.3-1.1c1.5,0,2.6,0.4,3.4,1.2s1.2,2,1.2,3.5c0,0.2,0,0.3,0,0.4c0,0.1,0,0.2,0,0.2h-2.8V5
+                 c0-0.4,0-0.8-0.1-1.1c-0.1-0.3-0.2-0.6-0.3-0.7s-0.3-0.3-0.6-0.4c-0.2-0.1-0.5-0.1-0.8-0.1c-0.5,0-0.9,0.1-1.1,0.4
+                 c-0.3,0.3-0.4,0.7-0.4,1.2c0,0.7,0.6,1.4,1.8,2.2l0,0L19,7.5c1.2,0.8,2,1.5,2.4,2.2c0.4,0.7,0.6,1.6,0.6,2.6
+                 c0,0.7-0.1,1.4-0.3,1.9s-0.5,1-0.9,1.4s-0.9,0.7-1.5,0.9c-0.6,0.2-1.3,0.3-2,0.3c-1.6,0-2.8-0.4-3.6-1.2s-1.2-2.1-1.2-3.8
+                 c0-0.1,0-0.2,0-0.4S12.5,11.2,12.5,10.9L12.5,10.9z"/>
+               <path d="M24.4,16.5V0.6h8.2v2.7h-5.2v3.7h4.9v2.5h-4.9v4.4h5.4v2.7H24.4z"/>
+               <path d="M42.5,16.5V3.2h-3.4V0.6h9.8v2.6h-3.4v13.3H42.5z"/>
+               <path d="M50.4,16.5V0.6h3v6.3h4.1V0.6h3v15.9h-3V9.3h-4.1v7.2H50.4z"/>
+               <path d="M63.1,16.5V0.6h8.2v2.7h-5.2v3.7H71v2.5h-4.9v4.4h5.4v2.7H63.1z"/>
+               <path d="M77.8,16.5l3.6-15.9h4L89,16.5h-3.2l-0.8-4h-3.4l-0.8,4H77.8z M82,10.1h2.5l-1.3-6.7L82,10.1z"/>
+               <path d="M90.5,16.5V0.6h5.2c1.6,0,2.7,0.4,3.4,1.1c0.7,0.7,1,1.8,1,3.5c0,1.6-0.4,2.8-1.1,3.5
+                 c-0.7,0.8-1.9,1.1-3.4,1.1h-2.2v6.8H90.5z M93.4,7.5h1.2c0.9,0,1.6-0.2,1.9-0.5c0.4-0.4,0.6-1,0.6-1.9c0-0.9-0.2-1.5-0.5-1.8
+                 c-0.3-0.3-1-0.5-1.9-0.5h-1.3V7.5z"/>
+               <path d="M102.1,16.5V0.6h5.2c1.6,0,2.7,0.4,3.4,1.1c0.7,0.7,1,1.8,1,3.5c0,1.6-0.4,2.8-1.1,3.5
+                 c-0.7,0.8-1.9,1.1-3.4,1.1H105v6.8H102.1z M104.9,7.5h1.2c0.9,0,1.6-0.2,1.9-0.5c0.4-0.4,0.6-1,0.6-1.9c0-0.9-0.2-1.5-0.5-1.8
+                 c-0.3-0.3-1-0.5-1.9-0.5h-1.3V7.5z"/>
+             </g>
+          </svg>
+        </div>
+        <div class="frame" id="device-frame-end">
+          <img src="images/device-icon.png" id="device-icon-end" class="device-icon">
+          <img src="images/device.png" id="device-end">
+        </div>
+        <div class="frame" id="text-two-upper">
+          <img src="images/shuttle-tracker.png" id="shuttle-tracker">
+        </div>
+        <img src="images/line-end.png" id="line-end">
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script>
+      var banner
+      var tl = new TimelineMax()
+      var iconTl = new TimelineMax()
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        // icon timeline is separate
+
+        iconTl.to('.device-icon', 2, {
+          x: -24,
+          ease: Linear.easeNone
+        })
+
+        iconTl.to('.device-icon', 0.5, {
+          rotation: -90,
+          ease: Linear.easeNone
+        }, '-=0.2')
+
+        iconTl.to('.device-icon', 3, {
+          y: 42,
+          ease: Linear.easeNone
+        }, '-=0.1')
+
+        iconTl.to('.device-icon', 0.5, {
+          rotation: -180,
+          ease: Linear.easeNone
+        }, '-=0.2')
+
+        iconTl.to('.device-icon', 6, {
+          x: 53,
+          ease: Linear.easeNone
+        }, '-=0.1')
+
+        iconTl.to('.device-icon', 0.5, {
+          rotation: -270,
+          ease: Linear.easeNone
+        }, '-=0.2')
+
+        iconTl.to('.device-icon', 3, {
+          y: 0,
+          ease: Linear.easeNone
+        }, '-=0.1')
+
+        iconTl.to('.device-icon', 0.5, {
+          rotation: -360,
+          ease: Linear.easeNone
+        }, '-=0.2')
+
+        iconTl.to('.device-icon', 2, {
+          x: 30,
+          ease: Linear.easeNone
+        }, '-=0.1')
+
+        iconTl.duration(15)
+
+        // end icon timeline
+
+        tl.from('#frame-one', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#device, #device-icon, #bg, #logo']
+        })
+
+        tl.from('#device-frame, #logo', 0.5, {
+          x: 150,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.to('#bg', 3.5, {
+          x: -150,
+          ease: Quad.easeInOut
+        })
+
+        tl.to('#frame-one', 0.5, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut
+        })
+
+        tl.to('#device-frame', 0.5, {
+          x: -150,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.from('#frame-two', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#logo-end']
+        }, '-=0.5')
+
+        tl.from('#line', 1, {
+          x: -banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line']
+        }, '-=0.7')
+
+        tl.from('#know-then-go', 0.5, {
+          y: 30,
+          alpha: 0,
+          ease: Back.easeOut,
+          onStart: enableElement,
+          onStartParams: ['#know-then-go']
+        }, '-=0.2')
+
+        tl.from('#track-your-shuttle', 0.5, {
+          y: -30,
+          alpha: 0,
+          ease: Back.easeOut,
+          onStart: enableElement,
+          onStartParams: ['#track-your-shuttle']
+        }, '-=0.1')
+
+        tl.to('#logo-end', 0.5, {
+          x: -62,
+          y: 10,
+          ease: Quad.easeInOut,
+        }, '+=1.5')
+
+        tl.to('#line', 0.5, {
+          x: -99,
+          y: 19,
+          alpha: 0,
+          ease: Quad.easeInOut
+        }, '-=0.5')
+
+        tl.from('#line-end', 0.5, {
+          x: 99,
+          y: -19,
+          alpha: 0,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#line-end']
+        }, '-=0.5')
+
+        tl.to('#text-one-upper, #text-one-lower', 0.5, {
+          x: -banner.clientWidth,
+          y: 19,
+          ease: Quad.easeInOut,
+        }, '-=0.5')
+
+        tl.from('#device-frame-end', 0.5, {
+          x: banner.clientWidth,
+          ease: Quad.easeInOut,
+          onStart: enableElement,
+          onStartParams: ['#device-end, #device-icon-end']
+        }, '-=0.5')
+
+        tl.from('#shuttle-tracker', 0.5, {
+          y: 20,
+          alpha: 0,
+          ease: Back.easeOut,
+          onStart: enableElement,
+          onStartParams: ['#shuttle-tracker']
+        }, '-=0.2')
+
+        tl.from('#cta', 0.5, {
+          scale: 0,
+          ease: Back.easeOut,
+          onStart: enableElement,
+          onStartParams: ['#cta'],
+          onComplete: function() {
+            banner.addEventListener('mouseover', onBannerOver)
+            banner.addEventListener('mouseout', onBannerOut)
+          }
+        }, '+=0.5')
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      function onBannerOver(event) {
+        TweenMax.to('#cta', 0.3, {
+          backgroundColor: 0xFFFFFF,
+        })
+
+        TweenMax.to('path', 0.3, {
+          fill: 0x444054,
+        })
+      }
+
+      function onBannerOut(event) {
+        TweenMax.to('#cta', 0.2, {
+          backgroundColor: 0x444054,
+        })
+
+        TweenMax.to('path', 0.2, {
+          fill: 0xFFFFFF,
+        })
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>

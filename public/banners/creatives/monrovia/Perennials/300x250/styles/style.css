@@ -1,0 +1,129 @@
+#main {
+	position: absolute;
+	width: 300px;
+	height: 250px;
+	left: 0;
+	top: 0;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+#background_texture {
+	position: absolute;
+	width: 300px;
+	height: 444px;
+	left: 0;
+	bottom: 0;
+	background-image: url(../images/background_texture.jpg);
+	z-index: 0;
+}
+
+#flower {
+	position: absolute;
+	width: 244px;
+	height: 398px;
+	left: 30px;
+	top: -35px;
+	z-index: 15;
+	background-image: url(../images/flower.png);
+	opacity: 0;
+}
+
+#footer {
+	position: absolute;
+	width: 300px;
+	height: 67px;
+	left: 0;
+	bottom: 0;
+	z-index: 20;
+	background-color: #364528;
+}
+
+#cta {
+	position: absolute;
+	right: 23px;
+	bottom: 23px;
+	z-index: 25;
+	font-family: lato, sans-serif;
+	font-size: 12px;
+	color: white;
+	border: solid 1px white;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+	padding: 3px 9px 3px 9px;
+	background-color: #364528;
+	-webkit-font-smoothing: antialiased;
+}
+
+#logo {
+	position: absolute;
+	width: 143px;
+	left: 22px;
+	top: 12px;
+	z-index: 25;
+}
+
+#frame1_text1 {
+	position: absolute;
+	width: 300px;
+	top: 46%;
+	left: 0;
+	text-align: center;
+	color: white;
+	-webkit-transform: translate3d(0, -50%, 0);
+	-moz-transform: translate3d(0, -50%, 0);
+	-ms-transform: translate3d(0, -50%, 0);
+	-o-transform: translate3d(0, -50%, 0);
+	transform: translate3d(0, -50%, 0);
+	font-family: 'Cinzel', serif;
+	font-size: 42px;
+	line-height: 43px;
+	text-shadow: 0px 0px 10px #303e21;
+	z-index: 30;
+}
+
+#frame2_text1 {
+	position: absolute;
+	width: 300px;
+	z-index: 40;
+	top: 15px;
+	left: 0;
+	text-align: center;
+	color: #303e21;
+	font-family: lato, serif;
+	font-size: 10px;
+	letter-spacing: 5.2px;
+}
+
+#frame2_line {
+	position: absolute;
+	width: 220px;
+	height: 0.5px;
+	top: 25px;
+	left: 50%;
+	-webkit-transform: translate3d(-50%, 0, 0);
+	-moz-transform: translate3d(-50%, 0, 0);
+	-ms-transform: translate3d(-50%, 0, 0);
+	-o-transform: translate3d(-50%, 0, 0);
+	transform: translate3d(-50%, 0, 0);
+	z-index: 40;
+	background-color: #303e21;
+	border: none;
+	opacity: 0;
+}
+
+#frame2_text2 {
+	position: absolute;
+	width: 300px;
+	z-index: 40;
+	top: 42px;
+	left: 0;
+	text-align: center;
+	color: #303e21;
+	font-family: lato, serif;
+	font-size: 18px;
+	letter-spacing: 1px;
+	line-height: 18px;
+	font-style: italic;
+}

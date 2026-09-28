@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <style media="screen">
+      .banner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 300px;
+        height: 600px;
+        overflow: hidden;
+        background-image: linear-gradient(to bottom, #fcb040, #ffebbd);
+        cursor: pointer;
+      }
+
+      .full-frame-element {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        background-size: 100%;
+        z-index: 10;
+      }
+
+      .frame {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        overflow: hidden;
+      }
+
+      .border {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        z-index: 100;
+      }
+
+      img {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      #logo-cta {
+        z-index: 6;
+      }
+
+      #boot-foreground {
+        z-index: 5;
+      }
+
+      #birds {
+        z-index: 4;
+      }
+
+      #mountain {
+        z-index: 3;
+      }
+
+      #front-clouds {
+        z-index: 2;
+      }
+
+      #red-clouds {
+        z-index: 1;
+      }
+
+      #sun {
+        z-index: 0;
+      }
+    </style>
+    <script>
+      var clickTag = 'https://www.rockyboots.com/outback/'
+    </script>
+  </head>
+  <body>
+    <div class="banner">
+      <div class="border"></div>
+      <img id="logo-cta" src="images/logo-cta.png" />
+      <img id="boot-foreground" src="images/boot-foreground.png" />
+      <img id="birds" src="images/birds.png" />
+      <img id="mountain" src="images/mountain.png" />
+      <img id="front-clouds" src="images/front-clouds.png" />
+      <img id="red-clouds" src="images/red-clouds.png" />
+      <img id="sun" src="images/sun.png" />
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.6/gsap.min.js"></script>
+    <script>
+      var banner
+      let tl = new gsap.timeline()
+      let animationTime = 15
+
+      function init() {
+        banner = document.querySelector('.banner')
+
+        animate()
+        gsap.set('img', {display: 'block'})
+
+        banner.addEventListener('click', onBannerClick)
+      }
+
+      function animate() {
+        gsap.from('#logo-cta', {
+          duration: 1,
+          alpha: 0,
+          delay: 1
+        })
+
+        gsap.from('#boot-foreground', {
+          duration: animationTime,
+          scale: 1.3,
+          y: -20,
+          ease: Quad.easeInOut
+        })
+
+        gsap.fromTo('#birds', {
+          x: 150
+        }, {
+          duration: animationTime,
+          x: -100,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#mountain', {
+          duration: animationTime,
+          scale: 1.5,
+          x: 60,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#front-clouds', {
+          duration: animationTime,
+          scale: 1.4,
+          x: 60,
+          y: 40,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#red-clouds', {
+          duration: animationTime,
+          scale: 1.5,
+          x: -60,
+          ease: Quad.easeInOut
+        })
+
+        gsap.from('#sun', {
+          duration: animationTime,
+          scale: 1.4,
+          y: 50,
+          x: 60,
+          ease: Quad.easeInOut
+        })
+      }
+
+      function enableElement(element) {
+        TweenMax.set(element, {
+          display: 'block'
+        })
+      }
+
+      function onBannerClick(event) {
+        window.open(clickTag)
+      }
+
+      window.addEventListener('load', init)
+    </script>
+  </body>
+</html>
