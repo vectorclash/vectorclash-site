@@ -92,9 +92,14 @@ The site uses local JSON files for content management:
   for adjacent familiarity rather than core competency.
 - `src/data/profile.json` - Personal information and resume link
 - `src/data/banners.json` - The HTML5 banner portfolio at `/banners/`, grouped by
-  client. Each banner's `path` points at its delivered creative under
+  client. The order is emphasis, not the alphabet: clients appear in the order
+  they are listed, and each opens on its first campaign -- every size of the lead
+  title, at least four tiles -- with the rest behind "Show all". A client with
+  only one or two more is shown whole. Each banner's `path` points at its delivered creative under
   `public/banners/creatives/` and at its poster, `public/banners/posters/<path>.webp`:
   the banner's resting frame, captured at 1.5x once its animation has finished.
+  Where a banner comes to rest on a bare logo (the FirstNet Expanded Coverage set), the
+  poster is a key frame from mid-animation instead; the preview still plays it all.
   A banner without a poster fails the test suite.
 
 ## License

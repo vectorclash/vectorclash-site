@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { vi } from 'vitest';
 
 // WebGL, and components with their own tests of nothing here.
@@ -41,13 +41,36 @@ test('every banner in the data has its creative and its poster on disk, in exact
   expect(missing).toEqual([]);
 });
 
-test('renders a section per client and a tile per banner', () => {
+const tiles = () => screen.getAllByRole('button', { name: /\d+ by \d+$/ });
+const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+test('each client shows a preview, and Show all brings in exactly the rest', () => {
   render(<BannerPortfolio />);
 
   clients.forEach(({ client }) => {
     expect(screen.getByRole('region', { name: client })).toBeInTheDocument();
   });
-  expect(screen.getAllByRole('button', { name: /\d+ by \d+$/ })).toHaveLength(banners.length);
+
+  const more = screen.getAllByRole('button', { name: /^Show all \d+$/ });
+  expect(more.length).toBeGreaterThan(0);
+  expect(tiles().length).toBeLessThan(banners.length);
+
+  more.forEach((button) => fireEvent.click(button));
+  expect(tiles()).toHaveLength(banners.length);
+  expect(screen.getAllByRole('button', { name: 'Show fewer' })).toHaveLength(more.length);
+});
+
+test('the index links every client to its own section', () => {
+  render(<BannerPortfolio />);
+  const index = screen.getByRole('navigation', { name: 'Clients' });
+
+  clients.forEach(({ client, banners: own }) => {
+    const link = within(index).getByRole('link', {
+      name: new RegExp(`^${escape(client)} ${own.length}$`),
+    });
+    const target = document.getElementById(link.getAttribute('href').slice(1));
+    expect(target).toBe(screen.getByRole('region', { name: client }));
+  });
 });
 
 test('a tile opens its creative live, and Escape closes it', () => {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { gsap, SplitText, ScrollTrigger } from "gsap/all";
 import tinycolor from "tinycolor2";
 
@@ -96,13 +97,12 @@ function useWallReveal(ref) {
       );
     };
 
-    reveal(wall.querySelector(".banner-wall-intro"), (tl) =>
-      tl.fromTo(
-        wall.querySelector(".banner-wall-intro"),
-        { alpha: 0, y: 20 },
-        { alpha: 1, y: 0, duration: 1, ease: "quad.out" }
-      )
-    );
+    for (const selector of [".banner-wall-intro", ".banner-index"]) {
+      const el = wall.querySelector(selector);
+      reveal(el, (tl) =>
+        tl.fromTo(el, { alpha: 0, y: 20 }, { alpha: 1, y: 0, duration: 1, ease: "quad.out" })
+      );
+    }
 
     wall.querySelectorAll(".banner-client").forEach((client) =>
       reveal(client, (tl) =>
@@ -114,6 +114,8 @@ function useWallReveal(ref) {
             { alpha: 1, y: 0, duration: 0.5, ease: "quad.out" },
             0
           )
+          // Only the preview is on the page when this is built. Tiles a
+          // "Show all" adds bring their own entrance, so the two never fight.
           .fromTo(
             client.querySelectorAll(".banner-tile"),
             { alpha: 0, y: 40 },
@@ -195,6 +197,129 @@ function BannerTile({ banner, client, onOpen }) {
   );
 }
 
+// "AT&T" -> "att", "Bowers & Wilkins" -> "bowers-wilkins": the anchor each
+// client's section answers to, from the index and from a shared link.
+export const clientId = (client) =>
+  client
+    .toLowerCase()
+    .replace(/&/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+// How much of a client shows before "Show all": its lead campaign in every
+// size it ran at, and never fewer than four tiles, so the preview reads as a
+// set rather than a fragment. Where only a couple would be held back, nothing
+// is -- a button to reveal two banners costs more than the two banners.
+const PREVIEW_MIN = 4;
+const HELD_BACK_MIN = 3;
+
+const previewCount = (banners) => {
+  const leadEnds = banners.findIndex((b) => b.title !== banners[0].title);
+  const count = Math.max(leadEnds === -1 ? banners.length : leadEnds, PREVIEW_MIN);
+  return banners.length - count >= HELD_BACK_MIN ? count : banners.length;
+};
+
+const SHELF_MOVE = { duration: 0.6, ease: "power3.inOut" };
+
+function BannerClient({ client, banners, onOpen }) {
+  const [expanded, setExpanded] = useState(false);
+  const sectionRef = useRef(null);
+  const shelfRef = useRef(null);
+  const preview = previewCount(banners);
+  const shown = expanded ? banners : banners.slice(0, preview);
+  const id = clientId(client);
+
+  // The shelf's height is tweened between the two layouts rather than snapped,
+  // and the page's scroll triggers are re-measured once it lands: everything
+  // below this client has moved, the footer's reveal included.
+  const settle = (from) => {
+    const shelf = shelfRef.current;
+    gsap.fromTo(
+      shelf,
+      { height: from, overflow: "hidden" },
+      {
+        ...SHELF_MOVE,
+        height: shelf.offsetHeight,
+        clearProps: "height,overflow",
+        onComplete: () => ScrollTrigger.refresh(),
+      }
+    );
+  };
+
+  const toggle = () => {
+    const shelf = shelfRef.current;
+    const from = shelf.offsetHeight;
+
+    if (!expanded) {
+      flushSync(() => setExpanded(true));
+      settle(from);
+      gsap.fromTo(
+        [...shelf.children].slice(preview),
+        { alpha: 0, y: 30 },
+        { alpha: 1, y: 0, duration: 0.5, ease: "back.out", stagger: { amount: 0.4 }, delay: 0.1 }
+      );
+      return;
+    }
+
+    // Closing, the extra tiles fade before the shelf closes over them, so
+    // nothing is cut off mid-tile. A long client closed from its button leaves
+    // its heading above the screen, so the page comes back up to it.
+    gsap.to([...shelf.children].slice(preview), {
+      alpha: 0,
+      duration: 0.2,
+      ease: "quad.in",
+      onComplete: () => {
+        flushSync(() => setExpanded(false));
+        settle(from);
+        if (sectionRef.current.getBoundingClientRect().top < 0) {
+          sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      },
+    });
+  };
+
+  return (
+    <section className="banner-client" id={id} ref={sectionRef} aria-label={client}>
+      <h4 className="banner-client-name">
+        {client} <span className="banner-client-count">{banners.length}</span>
+      </h4>
+      <ul className="banner-shelf" id={`${id}-shelf`} ref={shelfRef}>
+        {shown.map((banner) => (
+          <BannerTile
+            key={banner.path}
+            banner={banner}
+            client={client}
+            onOpen={() => onOpen({ banner, client })}
+          />
+        ))}
+      </ul>
+      {preview < banners.length && (
+        <button
+          type="button"
+          className="banner-client-more"
+          aria-expanded={expanded}
+          aria-controls={`${id}-shelf`}
+          onClick={toggle}
+        >
+          {expanded ? "Show fewer" : `Show all ${banners.length}`}
+          <svg viewBox="0 0 448 512" aria-hidden="true">
+            <path d="M201.4 374.6a32 32 0 0 0 45.3 0l160-160a32 32 0 0 0-45.3-45.3L224 306.7 86.6 169.4a32 32 0 0 0-45.3 45.3l160 160z" />
+          </svg>
+        </button>
+      )}
+    </section>
+  );
+}
+
+// The index scrolls rather than jumps, and leaves the address pointing at the
+// client, so a link to /banners/#att can be shared and lands where it says.
+function jumpTo(event) {
+  event.preventDefault();
+  const id = event.currentTarget.hash.slice(1);
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  history.replaceState(null, "", `#${id}`);
+}
+
 export default function BannerPortfolio() {
   const headerRef = useRef(null);
   const wallRef = useRef(null);
@@ -202,6 +327,13 @@ export default function BannerPortfolio() {
 
   useHeaderEntrance(headerRef);
   useWallReveal(wallRef);
+
+  // A shared link to a client: the browser tries the anchor before any of the
+  // page exists, so it is honoured again once the wall is in place.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
+  }, []);
 
   // The glow the preview throws around a playing banner. It was a fixed hot
   // pink; it is one hue off the brand chartreuse now, rolled once per visit,
@@ -252,20 +384,20 @@ export default function BannerPortfolio() {
             </p>
           </div>
 
+          <nav className="banner-index" aria-label="Clients">
+            <ul>
+              {clients.map(({ client, banners }) => (
+                <li key={client}>
+                  <a href={`#${clientId(client)}`} onClick={jumpTo}>
+                    {client} <span>{banners.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           {clients.map(({ client, banners }) => (
-            <section className="banner-client" key={client} aria-label={client}>
-              <h4 className="banner-client-name">{client}</h4>
-              <ul className="banner-shelf">
-                {banners.map((banner) => (
-                  <BannerTile
-                    key={banner.path}
-                    banner={banner}
-                    client={client}
-                    onOpen={() => setOpen({ banner, client })}
-                  />
-                ))}
-              </ul>
-            </section>
+            <BannerClient key={client} client={client} banners={banners} onOpen={setOpen} />
           ))}
         </div>
       </main>
