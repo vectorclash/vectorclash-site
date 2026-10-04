@@ -56,7 +56,7 @@
     ],
     "sections": [
       {
-        "body": "<p>Winc was a complete ecommerce platform built from the ground up on native web components—no framework, just the browser's own component model. It was my first time working that close to the platform, and the constraint turned out to be the interesting part: everything the project needed had to be assembled from primitives rather than pulled from an ecosystem.</p>",
+        "body": "<p>The mission at Winc was to build a complete ecommerce platform from the ground up on native web components—no framework, just the browser's own component model. It was my first time working that close to the platform, and the constraint turned out to be the interesting part: everything the project needed had to be assembled from primitives rather than pulled from an ecosystem.</p>",
         "figures": [
           0
         ]
@@ -69,14 +69,14 @@
         ]
       },
       {
-        "body": "<p>That decision shaped everything downstream. Composing a page meant assembling components that already knew how to animate themselves, which kept layouts flexible without a central timeline to keep in sync, and it meant animation behavior stayed consistent because each part brought its own.</p>",
+        "body": "<p>That decision shaped everything downstream. Composing a page meant assembling components that already knew how to animate themselves, which kept layouts flexible without a central timeline to keep in sync and kept motion consistent because each part brought its own. The same encapsulation also marked the limit of what was finished: every component was complete on its own terms, and none of them knew the others were there.</p>",
         "figures": [
           3,
           4
         ]
       },
       {
-        "body": "<p>The library grew to cover the full shopping experience, and the payoff was that new page variations could be composed from existing pieces rather than built from scratch.</p>",
+        "body": "<p>When I left Winc, the project existed as that library and the pages assembled from it, not yet as a site that could ship. The missing piece was the layer between the components—a build step to pull them together and compile their JavaScript, and a shared channel for state and events so that the parts of a shopping experience could respond to one another. Working without a framework means supplying that layer from primitives as well, and it is the part I would now build first.</p>",
         "figures": [
           5,
           6
