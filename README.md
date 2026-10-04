@@ -1,6 +1,6 @@
 # VECTORCLASH
 
-Portfolio website for Aaron Ezra Sterczewski - design engineer.
+Portfolio website for Aaron Ezra Sterczewski - design engineer and creative technologist.
 
 ## About
 
