@@ -193,6 +193,13 @@
         ]
       },
       {
+        "body": "<p>To bring the store to an audience, I built a second tool beside the studio: a local ad builder that turns a saved design into an Instagram Reel. The video opens on a three.js flight through the design itself, which slows as the first product arrives; each product photograph then assembles out of triangular facets, drawn from the same Printful mockup pipeline the store uses but requested with transparent backgrounds, so the garment sits within the artwork rather than on a studio backdrop. Every cut lands on a bar line of a soundtrack rendered by Orrery, a generative music application I wrote separately, and the preview and the export draw each frame from the same function of time, so the exported file keeps the composition and timing approved in the preview.</p>",
+        "figures": [
+          8,
+          9
+        ]
+      },
+      {
         "body": "<p><a href='https://chromaforge.app/' target='_blank' rel='noopener noreferrer'>View Project</a></p>",
         "figures": []
       }
@@ -205,7 +212,9 @@
       "/projects/forge/images/forge_img05.jpg",
       "/projects/forge/images/forge_img06.jpg",
       "/projects/forge/images/forge_img07.jpg",
-      "/projects/forge/images/forge_img08.jpg"
+      "/projects/forge/images/forge_img08.jpg",
+      "/projects/forge/images/forge_img09.jpg",
+      "/projects/forge/images/forge_img10.jpg"
     ],
     "captions": [
       "A generated piece at its most diffuse, where broad overlapping planes let the palette read as light rather than as edges.",
@@ -215,11 +224,14 @@
       "The product page, where size, quantity and price resolve against a print-on-demand fulfiller behind the scenes.",
       "The gallery, where every generated piece keeps the name the algorithm gave it.",
       "A piece on a dark ground, the geometry held to hard edges and full saturation.",
-      "Dense overlap at the other end of the range, the structure legible only where the planes disagree."
+      "Dense overlap at the other end of the range, the structure legible only where the planes disagree.",
+      "The ad builder paused on a product, with Instagram's interface traced over the frame to show what the app will cover, and the wordmark held inside Meta's safe zone.",
+      "Three frames from one exported Reel, in order: the flight through the design, the first garment assembling out of facets, and a later product beneath the wordmark."
     ],
     "videos": [
       "/projects/forge/videos/FusedCryosphere-ebeb.mp4",
-      "/projects/forge/videos/GeodesicVortex-49ea.mp4"
+      "/projects/forge/videos/GeodesicVortex-49ea.mp4",
+      "/projects/forge/videos/ExtragalacticGravity-1808.mp4"
     ]
   },
   {

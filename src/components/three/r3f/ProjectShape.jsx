@@ -48,8 +48,8 @@ function loadTexture(url) {
 
 // Loads the images of the open project only. Every image of every project used
 // to be fetched at page load -- 43 full-size JPEGs downloaded and decoded to
-// texture a single cube face. Scoped to one project it is at most eight, and
-// they are the eight the gallery thumbnails can actually switch to, so
+// texture a single cube face. Scoped to one project it is at most ten, and
+// they are the ten the gallery thumbnails can actually switch to, so
 // switching within a project is still instant.
 export default function ProjectShape({ size = 300, textureURL, imageURLs }) {
   const groupRef = useRef();
