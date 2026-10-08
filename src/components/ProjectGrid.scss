@@ -93,6 +93,20 @@
     }
   }
 
+  // The filler is only there to close a short last row. When the projects
+  // fill every row it lands first in a row of its own, and flex: 1 stretches
+  // it the full width -- so in that position it steps aside. The counts follow
+  // the column widths above: four across, two below 777px.
+  li.grid-filler:nth-child(4n + 1) {
+    display: none;
+  }
+
+  @media only screen and (max-width: 777px) {
+    li.grid-filler:nth-child(2n + 1) {
+      display: none;
+    }
+  }
+
   li:hover,
   li.active {
     border-bottom-right-radius: 50px;
