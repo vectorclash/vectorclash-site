@@ -384,5 +384,87 @@
       "/projects/att/videos/delivery.mp4",
       "/projects/att/videos/ladybugs.mp4"
     ]
+  },
+  {
+    "title": "Orrery",
+    "tools": [
+      "Web Audio API",
+      "Sound Synthesis",
+      "three.js",
+      "esbuild"
+    ],
+    "sections": [
+      {
+        "body": "<p>Orrery is a piece of music that never ends and never repeats, composed, synthesised and performed in real time inside a web page. There is no server behind it and no recorded sound in it: every note is built from oscillators, filters and noise by the Web Audio API at the moment it falls due, and a three.js scene draws what the music is doing as it happens. An orrery is a clockwork model of the heavens, and in this one the clockwork is the harmony—the planet at the centre, its rings and the sky around it all move with the chords the engine writes.</p>",
+        "figures": [
+          0,
+          1
+        ]
+      },
+      {
+        "body": "<p>It began as a generator of random notes in a scale, and most of the work since has gone into replacing chance with the decisions a composer makes. Progressions are written for each mode around the chord that gives it its character and set in an AABA form; pads take whichever voicing moves least from the chord before; melodies develop a one-bar motif over a four-bar phrase and close on a cadence; two leads trade phrases in call and response. Left to itself, the music moves through eras of about forty seconds, and each change of key, tempo and arrangement waits for the next chord change, so a new era arrives on a downbeat rather than partway through a phrase.</p>",
+        "figures": [
+          2,
+          3
+        ]
+      },
+      {
+        "body": "<p>Each of the twenty-nine instruments is modelled on how its real counterpart makes sound. The strings—harp, sitar, clavinet, guitar and upright bass—are a physical model, a burst of noise circulating through a delay line tuned to the note, so the upper partials fade first, as they do on a real string. The choir is formant synthesis that glides between vowels across a chord, the organ sums true drawbar footages through a rotating speaker, and the sounds drawn from the 1980s carry their own chorus, ensemble and gated reverb, as the hardware did. Twenty-seven genres each assemble a kit from these, with twelve bass styles and thirty-one drum styles among them, and every voice was measured for loudness and balanced by its role, so a change of instrument never arrives as a jump in level.</p>",
+        "figures": [
+          4,
+          5
+        ]
+      },
+      {
+        "body": "<p>Infinite mode asks nothing of the listener; Edit mode hands over every decision the engine would otherwise make. The panel folds into three sections—genre, feel and instruments—each with its own random, so a listener can keep a kit and reroll the key, or keep the key and reroll the kit, and a closed section still reports what it holds in a single line. The instruments are grouped by the part they play in an arrangement rather than alphabetically, the same roles Infinite mode builds its eras from. On a phone the panel becomes a sheet over the scene with every control still in reach, and the whole configuration travels as a link of twenty-seven characters; links made by earlier versions still open, because the format has only ever been extended at its end.</p>",
+        "figures": [
+          6,
+          7
+        ]
+      },
+      {
+        "body": "<p>Most visualisers read a spectrum, which knows how loud the music is and nothing about its harmony. Here, every voice logs each note as it is scheduled, and the visuals replay that log in step with what is reaching the speakers. Pitch is laid out on the circle of fifths, which puts a key's scale in one unbroken arc and a chord's tones side by side: the ring's dust lifts into a plume wherever a note sounds, the sphere leans toward the current chord and ripples from the direction of each note, and the sky lights in the same directions, with a ring of light running outward on every kick. The log is read at the audio clock less the output latency, so the picture stays with the sound even over AirPlay, where the delay reaches two seconds.</p>",
+        "figures": [
+          8,
+          9
+        ]
+      },
+      {
+        "body": "<p>Orrery is also a tool I rely on. Export renders a lossless WAV offline through the same scheduler, in a hidden frame with its own copy of the engine, so the file is written faster than real time while the music plays on; the same renderer scores the Instagram Reels from Chromaforge's ad builder, which hands it a share link and cuts to the bar lines of what comes back. And because music is often left playing in the background, playback keeps time from a worker thread so a minimised window plays on, and when a phone pauses the audio, the controls follow the sound rather than offering STOP over silence.</p>",
+        "figures": []
+      },
+      {
+        "body": "<p><a href='https://vectorclash.com/orrery/' target='_blank' rel='noopener noreferrer'>View Project</a></p>",
+        "figures": []
+      }
+    ],
+    "images": [
+      "/projects/orrery/images/orrery_img01.jpg",
+      "/projects/orrery/images/orrery_img02.jpg",
+      "/projects/orrery/images/orrery_img03.jpg",
+      "/projects/orrery/images/orrery_img04.jpg",
+      "/projects/orrery/images/orrery_img05.jpg",
+      "/projects/orrery/images/orrery_img06.jpg",
+      "/projects/orrery/images/orrery_img07.jpg",
+      "/projects/orrery/images/orrery_img08.jpg",
+      "/projects/orrery/images/orrery_img09.jpg",
+      "/projects/orrery/images/orrery_img10.jpg"
+    ],
+    "captions": [
+      "A dense passage in Infinite mode, the ring, the sphere and the sky all answering the same notes.",
+      "Infinite mode's controls: stop, a step on to the next era, and a running account of the key, tempo, room, era and the instruments in play.",
+      "One era of a session in Infinite mode, its palette taken from its key.",
+      "The same session half a minute later, after an era change: a new arrangement, and the palette turned to match.",
+      "Edit mode with SYNTHWAVE chosen. A genre sets the feel and rolls a kit from the instruments that belong to it; choosing it again rolls another.",
+      "The instruments, grouped by the part each plays in an arrangement, holding a synthwave kit: synth bass, synthwave drums, Juno, mono lead and arpeggio.",
+      "The feel: key, scale, tempo and octave, then density, tone, space and room, how closely the melody keeps to the chord, how long each chord lasts, and the pump and sweep of house music.",
+      "On a phone, Infinite mode beside Edit mode's panel, open on the genres and on the instruments.",
+      "The ring edge-on. A sounding note lifts its patch of dust into a plume, placed by its pitch on the circle of fifths and by its octave across the ringlets.",
+      "Closer in: the sphere's five nested layers run from the bass at the core to the leads at the edge, inside a ring lit where notes are sounding."
+    ],
+    "videos": [
+      "/projects/orrery/videos/orrery-synthwave.mp4",
+      "/projects/orrery/videos/orrery-infinite.mp4"
+    ]
   }
 ]
