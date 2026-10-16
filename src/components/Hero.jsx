@@ -110,12 +110,15 @@ function Hero() {
       splits.push(subHeadlineSplit);
 
       // An ignored element is left out of split.words, so it has to be added
-      // back as a target by hand -- it sits last in the paragraph, which keeps
-      // the stagger in reading order.
+      // back as a target by hand. One can sit mid-sentence (the glyph rides
+      // with the word before it), so the targets are put back in document
+      // order to keep the stagger reading left to right.
       const subHeadlineTargets = [
         ...subHeadlineSplit.words,
         ...pElement.querySelectorAll(".nowrap"),
-      ];
+      ].sort((a, b) =>
+        a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+      );
 
       tl.fromTo(
         subHeadlineTargets,
