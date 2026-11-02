@@ -409,6 +409,13 @@
         ]
       },
       {
+        "body": "<p>Eras change everything at once, which sounds more like turning a radio dial than like a song, so Infinite mode can also play songs, one after another like a playlist. A song keeps what makes it itself—key, tempo, instruments, chord progressions, the hook—and changes only its arrangement from section to section: who plays, how hard the drums hit, how bright and full it is, which is all a verse, a chorus or a drop really is. Dance styles are built from grooves, builds and drops, with a snare roll and a riser into each drop and often a beat of silence before it lands; other styles have verses, choruses and a bridge, now and then with a last chorus a step up. Every choice is drawn from seeded random streams, one per voice and reseeded at each section, so a second chorus plays what the first one played, and the song that plays is the song that exports. In Edit mode a song can be any length from thirty seconds to six minutes, and at all but the slowest tempos it comes out exactly that long: whole phrases fill what they can, the last chorus stretches, and the final chord rings out to the last sample.</p>",
+        "figures": [
+          10,
+          11
+        ]
+      },
+      {
         "body": "<p>Each of the twenty-nine instruments is modelled on how its real counterpart makes sound. The strings—harp, sitar, clavinet, guitar and upright bass—are a physical model, a burst of noise circulating through a delay line tuned to the note, so the upper partials fade first, as they do on a real string. The choir is formant synthesis that glides between vowels across a chord, the organ sums true drawbar footages through a rotating speaker, and the sounds drawn from the 1980s carry their own chorus, ensemble and gated reverb, as the hardware did. Twenty-seven genres each assemble a kit from these, with twelve bass styles and thirty-one drum styles among them, and every voice was measured for loudness and balanced by its role, so a change of instrument never arrives as a jump in level.</p>",
         "figures": [
           4,
@@ -416,21 +423,21 @@
         ]
       },
       {
-        "body": "<p>Infinite mode asks nothing of the listener; Edit mode hands over every decision the engine would otherwise make. The panel folds into three sections—genre, feel and instruments—each with its own random, so a listener can keep a kit and reroll the key, or keep the key and reroll the kit, and a closed section still reports what it holds in a single line. The instruments are grouped by the part they play in an arrangement rather than alphabetically, the same roles Infinite mode builds its eras from. On a phone the panel becomes a sheet over the scene with every control still in reach, and the whole configuration travels as a link of twenty-seven characters; links made by earlier versions still open, because the format has only ever been extended at its end.</p>",
+        "body": "<p>Infinite mode asks nothing of the listener; Edit mode hands over every decision the engine would otherwise make. The panel folds into three sections—genre, feel and instruments—each with its own random, so a listener can keep a kit and reroll the key, or keep the key and reroll the kit, and a closed section still reports what it holds in a single line. The instruments are grouped by the part they play in an arrangement rather than alphabetically, the same roles Infinite mode builds its eras from. On a phone the panel becomes a sheet over the scene with every control still in reach, and the whole configuration travels as a link of twenty-seven characters, or thirty-eight for a song, which carries its seed and length too; links made by earlier versions still open, because the format has only ever been extended at its end.</p>",
         "figures": [
           6,
           7
         ]
       },
       {
-        "body": "<p>Most visualisers read a spectrum, which knows how loud the music is and nothing about its harmony. Here, every voice logs each note as it is scheduled, and the visuals replay that log in step with what is reaching the speakers. Pitch is laid out on the circle of fifths, which puts a key's scale in one unbroken arc and a chord's tones side by side: the ring's dust lifts into a plume wherever a note sounds, the sphere leans toward the current chord and ripples from the direction of each note, and the sky lights in the same directions, with a ring of light running outward on every kick. The log is read at the audio clock less the output latency, so the picture stays with the sound even over AirPlay, where the delay reaches two seconds.</p>",
+        "body": "<p>Most visualisers read a spectrum, which knows how loud the music is and nothing about its harmony. Here, every voice logs each note as it is scheduled, and the visuals replay that log in step with what is reaching the speakers. Pitch is laid out on the circle of fifths, which puts a key's scale in one unbroken arc and a chord's tones side by side: the ring's dust lifts into a plume wherever a note sounds, the sphere leans toward the current chord and ripples from the direction of each note, and the sky lights in the same directions, with a ring of light running outward on every kick. At the heart of the sphere, thousands of particles ride a strange attractor, a chaotic flow that spirals up and around and plunges back down a vortex through its axis without ever retracing its path; it runs faster as the music gets louder, twists on the kick, takes the chord's colours and is pushed in and out by the layers around it, so it bulges and ripples with them. The log is read at the audio clock less the output latency, so the picture stays with the sound even over AirPlay, where the delay reaches two seconds.</p>",
         "figures": [
           8,
           9
         ]
       },
       {
-        "body": "<p>Orrery is also a tool I rely on. Export renders a lossless WAV offline through the same scheduler, in a hidden frame with its own copy of the engine, so the file is written faster than real time while the music plays on; the same renderer scores the Instagram Reels from Chromaforge's ad builder, which hands it a share link and cuts to the bar lines of what comes back. And because music is often left playing in the background, playback keeps time from a worker thread so a minimised window plays on, and when a phone pauses the audio, the controls follow the sound rather than offering STOP over silence.</p>",
+        "body": "<p>Orrery is also a tool I rely on. Export renders a lossless WAV offline through the same scheduler, in a hidden frame with its own copy of the engine, so the file is written faster than real time while the music plays on; the same renderer scores the Instagram Reels from Chromaforge's ad builder, which hands it a share link and cuts to the bar lines of what comes back, and a song set to the length of a Reel fills it exactly, from its first downbeat to the end of its last chord's ring. And because music is often left playing in the background, playback keeps time from a worker thread so a minimised window plays on, and when a phone pauses the audio, the controls follow the sound rather than offering STOP over silence.</p>",
         "figures": []
       },
       {
@@ -448,11 +455,13 @@
       "/projects/orrery/images/orrery_img07.jpg",
       "/projects/orrery/images/orrery_img08.jpg",
       "/projects/orrery/images/orrery_img09.jpg",
-      "/projects/orrery/images/orrery_img10.jpg"
+      "/projects/orrery/images/orrery_img10.jpg",
+      "/projects/orrery/images/orrery_img11.jpg",
+      "/projects/orrery/images/orrery_img12.jpg"
     ],
     "captions": [
       "A dense passage in Infinite mode, the ring, the sphere and the sky all answering the same notes.",
-      "Infinite mode's controls: stop, a step on to the next era, and a running account of the key, tempo, room, era and the instruments in play.",
+      "Infinite mode playing songs: pause, a skip to the next song, the switch between eras and songs, and an export of the whole song, above the genre, key, tempo and room, the section and the time through the song, and who is playing in it.",
       "One era of a session in Infinite mode, its palette taken from its key.",
       "The same session half a minute later, after an era change: a new arrangement, and the palette turned to match.",
       "Edit mode with SYNTHWAVE chosen. A genre sets the feel and rolls a kit from the instruments that belong to it; choosing it again rolls another.",
@@ -460,11 +469,13 @@
       "The feel: key, scale, tempo and octave, then density, tone, space and room, how closely the melody keeps to the chord, how long each chord lasts, and the pump and sweep of house music.",
       "On a phone, Infinite mode beside Edit mode's panel, open on the genres and on the instruments.",
       "The ring edge-on. A sounding note lifts its patch of dust into a plume, placed by its pitch on the circle of fifths and by its octave across the ringlets.",
-      "Closer in: the sphere's five nested layers run from the bass at the core to the leads at the edge, inside a ring lit where notes are sounding."
+      "Closer in: the sphere's five nested layers, each listening to part of the band with the bass at the core, and inside them the attractor's flow, bulging with the innermost, beside a ring whose dust lifts wherever a note sounds.",
+      "Edit mode with FORM set to SONG and LENGTH to one minute: a synthwave song half a minute in, in its chorus, and due to end at exactly 1:00.",
+      "A drop at full tilt: the ring burns white with every part playing, its dust lifting in plumes, and the attractor's vortex stands up through the middle of the sphere."
     ],
     "videos": [
       "/projects/orrery/videos/orrery-synthwave.mp4",
-      "/projects/orrery/videos/orrery-infinite.mp4"
+      "/projects/orrery/videos/orrery-song.mp4"
     ]
   }
 ]
