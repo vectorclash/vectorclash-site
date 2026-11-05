@@ -11,6 +11,11 @@
 # production
 /build
 
+# The reel and its poster are uploaded to the server by hand. Nothing in here may
+# reach git: the deploy's rsync --delete covers every top-level folder in build/,
+# so a committed public/reel would make it delete the uploaded video.
+/public/reel
+
 # misc
 .DS_Store
 .env.local

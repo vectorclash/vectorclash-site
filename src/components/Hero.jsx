@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap, SplitText, ScrollTrigger } from "gsap/all";
 import "./Hero.scss";
 import PDFIcon from "./PDFIcon";
 import HeroBackground from "./HeroBackground";
+import ReelPlayer, { PlayIcon } from "./ReelPlayer";
 import Logo from "./Logo";
 import profileData from "../data/profile.json";
 
@@ -10,6 +11,7 @@ gsap.registerPlugin(SplitText, ScrollTrigger);
 
 function Hero() {
   const myRef = useRef(null);
+  const [reelOpen, setReelOpen] = useState(false);
 
   // Only a width change relocks the height. On mobile the address bar
   // collapsing fires resize with a new innerHeight, and relocking on that
@@ -158,6 +160,9 @@ function Hero() {
         </h1>
         <p dangerouslySetInnerHTML={{ __html: profileData.intro }} />
         <div className="hero-buttons">
+          <button type="button" onClick={() => setReelOpen(true)}>
+            {profileData.reel.text} <PlayIcon />
+          </button>
           <a
             href={profileData.resume.url}
             target="_blank"
@@ -167,7 +172,15 @@ function Hero() {
           </a>
         </div>
       </article>
-      <HeroBackground />
+      <HeroBackground paused={reelOpen} />
+      {reelOpen && (
+        <ReelPlayer
+          src={profileData.reel.video}
+          poster={profileData.reel.poster}
+          title={profileData.reel.title}
+          onClose={() => setReelOpen(false)}
+        />
+      )}
     </header>
   );
 }

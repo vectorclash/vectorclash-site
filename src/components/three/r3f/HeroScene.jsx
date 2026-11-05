@@ -1406,9 +1406,11 @@ function Scene({ colors }) {
   );
 }
 
-export default function HeroScene({ colors, fallback, ready, onReady }) {
+export default function HeroScene({ colors, fallback, paused = false, ready, onReady }) {
   const fallbackColor = paletteAverage(colors);
-  const [canvasRef, frameloop] = useRenderWhenVisible();
+  // Parked while the reel plays over it: the scene is hidden then, and decoding
+  // video is the one thing on the page that must not lose frames to it.
+  const [canvasRef, frameloop] = useRenderWhenVisible(!paused);
 
   return (
     <Canvas

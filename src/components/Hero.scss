@@ -144,9 +144,27 @@
 
     .hero-buttons {
       opacity: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 10px;
+
+      // Side by side on a phone too. The hero is locked to the screen's height
+      // there, and a second row would push the column into the fold.
+      @media only screen and (max-width: 600px) {
+        flex-wrap: nowrap;
+
+        a,
+        button {
+          flex: 1;
+          min-width: 0;
+          text-align: center;
+        }
+      }
     }
 
-    a {
+    a,
+    button {
       // Inherited from article, where it is meant for white type over the
       // scene. On black text sitting on the button's own white ground it just
       // smudges the letterforms.
@@ -155,14 +173,17 @@
       padding: 15px 50px;
       @media only screen and (max-width: 600px) {
         display: block;
-        padding: 20px;
+        padding: 20px 10px;
       }
       border: 1px solid white;
       border-bottom-color: #CCFF00;
       border-radius: 5px;
       color: black;
       text-decoration: none;
+      font-family: inherit;
+      font-size: inherit;
       font-weight: bold;
+      cursor: pointer;
       transition: 0.2s;
 
       svg {
@@ -173,14 +194,15 @@
       }
     }
 
-    a:hover {
+    a:hover,
+    button:hover {
       background-color: black;
       color: white;
       text-decoration: none;
       border: 1px solid black;
       padding: 15px 80px;
       @media only screen and (max-width: 600px) {
-        padding: 20px;
+        padding: 20px 10px;
       }
 
       svg {

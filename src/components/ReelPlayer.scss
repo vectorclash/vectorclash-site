@@ -1,0 +1,234 @@
+// On document.body through a portal, for the same reason as the lightbox: the
+// hero is a stacking context of its own. Opaque rather than the lightbox's 95%,
+// because the hero's scene is paused behind this and a frozen frame showing
+// through a reel is no one's idea of a backdrop.
+.reel-player {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #000;
+  color: white;
+  outline: none;
+  overscroll-behavior: contain;
+
+  &.is-idle {
+    cursor: none;
+  }
+
+  .reel-player-stage {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
+  .reel-player-loader,
+  .reel-player-paused,
+  .reel-player-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .reel-player-paused {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    padding-left: 6px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+
+    svg {
+      width: 36px;
+      fill: white;
+    }
+  }
+
+  .reel-player-message {
+    margin: 0;
+    width: min(90%, 420px);
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .reel-player-close,
+  .reel-player-controls {
+    transition: opacity 0.25s ease;
+  }
+
+  &.is-idle .reel-player-close,
+  &.is-idle .reel-player-controls {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  button {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    padding: 9px;
+    border: 0;
+    background: none;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+
+    svg {
+      display: block;
+      width: 100%;
+      fill: currentColor;
+    }
+
+    &:hover {
+      color: #d4ff00;
+      transform: scale(1.12);
+    }
+
+    &:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+  }
+
+  .reel-player-close {
+    position: absolute;
+    top: calc(16px + env(safe-area-inset-top));
+    right: calc(16px + env(safe-area-inset-right));
+
+    img {
+      width: 100%;
+      height: 100%;
+      filter: brightness(0) invert(1);
+    }
+
+    &:hover {
+      transform: scale(1.2) rotate(90deg);
+    }
+  }
+
+  .reel-player-controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding:
+      60px
+      calc(20px + env(safe-area-inset-right))
+      calc(14px + env(safe-area-inset-bottom))
+      calc(20px + env(safe-area-inset-left));
+    // Holds up over the white and bright frames the reel has plenty of.
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    // The gradient reaches well above the controls, and clicks there are for the
+    // picture. The controls take them back below.
+    pointer-events: none;
+
+    > * {
+      pointer-events: auto;
+    }
+
+    @media only screen and (max-width: 600px) {
+      flex-wrap: wrap;
+      gap: 4px 6px;
+      padding-left: calc(10px + env(safe-area-inset-left));
+      padding-right: calc(10px + env(safe-area-inset-right));
+    }
+  }
+
+  .reel-player-time {
+    flex: none;
+    font-size: 14px;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+
+    @media only screen and (max-width: 600px) {
+      margin-right: auto;
+    }
+  }
+
+  .reel-player-scrub {
+    --progress: 0%;
+    $track: 4px;
+    $thumb: 14px;
+
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    margin: 0;
+    appearance: none;
+    background: none;
+    cursor: pointer;
+
+    // A row of its own on a phone, above the buttons, where it gets the width
+    // a thumb needs.
+    @media only screen and (max-width: 600px) {
+      order: -1;
+      flex-basis: 100%;
+      height: 28px;
+    }
+
+    @mixin track {
+      height: $track;
+      border-radius: $track;
+      background: linear-gradient(
+        to right,
+        #d4ff00 var(--progress),
+        rgba(255, 255, 255, 0.3) var(--progress)
+      );
+    }
+
+    @mixin thumb {
+      width: $thumb;
+      height: $thumb;
+      border: 0;
+      border-radius: 50%;
+      background: #d4ff00;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+    }
+
+    &::-webkit-slider-runnable-track {
+      @include track;
+    }
+
+    &::-webkit-slider-thumb {
+      @include thumb;
+      appearance: none;
+      margin-top: ($track - $thumb) * 0.5;
+    }
+
+    &::-moz-range-track {
+      @include track;
+    }
+
+    &::-moz-range-thumb {
+      @include thumb;
+    }
+
+    &:focus-visible {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+  }
+}

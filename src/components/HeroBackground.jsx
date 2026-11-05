@@ -8,7 +8,7 @@ import GradientGenerator from "./utils/GradientGenerator";
 // on the flat fallback and the scene fades in over it when it arrives.
 const HeroScene = lazy(() => import("./three/r3f/HeroScene"));
 
-export default function HeroBackground() {
+export default function HeroBackground({ paused = false }) {
   const colors = useMemo(() => {
     let colorAmount = 3;
     let randomChance = Math.random();
@@ -42,6 +42,7 @@ export default function HeroBackground() {
         <HeroScene
           colors={colors}
           fallback={fallback}
+          paused={paused}
           ready={sceneReady}
           onReady={() => setSceneReady(true)}
         />
