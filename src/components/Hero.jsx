@@ -134,10 +134,13 @@ function Hero() {
         }
       );
 
+      const buttons = myRef.current.querySelector(".hero-buttons");
+      gsap.set(buttons, { autoAlpha: 1 });
+
       tl.fromTo(
-        myRef.current.querySelector(".hero-buttons"),
+        buttons.children,
         { alpha: 0, y: 30 },
-        { duration: 0.5, y: 0, alpha: 1, ease: "quad.out" }
+        { duration: 0.5, y: 0, alpha: 1, ease: "quad.out", stagger: 0.15 }
       );
     };
 

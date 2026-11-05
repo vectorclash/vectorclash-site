@@ -184,7 +184,13 @@
       font-size: inherit;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.2s;
+      // Named rather than all: the entrance tweens opacity and transform on these
+      // directly, and a transition on those would drag behind every frame of it.
+      transition:
+        background-color 0.2s,
+        color 0.2s,
+        border-color 0.2s,
+        padding 0.2s;
 
       svg {
         width: 10px;
