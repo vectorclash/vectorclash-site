@@ -441,6 +441,10 @@
         "figures": []
       },
       {
+        "body": "<p>The same renderer makes music videos. Beside the site I built a studio, a local tool that turns a song into an MP4 without recording the screen: it renders the audio as export does, writing down every note and chord the visuals would hear, then steps the visuals frame by frame on the video's own clock, replaying that log, so picture and sound land on the same frame at any size up to 4K, faster than real time, and the browser encodes them through WebCodecs. A director plans the whole video from the song's sections before the first frame is drawn: a build pushes in as the picture softens with the build's own filter, the silence before a drop slows the world almost to a stop while the camera glides on, and the drop lands at full speed on a cut, folding the frame into mirrored tiles or seeing it through the 3D mirrors. Seven styles, picked from the drums or by hand, decide how it cuts and which of fifteen effects it reaches for—a lens that bends the starlight round the planet, a shockwave on every kick, glints on the hats—and a bench beside the preview switches each one off, sets its strength or shows it alone.</p>",
+        "figures": [12, 13]
+      },
+      {
         "body": "<p><a href='https://orrery.vectorclash.com/' target='_blank' rel='noopener noreferrer'>View Project</a></p>",
         "figures": []
       }
@@ -457,7 +461,9 @@
       "/projects/orrery/images/orrery_img09.jpg",
       "/projects/orrery/images/orrery_img10.jpg",
       "/projects/orrery/images/orrery_img11.jpg",
-      "/projects/orrery/images/orrery_img12.jpg"
+      "/projects/orrery/images/orrery_img12.jpg",
+      "/projects/orrery/images/orrery_img13.jpg",
+      "/projects/orrery/images/orrery_img14.jpg"
     ],
     "captions": [
       "A dense passage in Infinite mode, the ring, the sphere and the sky all answering the same notes.",
@@ -471,7 +477,9 @@
       "The kaleidoscope during a nu-disco build, folding the frame into mirrored wedges around the sphere, so the ring's plumes come round as petals.",
       "Closer in: the sphere's five nested layers, each listening to part of the band with the bass at the core, and inside them the attractor's flow, bulging with the innermost, beside a ring whose dust lifts wherever a note sounds.",
       "Edit mode with FORM set to SONG and LENGTH to one minute: a synthwave song half a minute in, in its chorus, and due to end at exactly 1:00. The song section also holds MORE LIKE THIS, KEEP and the choice of composer.",
-      "A drop at full tilt: the ring burns white with every part playing, its dust lifting in plumes, and the attractor's vortex stands up through the middle of the sphere."
+      "A drop at full tilt: the ring burns white with every part playing, its dust lifting in plumes, and the attractor's vortex stands up through the middle of the sphere.",
+      "The music video studio, a local tool: a techno song's first drop in the preview, folded into hexagonal tiles, with the song's sections along the bottom and, beside it, the link, the look, the style and the first of the effects.",
+      "A frame from a finished video, at a drop seen through the 3D mirrors: the icosahedron's 120 reflections turn the strings arching between the chord's moons into a wreath of leaves round the sphere, as the stars stream past in trails."
     ],
     "videos": [
       "/projects/orrery/videos/orrery-kaleidoscope.mp4",
