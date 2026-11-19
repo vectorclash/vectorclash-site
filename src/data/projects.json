@@ -163,10 +163,11 @@
     "pinned": true,
     "tools": [
       "React",
-      "Vite",
+      "three.js",
+      "WebGL",
       "GSAP",
-      "tinycolor",
-      "Supabase"
+      "Supabase",
+      "Stripe"
     ],
     "sections": [
       {
@@ -177,7 +178,7 @@
         ]
       },
       {
-        "body": "<p>Every piece is procedurally generated, which means the interface's real job is not to offer choices but to expose the right parameters: enough control to steer a result without reducing the process back to manual picking. tinycolor handles the color manipulation underneath, and GSAP carries the transitions between states.</p>",
+        "body": "<p>A piece is built in layers—a gradient sky, a nebula of drifting gas, a field of stars and a layer of overlapping geometry—and every one of them is a pure function of a seed, a palette and a handful of settings. So a saved design is a few hundred bytes of JSON rather than an image: it rebuilds the identical composition at any size, and recomposes itself for any shape rather than being cropped to it. The interface's real job is not to offer choices but to expose the right parameters: a palette to edit or swap for a curated one, and sliders for how often geometry appears, how many corners it has, how large and how dense it is, and how far it settles from scattered triangles into an ordered lattice. The rendering runs in a worker thread, off the page, so generating a new piece never stalls the interface around it.</p>",
         "figures": [
           2,
           6,
@@ -186,14 +187,21 @@
         ]
       },
       {
-        "body": "<p>Since the first release, Chromaforge has grown past the studio itself into a print-on-demand service, where a generated piece can be put onto a garment and ordered, closing the distance between making an image and owning the thing.</p>",
+        "body": "<p>The Animation tab turns the same design into a flight. A three.js scene rebuilds the piece's layers from the same generators and gives them depth: the sky stays at infinity, the nebula becomes a volume the camera passes through, and the geometry stands as a run of plates along the path, each opening from the center as the camera reaches it. The plates are drawn as vectors, per pixel in a shader, so they stay crisp at any distance, and each layer is composited with the same blend modes the still uses. Every flight loops seamlessly and exports to MP4 in the browser through WebCodecs.</p>",
         "figures": [
-          3,
-          4
+          10
         ]
       },
       {
-        "body": "<p>To bring the store to an audience, I built a second tool beside the studio: a local ad builder that turns a saved design into an Instagram Reel. The video opens on a three.js flight through the design itself, which slows as the first product arrives; each product photograph then assembles out of triangular facets, drawn from the same Printful mockup pipeline the store uses but requested with transparent backgrounds, so the garment sits within the artwork rather than on a studio backdrop. Every cut lands on a bar line of a soundtrack rendered by Orrery, a generative music application I wrote separately, and the preview and the export draw each frame from the same function of time, so the exported file keeps the composition and timing approved in the preview.</p>",
+        "body": "<p>Chromaforge has grown past the studio into a print-on-demand store of twenty products, where a generated piece can be put onto a garment and ordered. Every product photograph wears the current design the moment it is made: rather than waiting on a mockup service, the browser composites the artwork into each photo using a mapping I measured from Printful's own renders, sending patterns through their mockup generator and decoding where each pixel of the print lands, with the shading of every fold. Once an order is paid, the print files are rendered at full print resolution by the same rendering code running in Node on a separate service, because a phone's browser cannot hold a canvas that large.</p>",
+        "figures": [
+          3,
+          4,
+          11
+        ]
+      },
+      {
+        "body": "<p>To bring the store to an audience, I built a second tool beside the studio: a local ad builder that turns a saved design into Instagram posts and publishes them straight to the account. A Reel opens on a three.js flight through the design itself, which slows as the first product arrives; each product photograph then assembles out of triangular facets, drawn from the same Printful mockup pipeline the store uses but requested with transparent backgrounds, so the garment sits within the artwork rather than on a studio backdrop. Every cut lands on a bar line of a soundtrack rendered by Orrery, a generative music application I wrote separately, and the preview and the export draw each frame from the same function of time, so the exported file keeps the composition and timing approved in the preview. The same tool makes carousels, flight-only Reels and an explainer that shows how the site works, at four sizes.</p>",
         "figures": [
           8,
           9
@@ -214,24 +222,28 @@
       "/projects/forge/images/forge_img07.jpg",
       "/projects/forge/images/forge_img08.jpg",
       "/projects/forge/images/forge_img09.jpg",
-      "/projects/forge/images/forge_img10.jpg"
+      "/projects/forge/images/forge_img10.jpg",
+      "/projects/forge/images/forge_img11.jpg",
+      "/projects/forge/images/forge_img12.jpg"
     ],
     "captions": [
-      "A generated piece at its most diffuse, where broad overlapping planes let the palette read as light rather than as edges.",
-      "The landing screen: generate something new, or return to what has already been saved, with the studio itself one step further in.",
-      "The studio's control panel, open on color. The palette is a list to be edited or swapped wholesale, not a picker to hunt through.",
-      "Choosing which generated piece goes onto a garment, drawn from the same saved designs the studio produces.",
-      "The product page, where size, quantity and price resolve against a print-on-demand fulfiller behind the scenes.",
-      "The gallery, where every generated piece keeps the name the algorithm gave it.",
-      "A piece on a dark ground, the geometry held to hard edges and full saturation.",
-      "Dense overlap at the other end of the range, the structure legible only where the planes disagree.",
+      "A generated piece: the gradient sky, a nebula of drifting gas, the star field and the geometry, all rebuilt from one seed.",
+      "The landing screen: generate something new, print it or save it, beside a shirt already wearing the piece behind it.",
+      "The studio's settings panel, open on color. The palette is a list to edit, swap wholesale for a curated preset, or leave on Auto for the algorithm to choose.",
+      "Choosing which piece goes onto a garment, from the public gallery or the designs you have saved.",
+      "The product page. Its photographs are made in the browser, so they change the moment the design does, while size, quantity and price resolve against a print-on-demand fulfiller behind the scenes.",
+      "The gallery, where every saved piece keeps the name the algorithm gave it.",
+      "A piece on a dark ground, the geometry held to hard edges and full saturation, with the stars drawn in front of it.",
+      "Coherence raised: the triangles settle into nested rings, every corner joined to the others across the figure.",
       "The ad builder paused on a product, with Instagram's interface traced over the frame to show what the app will cover, and the wordmark held inside Meta's safe zone.",
-      "Three frames from one exported Reel, in order: the flight through the design, the first garment assembling out of facets, and a later product beneath the wordmark."
+      "Three frames from one exported Reel, in order: the flight through the design, the first garment assembling out of facets, and a later product beneath the wordmark.",
+      "The Animation tab: a flight through the design, its geometry standing as plates along the path and the nebula drifting past.",
+      "The shop, every product photographed wearing the current design, with no wait on a mockup service."
     ],
     "videos": [
-      "/projects/forge/videos/FusedCryosphere-ebeb.mp4",
-      "/projects/forge/videos/GeodesicVortex-49ea.mp4",
-      "/projects/forge/videos/ExtragalacticGravity-1808.mp4"
+      "/projects/forge/videos/SiderealPerihelion-49fe.mp4",
+      "/projects/forge/videos/CoherentGravity-8788.mp4",
+      "/projects/forge/videos/SolarPhoton-cc05.mp4"
     ]
   },
   {
